@@ -376,7 +376,6 @@ a.card:hover, .card.interactive:hover, a.card.track-card:hover {
 .pill.brass { background: var(--brass-soft); color: var(--brass-strong); border-color: var(--brass-ring); }
 .pill.gain { background: var(--gain-soft); color: var(--gain); border-color: var(--gain-mark); }
 .pill.loss { background: var(--loss-soft); color: var(--loss); border-color: var(--loss); }
-.pill.kid { background: var(--brass-soft); color: var(--brass-strong); border-color: transparent; }
 
 /* ---------- tables ---------- */
 table.oa { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -517,17 +516,9 @@ input[type="range"] { accent-color: var(--brass); width: 100%; }
 .event-item { display: flex; gap: 10px; font-size: 13px; align-items: baseline; }
 .event-item .et { font-family: var(--mono); font-size: 11px; color: var(--ink-3); flex: 0 0 74px; }
 
-/* ---------- kids ---------- */
-.kids-hero { display: flex; align-items: center; gap: 16px; }
-.kids-hero .big { font-size: 44px; }
-.game-card {
-  display: flex; flex-direction: column; gap: 8px;
-  border: 2px solid var(--hairline); border-radius: 12px; padding: 18px;
-  background: var(--card); cursor: pointer; text-align: left;
-}
-.game-card:hover { border-color: var(--brass-ring); transform: translateY(-2px); }
-@media (prefers-reduced-motion: reduce) { .game-card:hover { transform: none; } }
-.game-card .gi { font-size: 34px; }
+/* ---------- profile hero ---------- */
+.profile-hero { display: flex; align-items: center; gap: 16px; }
+.profile-hero .big { font-size: 44px; }
 .star { color: var(--warn); }
 .coin-pile { font-family: var(--mono); font-size: 18px; font-weight: 700; }
 .spinner-opt { border: 2px solid var(--hairline); border-radius: 12px; padding: 14px; cursor: pointer; background: var(--card); }
@@ -715,8 +706,6 @@ input[type="range"] { accent-color: var(--brass); width: 100%; }
   }
   .oa-tabbar .ti { font-size: 18px; line-height: 1; }
   .oa-tabbar .active { color: var(--brass-strong); }
-  body.kids-targets .oa-tabbar button,
-  body.kids-targets .oa-tabbar a { min-height: 48px; }
 
   /* nav / labs / you sheets */
   .oa-sheet-bg {

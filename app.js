@@ -202,7 +202,7 @@
     panic: ["\u26A0\uFE0F", "Volatility regime shift: markets turn panicky"]
   };
   var DEFS = [
-    { sym: "FAM500", name: "Family 500 Index", emoji: "\u{1F3DB}\uFE0F", sector: "Index", S0: 500, drift: 0.07, baseVol: 0.15, beta: 0.5, skew: 0.45, earnings: false },
+    { sym: "FAM500", name: "Academy 500 Index", emoji: "\u{1F3DB}\uFE0F", sector: "Index", S0: 500, drift: 0.07, baseVol: 0.15, beta: 0.5, skew: 0.45, earnings: false },
     { sym: "LMND", name: "Lemonade Labs", emoji: "\u{1F34B}", sector: "Consumer", S0: 42, drift: 0.1, baseVol: 0.42, beta: 1.1, skew: 0.25 },
     { sym: "RCKT", name: "Rocket Robotics", emoji: "\u{1F680}", sector: "Tech", S0: 182, drift: 0.14, baseVol: 0.62, beta: 1.8, skew: 0.2 },
     { sym: "BRGR", name: "Burger Barn", emoji: "\u{1F354}", sector: "Consumer", S0: 67, drift: 0.07, baseVol: 0.24, beta: 0.7, skew: 0.3 },
@@ -412,7 +412,7 @@
             }
           }
         }
-        pushEvent("\u{1F514}", "Welcome to the Family Exchange. Markets are open \u2014 Day 1.");
+        pushEvent("\u{1F514}", "Welcome to the Academy Exchange. Markets are open \u2014 Day 1.");
         applyScenarioTimeline(1, 0, "preOpen");
         applyScenarioTimeline(1, 0, "postOpen");
       }
@@ -741,7 +741,7 @@
   };
 
   // src/state/migrations.js
-  var SCHEMA_VERSION = 2;
+  var SCHEMA_VERSION = 3;
   function migrateV1toV2(v1) {
     return {
       schemaVersion: 2,
@@ -756,6 +756,20 @@
       market: v1.market || null
     };
   }
+  function migrateV2toV3(db2) {
+    for (const p of db2.profiles || []) {
+      if (p.mode === "kid") {
+        p.placement = p.placement || {};
+        if (!p.placement.foundations) {
+          p.placement.foundations = { startModule: 99, scorePct: 1, day: Date.now() };
+        }
+      }
+      p.mode = "adult";
+      if (!p.riskMode) p.riskMode = "all";
+    }
+    db2.schemaVersion = 3;
+    return db2;
+  }
   function loadDb(storage4) {
     try {
       const v2raw = storage4.getItem("oa.v2");
@@ -765,13 +779,14 @@
         if (db2 && db2.schemaVersion < SCHEMA_VERSION) return upgrade(db2);
       }
       const v1raw = storage4.getItem("oa.v1");
-      if (v1raw) return migrateV1toV2(JSON.parse(v1raw));
+      if (v1raw) return upgrade(migrateV1toV2(JSON.parse(v1raw)));
     } catch (e) {
       console.warn("storage load failed, starting fresh", e);
     }
     return { schemaVersion: SCHEMA_VERSION, profiles: [], activeId: null, market: null };
   }
   function upgrade(db2) {
+    if ((db2.schemaVersion || 0) < 3) migrateV2toV3(db2);
     db2.schemaVersion = SCHEMA_VERSION;
     return db2;
   }
@@ -831,20 +846,20 @@
     { id: "track-core", icon: "\u{1F4D8}", name: "Core Graduate", desc: "Finish the Options Core track" },
     { id: "track-greeks-vol", icon: "\u{1F3DB}\uFE0F", name: "Greek Scholar", desc: "Finish Greeks & Volatility" },
     { id: "track-pro", icon: "\u{1F393}", name: "Pro Lab Alum", desc: "Finish the Pro Lab track" },
-    { id: "kids-3", icon: "\u2B50", name: "Game Champ", desc: "Finish all three Kids Corner games" },
     { id: "streak-3", icon: "\u{1F525}", name: "On a Roll", desc: "Learn on 3 different days" },
     { id: "xp-1000", icon: "\u{1F48E}", name: "Scholar", desc: "Earn 1,000 XP" },
     { id: "first-mission", icon: "\u{1F9ED}", name: "Mission One", desc: "Pass your first guided mission" },
     { id: "mission-5", icon: "\u{1F5FA}\uFE0F", name: "Field Operative", desc: "Pass five missions" },
     { id: "first-journal", icon: "\u{1F4D3}", name: "Dear Journal", desc: "Complete your first trade debrief" }
   ];
-  function blank(name, emoji, mode) {
+  function blank(name, emoji) {
     return {
       id: "p" + Math.random().toString(36).slice(2, 8),
       name,
       emoji,
-      mode,
-      // 'adult' | 'kid'
+      mode: "adult",
+      riskMode: "all",
+      // 'all' | 'defined' — defined-risk-only safety (Settings)
       xp: 0,
       lessons: {},
       quizzes: {},
@@ -863,12 +878,18 @@
   function profiles() {
     return db.profiles;
   }
-  function addProfile(name, emoji, mode) {
-    const p = blank(name, emoji, mode);
+  function addProfile(name, emoji) {
+    const p = blank(name, emoji);
     db.profiles.push(p);
     db.activeId = p.id;
     save();
     return p;
+  }
+  function setRiskMode(mode) {
+    const p = active();
+    if (!p) return;
+    p.riskMode = mode === "defined" ? "defined" : "all";
+    save();
   }
   var active = () => db.profiles.find((p) => p.id === db.activeId) || null;
   function setActive(id) {
@@ -921,17 +942,6 @@
     }
     save();
   }
-  function gameDone(id, note) {
-    const p = active();
-    if (!p) return;
-    if (!p.games[id]) {
-      p.games[id] = 0;
-      addXP(40, note || "game complete");
-    }
-    p.games[id]++;
-    if (["lemonade", "spinner", "ladder"].every((g) => p.games[g])) grant("kids-3");
-    save();
-  }
   function saveMarketSnapshot(snap) {
     db.market = snap;
     save();
@@ -951,8 +961,8 @@
     }
     if (!data || !Array.isArray(data.profiles)) return { err: "Not an Options Academy backup (no profiles found)." };
     if ((data.schemaVersion || 0) > SCHEMA_VERSION) return { err: "Backup is from a newer app version \u2014 update the app first." };
-    db = data;
-    db.schemaVersion = db.schemaVersion || SCHEMA_VERSION;
+    data.schemaVersion = data.schemaVersion || 2;
+    db = upgrade(data);
     db.activeId = db.activeId && db.profiles.some((p) => p.id === db.activeId) ? db.activeId : db.profiles[0]?.id || null;
     save();
     return { ok: true, profiles: db.profiles.length };
@@ -1015,8 +1025,76 @@
     if (!FREE_LIMITS.freeTracks.includes(trackId)) return true;
     return lessonIndexInTrack >= FREE_LIMITS.lessonsPerTrack;
   }
-  function kidsEnabled() {
-    return isFamilyBuild();
+
+  // src/engine/payoff.js
+  var mult = (leg) => leg.kind === "stock" ? 1 : 100;
+  function valueAtExpiry(legs, S2) {
+    return legs.reduce((sum, l) => {
+      const v = l.kind === "stock" ? S2 : l.kind === "call" ? Math.max(0, S2 - l.strike) : Math.max(0, l.strike - S2);
+      return sum + l.side * l.qty * mult(l) * v;
+    }, 0);
+  }
+  function entryCost(legs) {
+    return legs.reduce((sum, l) => sum + l.side * l.qty * mult(l) * l.entry, 0);
+  }
+  function pnlAtExpiry(legs, S2) {
+    return valueAtExpiry(legs, S2) - entryCost(legs);
+  }
+  function tailSlopes(legs) {
+    let up = 0, down = 0;
+    for (const l of legs) {
+      const m = l.side * l.qty * mult(l);
+      if (l.kind === "stock") {
+        up += m;
+        down += m;
+      } else if (l.kind === "call") up += m;
+      else down -= m;
+    }
+    return { up, down };
+  }
+  function maxLossAtExpiry(legs, Sref) {
+    const { up, down } = tailSlopes(legs);
+    const lo = 0, hi = Math.max(Sref * 3, ...legs.filter((l) => l.strike).map((l) => l.strike * 2), 1);
+    let worst = Infinity, at = null;
+    const candidates = [lo, hi, Sref, ...legs.filter((l) => l.strike).map((l) => l.strike)];
+    for (let i = 0; i <= 160; i++) candidates.push(lo + (hi - lo) * i / 160);
+    for (const x of candidates) {
+      const y = pnlAtExpiry(legs, x);
+      if (y < worst) {
+        worst = y;
+        at = x;
+      }
+    }
+    const bounded = up >= 0;
+    return { amount: worst, bounded, at };
+  }
+  function isDefinedRisk(legs) {
+    return maxLossAtExpiry(legs, legs.find((l) => l.strike)?.strike ?? 100).bounded;
+  }
+  function classify(legs) {
+    const stocks = legs.filter((l) => l.kind === "stock");
+    const calls = legs.filter((l) => l.kind === "call");
+    const puts = legs.filter((l) => l.kind === "put");
+    const opt = calls.length + puts.length;
+    const longStock = stocks.reduce((s2, l) => s2 + l.side * l.qty, 0);
+    if (opt === 0 && longStock > 0) return "long-stock";
+    if (opt === 1 && calls.length === 1) {
+      const c = calls[0];
+      if (c.side < 0 && longStock >= c.qty * 100) return "covered-call";
+      return c.side > 0 ? "long-call" : "short-call";
+    }
+    if (opt === 1 && puts.length === 1) {
+      const p = puts[0];
+      if (p.side > 0 && longStock > 0) return "protective-put";
+      return p.side > 0 ? "long-put" : "cash-secured-put";
+    }
+    if (opt === 2 && calls.length === 1 && puts.length === 1 && calls[0].side > 0 && puts[0].side > 0) {
+      return calls[0].strike === puts[0].strike ? "long-straddle" : "long-strangle";
+    }
+    if (opt === 2 && calls.length === 2 && calls[0].side !== calls[1].side) return "call-vertical";
+    if (opt === 2 && puts.length === 2 && puts[0].side !== puts[1].side) return "put-vertical";
+    if (opt === 4 && calls.length === 2 && puts.length === 2) return "iron-condor";
+    return "custom";
   }
 
   // src/state/broker.js
@@ -1026,16 +1104,16 @@
     feed = marketFeed;
   }
   var getFeed = () => feed;
-  var mult = (leg) => leg.kind === "stock" ? 1 : 100;
+  var mult2 = (leg) => leg.kind === "stock" ? 1 : 100;
   function legValue(sym, leg) {
     if (leg.kind === "stock") return feed.quote(sym).S;
     return feed.optQuote(sym, leg.strike, leg.expDay, leg.kind).mid;
   }
   function posValue(pos) {
-    return pos.legs.reduce((s2, l) => s2 + l.side * l.qty * mult(l) * legValue(pos.sym, l), 0);
+    return pos.legs.reduce((s2, l) => s2 + l.side * l.qty * mult2(l) * legValue(pos.sym, l), 0);
   }
   function posCost(pos) {
-    return pos.legs.reduce((s2, l) => s2 + l.side * l.qty * mult(l) * l.entry, 0);
+    return pos.legs.reduce((s2, l) => s2 + l.side * l.qty * mult2(l) * l.entry, 0);
   }
   function posPnl(pos) {
     return posValue(pos) - posCost(pos) + (pos.settledLegs || []).reduce((sum, l) => sum + l.settled.pnlContribution, 0);
@@ -1066,7 +1144,7 @@
     const b = emptyBuckets(), g = leg.g0;
     if (!g) return b;
     const dS = feed.quote(sym).S - g.S0;
-    const scale = leg.side * leg.qty * mult(leg);
+    const scale = leg.side * leg.qty * mult2(leg);
     if (leg.kind === "stock") b.delta = scale * dS;
     else {
       const q = feed.optQuote(sym, leg.strike, leg.expDay, leg.kind);
@@ -1094,7 +1172,7 @@
       const slip = leg.side * (legValue(pos.sym, leg) - price2);
       buckets.slippage -= slip * leg.qty * 100;
     }
-    leg.settled = { pnlContribution: leg.side * leg.qty * mult(leg) * (price2 - leg.entry), buckets };
+    leg.settled = { pnlContribution: leg.side * leg.qty * mult2(leg) * (price2 - leg.entry), buckets };
     pos.settledLegs = pos.settledLegs || [];
     pos.settledLegs.push(leg);
   }
@@ -1144,11 +1222,11 @@
   function openPosition(sym, legs, label) {
     const p = active();
     if (!p) return { err: "No profile" };
-    const cost = legs.reduce((s2, l) => s2 + l.side * l.qty * mult(l) * l.entry, 0);
+    const cost = legs.reduce((s2, l) => s2 + l.side * l.qty * mult2(l) * l.entry, 0);
     const fees = legs.filter((l) => l.kind !== "stock").reduce((s2, l) => s2 + FEE * l.qty, 0);
     const req = marginRequirement(sym, legs);
-    if (p.mode === "kid" && legs.some((l) => l.kind !== "stock" && l.side < 0)) {
-      return { err: "Selling options is locked in kid mode \u2014 learn with long options and stock first." };
+    if (p.riskMode === "defined" && !isDefinedRisk(legs)) {
+      return { err: "Defined-risk only is on for this account \u2014 this order has unbounded risk. Covered calls and spreads are fine; turn the guard off in Settings to trade naked shorts." };
     }
     const gate = canOpenPosition(p, sym);
     if (gate.err) return gate;
@@ -1184,7 +1262,7 @@
     const pos = p.positions[i];
     const fees = feesFor(pos.legs);
     const fills = pos.legs.map((l) => touch(pos.sym, l, true));
-    const val = pos.legs.reduce((sum, l, n) => sum + l.side * l.qty * mult(l) * fills[n], 0);
+    const val = pos.legs.reduce((sum, l, n) => sum + l.side * l.qty * mult2(l) * fills[n], 0);
     pos.legs.forEach((l, n) => freezeLeg(pos, l, fills[n], feed.day, true));
     pos.legs = [];
     const pnl = posPnl(pos);
@@ -1498,7 +1576,10 @@
   }
   function incomplete(id) {
     const s2 = get(id);
-    return !s2.done && s2.step < TOTAL;
+    if (s2.done || s2.step >= TOTAL) return false;
+    const p = active();
+    if (p && (p.xp >= 100 || Object.keys(p.lessons || {}).length >= 2 || (p.trades || []).length > 0)) return false;
+    return true;
   }
   function currentStep(id) {
     return get(id).step;
@@ -2063,77 +2144,6 @@
     ctx.beginPath();
     ctx.arc(X(points.length - 1), Y(points[points.length - 1]), 2.4, 0, Math.PI * 2);
     ctx.fill();
-  }
-
-  // src/engine/payoff.js
-  var mult2 = (leg) => leg.kind === "stock" ? 1 : 100;
-  function valueAtExpiry(legs, S2) {
-    return legs.reduce((sum, l) => {
-      const v = l.kind === "stock" ? S2 : l.kind === "call" ? Math.max(0, S2 - l.strike) : Math.max(0, l.strike - S2);
-      return sum + l.side * l.qty * mult2(l) * v;
-    }, 0);
-  }
-  function entryCost(legs) {
-    return legs.reduce((sum, l) => sum + l.side * l.qty * mult2(l) * l.entry, 0);
-  }
-  function pnlAtExpiry(legs, S2) {
-    return valueAtExpiry(legs, S2) - entryCost(legs);
-  }
-  function tailSlopes(legs) {
-    let up = 0, down = 0;
-    for (const l of legs) {
-      const m = l.side * l.qty * mult2(l);
-      if (l.kind === "stock") {
-        up += m;
-        down += m;
-      } else if (l.kind === "call") up += m;
-      else down -= m;
-    }
-    return { up, down };
-  }
-  function maxLossAtExpiry(legs, Sref) {
-    const { up, down } = tailSlopes(legs);
-    const lo = 0, hi = Math.max(Sref * 3, ...legs.filter((l) => l.strike).map((l) => l.strike * 2), 1);
-    let worst = Infinity, at = null;
-    const candidates = [lo, hi, Sref, ...legs.filter((l) => l.strike).map((l) => l.strike)];
-    for (let i = 0; i <= 160; i++) candidates.push(lo + (hi - lo) * i / 160);
-    for (const x of candidates) {
-      const y = pnlAtExpiry(legs, x);
-      if (y < worst) {
-        worst = y;
-        at = x;
-      }
-    }
-    const bounded = up >= 0;
-    return { amount: worst, bounded, at };
-  }
-  function isDefinedRisk(legs) {
-    return maxLossAtExpiry(legs, legs.find((l) => l.strike)?.strike ?? 100).bounded;
-  }
-  function classify(legs) {
-    const stocks = legs.filter((l) => l.kind === "stock");
-    const calls = legs.filter((l) => l.kind === "call");
-    const puts = legs.filter((l) => l.kind === "put");
-    const opt = calls.length + puts.length;
-    const longStock = stocks.reduce((s2, l) => s2 + l.side * l.qty, 0);
-    if (opt === 0 && longStock > 0) return "long-stock";
-    if (opt === 1 && calls.length === 1) {
-      const c = calls[0];
-      if (c.side < 0 && longStock >= c.qty * 100) return "covered-call";
-      return c.side > 0 ? "long-call" : "short-call";
-    }
-    if (opt === 1 && puts.length === 1) {
-      const p = puts[0];
-      if (p.side > 0 && longStock > 0) return "protective-put";
-      return p.side > 0 ? "long-put" : "cash-secured-put";
-    }
-    if (opt === 2 && calls.length === 1 && puts.length === 1 && calls[0].side > 0 && puts[0].side > 0) {
-      return calls[0].strike === puts[0].strike ? "long-straddle" : "long-strangle";
-    }
-    if (opt === 2 && calls.length === 2 && calls[0].side !== calls[1].side) return "call-vertical";
-    if (opt === 2 && puts.length === 2 && puts[0].side !== puts[1].side) return "put-vertical";
-    if (opt === 4 && calls.length === 2 && puts.length === 2) return "iron-condor";
-    return "custom";
   }
 
   // src/content/missions.js
@@ -3108,7 +3118,7 @@
       if (!remote || typeof remote !== "object") {
         return { schemaVersion: SCHEMA_VERSION, profiles: [], activeId: null, market: null };
       }
-      return clone(remote);
+      return normalizeModes(clone(remote));
     }
     if (!remote || typeof remote !== "object" || !Array.isArray(remote.profiles) || remote.profiles.length === 0) {
       return clone(local);
@@ -3153,7 +3163,13 @@
     if (remote.subStatus !== void 0) {
       out.subStatus = remote.subStatus;
     }
-    return out;
+    return normalizeModes(out);
+  }
+  function normalizeModes(db2) {
+    for (const p of db2.profiles || []) {
+      if (p && p.mode !== "adult") p.mode = "adult";
+    }
+    return db2;
   }
   function status() {
     if (!configured() || !user()) return "off";
@@ -3745,10 +3761,6 @@
         root.appendChild(el("p", { class: "sub" }, "Create a profile to begin setup."));
         return;
       }
-      if (p.mode === "kid") {
-        location.hash = "#/kids";
-        return;
-      }
       let st = get();
       if (st.done) {
         location.hash = "#/home";
@@ -4061,7 +4073,7 @@
         root.appendChild(el(
           "p",
           { class: "sub" },
-          "This is the family / home build \u2014 kids mode is on and freemium gates are off. The commercial PWA is where Free vs Academy lives."
+          "This is the founder build \u2014 everything is unlocked and freemium gates are off. The commercial PWA is where Free vs Academy lives."
         ));
         root.appendChild(el("a", { class: "btn mt2", href: "#/home" }, "\u2190 Home"));
         return;
@@ -4219,7 +4231,7 @@
   }
   function realDataAllowed() {
     const p = active();
-    if (!p || p.mode === "kid") return false;
+    if (!p) return false;
     return isFamilyBuild() || tier() === "pro";
   }
   function realDataReady() {
@@ -4256,7 +4268,6 @@
   var view3 = {
     render(root) {
       const p = active();
-      const isKid = p?.mode === "kid";
       root.appendChild(el("div", { class: "eyebrow" }, "Settings"));
       root.appendChild(el("h1", {}, "Device settings"));
       root.appendChild(el(
@@ -4264,7 +4275,7 @@
         { class: "sub", style: "max-width:68ch" },
         "Keys and backups stay on this device. Nothing here is synced to the cloud."
       ));
-      if (!isKid) {
+      {
         const realCard = el("div", { class: "card mt2 settings-section" });
         realCard.appendChild(el(
           "div",
@@ -4367,6 +4378,36 @@
             el("a", { href: "https://developer.tradier.com/", target: "_blank", rel: "noopener" }, "Get a Tradier sandbox key \u2192")
           ));
         }
+      }
+      if (p) {
+        const safety = el("div", { class: "card mt2 settings-section" });
+        safety.appendChild(el("h3", {}, "Account safety"));
+        safety.appendChild(el(
+          "p",
+          { class: "sub" },
+          "Defined-risk only blocks orders whose loss is unbounded (like naked short calls). Long options, covered calls, and spreads stay available \u2014 the same training wheels real brokerages call Level 1\u20132 permissions."
+        ));
+        const isOn = () => active()?.riskMode === "defined";
+        const allB = el("button", { type: "button" }, "All strategies");
+        const defB = el("button", { type: "button" }, "Defined-risk only");
+        const riskSeg = el("div", { class: "seg", role: "group", "aria-label": "Strategy permissions" }, allB, defB);
+        const paintRisk = () => {
+          allB.classList.toggle("on", !isOn());
+          defB.classList.toggle("on", isOn());
+        };
+        allB.addEventListener("click", () => {
+          setRiskMode("all");
+          paintRisk();
+          toast("Risk guard off \u2014 all strategies available.", "gain");
+        });
+        defB.addEventListener("click", () => {
+          setRiskMode("defined");
+          paintRisk();
+          toast("Defined-risk only is ON for this profile.", "gain");
+        });
+        paintRisk();
+        safety.appendChild(el("div", { class: "field mt1" }, el("label", {}, "Strategy permissions"), riskSeg));
+        root.appendChild(safety);
       }
       const dataCard = el("div", { class: "card mt2 settings-section" });
       dataCard.appendChild(el("h3", {}, "Data"));
@@ -4751,12 +4792,12 @@
         el(
           "div",
           { class: "fd-pricing-inner" },
-          el("div", { class: "eyebrow" }, "Family build"),
-          el("h2", { class: "fd-band-title" }, "Built for the Lopez trading floor"),
+          el("div", { class: "eyebrow" }, "Founder build"),
+          el("h2", { class: "fd-band-title" }, "The unrestricted desk edition"),
           el(
             "p",
             { class: "sub" },
-            "Kids mode on, freemium gates off \u2014 the home build for the family bookshelf. The commercial PWA is where Free vs Academy lives."
+            "Every track, mission, and ticker unlocked \u2014 no account needed. The commercial PWA is where Free vs Academy lives."
           )
         )
       );
@@ -4897,7 +4938,6 @@
     { sect: "Learn" },
     { id: "home", icon: "\u{1F3E0}", ic: "home", label: "Home" },
     { id: "learn", icon: "\u{1F4DA}", ic: "book", label: "Curriculum" },
-    { id: "kids", icon: "\u{1F388}", ic: "balloon", label: "Kids Corner", kidsOnly: true },
     { sect: "Apply" },
     { id: "market", icon: "\u{1F4FA}", ic: "monitor", label: "Live Market" },
     { id: "strategy", icon: "\u{1F9E9}", ic: "layers", label: "Strategy Lab" },
@@ -4920,7 +4960,7 @@
   var LAB_IDS = new Set(LABS.map((l) => l.id));
   var YOU_IDS = /* @__PURE__ */ new Set(["progress", "settings", "upgrade", "welcome", "legal", "start"]);
   function navItems() {
-    return NAV.filter((n) => !n.kidsOnly || kidsEnabled());
+    return NAV;
   }
   function closeSheet() {
     if (sheetHost) {
@@ -4991,9 +5031,6 @@
       { id: "market", ic: "monitor", label: "Market", href: "#/market" },
       { id: "labs", ic: "layers", label: "Labs", onClick: openLabsSheet }
     ];
-    if (kidsEnabled()) {
-      tabs.push({ id: "kids", ic: "balloon", label: "Kids", href: "#/kids" });
-    }
     tabs.push({ id: "you", ic: "user", label: "You", onClick: openYouSheet });
     tabbarEl = el("nav", { class: "oa-tabbar", "aria-label": "Primary" });
     for (const t of tabs) {
@@ -5066,7 +5103,7 @@
           "div",
           {},
           el("div", { class: "oa-logo-name" }, "Options Academy"),
-          el("div", { class: "oa-logo-sub" }, "Family Exchange")
+          el("div", { class: "oa-logo-sub" }, "Academy Exchange")
         )
       ),
       navEl,
@@ -5087,7 +5124,6 @@
     app.appendChild(rail);
     app.appendChild(main);
     app.appendChild(buildTabbar());
-    document.body.classList.toggle("kids-targets", kidsEnabled());
     renderTape();
     refreshProfile();
   }
@@ -5147,8 +5183,8 @@
   }
   function profilePicker(firstRun = false) {
     const wrap = el("div", {});
-    wrap.appendChild(el("h2", {}, firstRun === true ? "Welcome to Options Academy" : "Who is learning?"));
-    wrap.appendChild(el("p", { class: "sub" }, firstRun === true ? "A family trading floor: learn a concept, then apply it on a live simulated market. Create a profile for each member of the family \u2014 progress, XP, and paper-money accounts are tracked separately." : "Switch profiles or add a new family member."));
+    wrap.appendChild(el("h2", {}, firstRun === true ? "Welcome to Options Academy" : "Select a trader profile"));
+    wrap.appendChild(el("p", { class: "sub" }, firstRun === true ? "A simulated trading floor: learn a concept, then apply it on a live simulated market. Each profile tracks its own progress, XP, and paper-money account." : "Switch profiles or add a new trader."));
     const grid = el("div", { class: "profile-grid" });
     for (const p of profiles()) {
       const lv = levelOf(p.xp);
@@ -5167,7 +5203,7 @@
         },
         avEl(p),
         el("div", { class: "pn", style: "font-weight:600" }, p.name),
-        el("div", { class: "small muted" }, p.mode === "kid" ? "\u{1F388} Kid explorer" : "Trader"),
+        el("div", { class: "small muted" }, "Trader"),
         el("div", { class: "small num muted" }, `Lv ${lv.n} \xB7 ${p.xp} XP`)
       ));
     }
@@ -5185,7 +5221,7 @@
     return m;
   }
   function addProfileModal(opts = {}) {
-    let emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)], mode = "adult";
+    let emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
     const nameIn = el("input", { type: "text", placeholder: "Name", "aria-label": "Profile name", style: "padding:8px 10px;border:1px solid var(--hairline);border-radius:6px;width:100%;background:var(--card);" });
     const emojiRow = el("div", { class: "btn-row", style: "margin:10px 0" });
     const emBtns = EMOJIS.map((e2) => {
@@ -5197,23 +5233,6 @@
       return b;
     });
     emBtns.forEach((b) => emojiRow.appendChild(b));
-    const modeSeg = el("div", { class: "seg" });
-    const bA = el("button", { class: "on", onclick: () => {
-      mode = "adult";
-      bA.classList.add("on");
-      bK.classList.remove("on");
-    } }, "Trader (teen/adult)");
-    const bK = el("button", { onclick: () => {
-      mode = "kid";
-      bK.classList.add("on");
-      bA.classList.remove("on");
-    } }, "Kid explorer (8\u201312)");
-    if (kidsEnabled()) {
-      modeSeg.appendChild(bA);
-      modeSeg.appendChild(bK);
-    } else {
-      modeSeg.appendChild(bA);
-    }
     const needAck = !isFamilyBuild();
     const ackBox = el("input", { type: "checkbox", id: "oa-ack", style: "margin-top:3px;flex:0 0 auto" });
     const ackRow = needAck ? el(
@@ -5228,7 +5247,6 @@
       el("h2", {}, "New profile"),
       el("div", { class: "field mt2" }, el("label", {}, "Name"), nameIn),
       isFamilyBuild() ? el("div", { class: "mt1" }, el("div", { class: "field" }, el("label", {}, "Avatar")), emojiRow) : null,
-      kidsEnabled() ? el("div", { class: "field" }, el("label", {}, "Mode"), modeSeg) : null,
       ackRow,
       el(
         "div",
@@ -5239,13 +5257,12 @@
             return;
           }
           const name = nameIn.value.trim() || "Learner";
-          const useMode = kidsEnabled() ? mode : "adult";
-          const p = addProfile(name, emoji, useMode);
+          const p = addProfile(name, emoji);
           m.close();
           refreshProfile();
           toast(`Welcome, ${name}! You start with ${F.usd(1e5, 0)} of paper money.`, "gain");
-          const dest = useMode === "kid" ? "#/kids" : opts.then || "#/welcome";
-          if (useMode !== "kid") start(p?.id || active()?.id);
+          const dest = opts.then || "#/welcome";
+          start(p?.id || active()?.id);
           if ((location.hash || "") === "#/start") location.replace(dest);
           else location.hash = dest;
           route();
@@ -5260,13 +5277,17 @@
     const hash = location.hash || "#/home";
     const parts = hash.replace(/^#\//, "").split("/");
     let name = (parts[0] || "home").split("?")[0] || "home";
+    if (name === "kids") {
+      location.replace("#/learn");
+      return;
+    }
     if (!profiles().length && name !== "start" && name !== "legal") {
       location.replace("#/start");
       return;
     }
     const landing = name === "start";
     document.body.classList.toggle("oa-landing", landing);
-    const view16 = VIEWS[name] || VIEWS.home;
+    const view15 = VIEWS[name] || VIEWS.home;
     if (currentCleanup) {
       try {
         currentCleanup();
@@ -5278,7 +5299,7 @@
     refreshTabActive(name);
     contentEl.innerHTML = "";
     window.scrollTo(0, 0);
-    currentCleanup = view16.render(contentEl, parts.slice(1)) || null;
+    currentCleanup = view15.render(contentEl, parts.slice(1)) || null;
   }
   function boot(views) {
     VIEWS = { welcome: view, upgrade: view2, settings: view3, start: view5, ...views };
@@ -5346,7 +5367,7 @@ So when someone says "there's a 70% chance of rain," they are not promising rain
                   "Short runs are streaky and surprising; probability only becomes reliable over many tries.",
                   "A spinner is never 'due' \u2014 each spin starts fresh."
                 ],
-                "sim": "kids",
+                "sim": "market",
                 "sim_task": "Open the Probability Spinner game. Set the spinner to 1 gold slice out of 4, predict how many golds you'll get in 20 spins, then run 20 spins and compare. Now run 200 spins \u2014 which run landed closer to 25%?",
                 "quiz": [
                   {
@@ -5395,7 +5416,7 @@ So when someone says "there's a 70% chance of rain," they are not promising rain
                   "Negative-EV games still produce occasional winners \u2014 that's how casinos and lotteries survive.",
                   "Judge decisions by their EV over many plays, not by a single lucky or unlucky result."
                 ],
-                "sim": "kids",
+                "sim": "market",
                 "sim_task": "In the Probability Spinner game, build the $1 carnival wheel (1 winning slice of $5 out of 10). Play 50 spins and watch your bankroll. Then rebuild it with 3 winning slices and play 50 more. Which wheel would you want to OWN, and which would you want to PLAY?",
                 "quiz": [
                   {
@@ -5450,7 +5471,7 @@ One more tool: compare deals by their **downside-to-upside shape**, not just the
                   "A high win rate means nothing by itself \u2014 one big loss can erase many small wins.",
                   "'Huge reward, no risk' is the slogan of every scam ever invented."
                 ],
-                "sim": "kids",
+                "sim": "market",
                 "sim_task": "Open the Risk-vs-Reward game. Play the 'Steady' ladder (small sure gains) and the 'Daredevil' ladder (big wins, big busts) for 10 rounds each with the same starting coins. Which one ever knocked you to zero? Which felt better \u2014 and which left you richer?",
                 "quiz": [
                   {
@@ -5505,7 +5526,7 @@ One more tool: compare deals by their **downside-to-upside shape**, not just the
                   "A price is the current handshake between buyers and sellers \u2014 a group guess about the future.",
                   "Investing means buying productive slices, not lottery tickets."
                 ],
-                "sim": "kids",
+                "sim": "market",
                 "sim_task": "In the Lemonade Stand game, sell one-fifth slices of your stand to raise $100 for a second location. After the summer season runs, check what each friend's slice earned \u2014 then see what price slices trade at after a rainy week versus a heat wave.",
                 "quiz": [
                   {
@@ -5560,7 +5581,7 @@ One warning: diversification smooths the ride; it doesn't guarantee profits. If 
                   "Spreading out makes your worst case survivable, which keeps you in the game.",
                   "It smooths the ride but doesn't guarantee gains \u2014 a seatbelt, not a force field."
                 ],
-                "sim": "kids",
+                "sim": "market",
                 "sim_task": "In the Lemonade Stand game, run three summers: (1) all coins in lemonade, (2) all in umbrellas, (3) half and half. Compare the biggest single-summer loss of each plan. Which plan never had a disaster summer?",
                 "quiz": [
                   {
@@ -5615,7 +5636,7 @@ One warning: diversification smooths the ride; it doesn't guarantee profits. If 
                   "Insurance makes your worst case survivable, which matters more than maximizing average profit.",
                   "A put option on a stock works exactly like rain insurance on a lemonade stand."
                 ],
-                "sim": "kids",
+                "sim": "market",
                 "sim_task": "In the Lemonade Stand insurance game, run one summer with no insurance and one buying Maya's $3 rain policy every week. Compare your worst single week in each run. Then switch roles and BE Maya for a summer \u2014 track whether selling insurance made money on average.",
                 "quiz": [
                   {
@@ -5668,9 +5689,9 @@ Here's the mindset to carry into the rest of this academy: options are not prima
                   "A put option is insurance for shares: a premium buys the right to sell at a set price.",
                   "If nothing bad happens, the premium is 'wasted' \u2014 exactly like unused insurance, and that's okay.",
                   "Put prices rise when markets are stormier or people are more worried, just like hurricane insurance.",
-                  "Options are risk-reshaping tools first, lottery tickets never (at least not in this family)."
+                  "Options are risk-reshaping tools first, lottery tickets never (at least not on this desk)."
                 ],
-                "sim": "kids",
+                "sim": "market",
                 "sim_task": "In the Lemonade Stand game's 'Stock Mode', own a $100 share through a 12-week season. Buy the $95-protection policy for $4 in one run and skip it in another. Write down your worst week in each run \u2014 then explain to a parent which run you'd choose with real money and why.",
                 "quiz": [
                   {
@@ -7510,13 +7531,13 @@ This is why the simulator matters more than the formula sheet. Run the same path
       const p = active();
       const hour = (/* @__PURE__ */ new Date()).getHours();
       const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-      root.appendChild(viewHeader("Family Exchange", p ? `${greet}, ${p.name}` : "Welcome to Options Academy"));
+      root.appendChild(viewHeader("Academy Exchange", p ? `${greet}, ${p.name}` : "Welcome to Options Academy"));
       root.appendChild(el(
         "p",
         { class: "sub", style: "max-width:70ch" },
-        "Learn a concept, then apply it on a live simulated market \u2014 the way traders actually learn. Built on the family bookshelf: McMillan's Options as a Strategic Investment and the Volcube volatility series."
+        "Learn a concept, then apply it on a live simulated market \u2014 the way traders actually learn. Built on the desk library: McMillan's Options as a Strategic Investment and the Volcube volatility series."
       ));
-      if (p && p.mode !== "kid" && incomplete()) {
+      if (p && incomplete()) {
         const n = Math.min(currentStep() + 1, TOTAL);
         root.appendChild(el("a", {
           class: "pill brass onboard-continue",
@@ -7531,7 +7552,6 @@ This is why the simulator matters more than the formula sheet. Run the same path
       let nextLesson = null, trackTitle = "";
       if (curriculum?.tracks && p) {
         outer: for (const t of curriculum.tracks) {
-          if (p.mode === "kid" && t.id !== "foundations") continue;
           for (const m of t.modules) for (const l of m.lessons) {
             if (!p.lessons[l.id]) {
               nextLesson = l;
@@ -7553,24 +7573,14 @@ This is why the simulator matters more than the formula sheet. Run the same path
           el("a", { class: "btn", href: "#/learn" }, "Browse curriculum")
         ));
       } else if (p) {
-        contCard.appendChild(el("p", { class: "sub" }, p.mode === "kid" ? "Foundations complete! Play the Kids Corner games or visit the Live Market with a grown-up." : "All tracks complete \u2014 legend status. The market is still ticking, though."));
-        contCard.appendChild(el("a", { class: "btn primary", href: p.mode === "kid" ? "#/kids" : "#/market" }, p.mode === "kid" ? "Kids Corner \u2192" : "Live Market \u2192"));
+        contCard.appendChild(el(
+          "p",
+          { class: "sub" },
+          "All tracks complete \u2014 legend status. The market is still ticking, though."
+        ));
+        contCard.appendChild(el("a", { class: "btn primary", href: "#/market" }, "Live Market \u2192"));
       } else {
         contCard.appendChild(el("p", { class: "sub" }, "Create a profile to begin."));
-      }
-      if (p && p.mode === "kid") {
-        contCard.appendChild(el(
-          "div",
-          { class: "apply-card mt2" },
-          icon("balloon", { cls: "ic" }),
-          el(
-            "div",
-            { style: "flex:1;min-width:200px" },
-            el("div", { style: "font-weight:700" }, "Games are learning too"),
-            el("div", { class: "sub" }, "Lemonade stands, spinners, and gold coins \u2014 every game hides a real trading idea.")
-          ),
-          el("a", { class: "btn primary", href: "#/kids" }, "Play")
-        ));
       }
       const sideCol = el("div", { class: "w33", style: "display:flex;flex-direction:column;gap:16px" });
       row1.appendChild(sideCol);
@@ -7983,12 +7993,11 @@ This is why the simulator matters more than the formula sheet. Run the same path
     const p = active();
     const t = track(trackId);
     if (!t) return [];
-    const kidFree = p?.mode === "kid" && trackId === "foundations";
     const start5 = p?.placement?.[trackId]?.startModule ?? 0;
     let prevComplete = true;
     return t.modules.map((mod, i) => {
       const complete = p ? moduleComplete(p, mod) : false;
-      const unlocked = kidFree || !p ? i === 0 || kidFree : i <= start5 || prevComplete;
+      const unlocked = !p ? i === 0 : i <= start5 || prevComplete;
       const status2 = { id: mod.id, title: mod.title, index: i, unlocked, complete, quizAvg: p ? moduleQuizAvg(p, mod) : 0 };
       prevComplete = complete;
       return status2;
@@ -8020,8 +8029,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     strategy: { href: "#/strategy", label: "Open the Strategy Lab", icon: "\u{1F9E9}" },
     greeks: { href: "#/greeks", label: "Open the Greeks Lab", icon: "\u{1F3DB}\uFE0F" },
     vol: { href: "#/vol", label: "Open the Volatility Lab", icon: "\u{1F30A}" },
-    market: { href: "#/market", label: "Open the Live Market", icon: "\u{1F4FA}" },
-    kids: { href: "#/kids", label: "Open the Kids Corner", icon: "\u{1F388}" }
+    market: { href: "#/market", label: "Open the Live Market", icon: "\u{1F4FA}" }
   };
   function allLessons() {
     return curriculum.tracks.flatMap((t) => t.modules.flatMap((m) => m.lessons.map((l) => ({ ...l, trackId: t.id, trackTitle: t.title, moduleTitle: m.title }))));
@@ -9758,7 +9766,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           }
         }, "Puts"));
         wrap.appendChild(toolbar);
-        const ladder2 = el("div", {
+        const ladder = el("div", {
           class: "chain-ladder" + (sideEmphasis === "calls" ? " ladder-emphasize-calls" : "") + (sideEmphasis === "puts" ? " ladder-emphasize-puts" : "")
         });
         let atmRow = null;
@@ -9798,9 +9806,9 @@ This is why the simulator matters more than the formula sheet. Run the same path
             )
           );
           if (isAtm) atmRow = rEl;
-          ladder2.appendChild(rEl);
+          ladder.appendChild(rEl);
         }
-        wrap.appendChild(ladder2);
+        wrap.appendChild(ladder);
         chainBox.innerHTML = "";
         chainBox.appendChild(wrap);
         if (atmRow) {
@@ -10159,7 +10167,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       let sheetEl = null;
       let sheetBg = null;
       let coachEl = null;
-      const hdr = viewHeader("Live Market \u2014 Family Exchange", "Paper-trade the tape");
+      const hdr = viewHeader("Live Market \u2014 Academy Exchange", "Paper-trade the tape");
       const head = el("div", { class: "flex-between" });
       const clockBig = el("span", { class: "num muted" });
       const speedSeg = el("div", { class: "seg", role: "group", "aria-label": "Simulation speed" });
@@ -10391,7 +10399,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           toolbar.appendChild(callBtn);
           toolbar.appendChild(putBtn);
           wrap.appendChild(toolbar);
-          const ladder2 = el("div", {
+          const ladder = el("div", {
             class: "chain-ladder" + (sideEmphasis === "calls" ? " ladder-emphasize-calls" : "") + (sideEmphasis === "puts" ? " ladder-emphasize-puts" : "")
           });
           let atmRow = null;
@@ -10442,9 +10450,9 @@ This is why the simulator matters more than the formula sheet. Run the same path
               )
             );
             if (isAtm) atmRow = row;
-            ladder2.appendChild(row);
+            ladder.appendChild(row);
           }
-          wrap.appendChild(ladder2);
+          wrap.appendChild(ladder);
           chainBox.innerHTML = "";
           chainBox.appendChild(wrap);
           ticketCard.style.display = "none";
@@ -10993,386 +11001,8 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
   };
 
-  // src/ui/views/kids.js
-  function lemonade(root) {
-    const ROUNDS = 10;
-    let round = 0, money = 20, ghostMoney = 20, done = false;
-    let chance, ticketCost;
-    root.appendChild(el("div", { class: "crumb" }, el("a", { href: "#/kids" }, "\u2190 Kids Corner")));
-    root.appendChild(el("h1", {}, "\u{1F34B} Lemonade & the Rain Ticket"));
-    root.appendChild(el(
-      "p",
-      { class: "sub", style: "max-width:62ch" },
-      "You run a lemonade stand for 10 days. A sunny day earns you $10. A rainy day earns $0. Each morning you can buy a Rain Ticket \u2014 if it rains, the ticket pays you $10 anyway. Smart deal or waste of money? Depends on the price and the sky!"
-    ));
-    const board = el("div", { class: "card mt2", style: "max-width:560px" });
-    root.appendChild(board);
-    function newDay() {
-      chance = [0.2, 0.3, 0.4, 0.5, 0.6][Math.floor(Math.random() * 5)];
-      ticketCost = Math.round(chance * 10) + 1;
-      board.innerHTML = "";
-      board.appendChild(el(
-        "div",
-        { class: "flex-between" },
-        el("h3", {}, `Day ${round + 1} of ${ROUNDS}`),
-        el("span", { class: "coin-pile" }, `\u{1F4B0} ${F.usd(money, 0)}`)
-      ));
-      const suns = Math.round((1 - chance) * 10), rains = 10 - suns;
-      board.appendChild(el("div", { style: "font-size:26px;letter-spacing:3px;margin:8px 0" }, "\u2600\uFE0F".repeat(suns) + "\u{1F327}\uFE0F".repeat(rains)));
-      board.appendChild(el("p", {}, `The forecast says ${Math.round(chance * 100)}% chance of rain. A Rain Ticket costs ${F.usd(ticketCost, 0)} today.`));
-      board.appendChild(el(
-        "div",
-        { class: "btn-row" },
-        el("button", { class: "btn primary", onclick: () => play(true) }, `\u{1F39F}\uFE0F Buy ticket (${F.usd(ticketCost, 0)})`),
-        el("button", { class: "btn", onclick: () => play(false) }, "\u{1F91E} Skip it \u2014 sunny vibes")
-      ));
-    }
-    function play(bought) {
-      const rained = Math.random() < chance;
-      const earned = rained ? 0 : 10;
-      money += earned - (bought ? ticketCost : 0) + (bought && rained ? 10 : 0);
-      ghostMoney += earned;
-      board.innerHTML = "";
-      board.appendChild(el("div", { class: "big-result" }, rained ? "\u{1F327}\uFE0F It rained!" : "\u2600\uFE0F Sunshine!"));
-      const lines = [];
-      if (rained && bought) lines.push("No lemonade money\u2026 but your Rain Ticket paid you $10. Protected! \u{1F6E1}\uFE0F");
-      if (rained && !bought) lines.push("No ticket, no lemonade money. Ouch \u2014 $0 today.");
-      if (!rained && bought) lines.push(`You earned $10 but spent ${F.usd(ticketCost, 0)} on a ticket you didn't need. That's okay \u2014 that's what safety costs.`);
-      if (!rained && !bought) lines.push("You earned the full $10. Lucky and sunny!");
-      board.appendChild(el("p", {}, lines[0]));
-      board.appendChild(el("div", { class: "coin-pile" }, `\u{1F4B0} ${F.usd(money, 0)}`));
-      round++;
-      board.appendChild(el(
-        "div",
-        { class: "btn-row mt2" },
-        el("button", { class: "btn primary", onclick: round >= ROUNDS ? finish2 : newDay }, round >= ROUNDS ? "See results" : "Next morning \u2192")
-      ));
-    }
-    function finish2() {
-      done = true;
-      board.innerHTML = "";
-      board.appendChild(el("h3", {}, "\u{1F3C1} Ten days of lemonade!"));
-      board.appendChild(el(
-        "div",
-        { class: "stats mt1" },
-        el("div", { class: "stat" }, el("div", { class: "k" }, "You"), el("div", { class: "v" }, F.usd(money, 0))),
-        el("div", { class: "stat" }, el("div", { class: "k" }, "No-ticket twin"), el("div", { class: "v" }, F.usd(ghostMoney, 0)))
-      ));
-      board.appendChild(el(
-        "p",
-        { class: "mt1" },
-        money >= ghostMoney ? "Your tickets paid off \u2014 the rainy days would have hurt without them!" : "Your twin got lucky with sunshine this time. But imagine a super-rainy week\u2026 who sleeps better at night?"
-      ));
-      board.appendChild(el(
-        "div",
-        { class: "takeaways" },
-        el("h3", {}, "\u{1F309} The bridge to trading"),
-        el("p", { style: "margin:6px 0 0" }, `Grown-up traders buy Rain Tickets for their stocks. They are called PUT OPTIONS: you pay a small price now, and if your stock "rains" (drops), the put pays you back. Dad's protective puts work exactly like your lemonade tickets.`)
-      ));
-      board.appendChild(el(
-        "div",
-        { class: "btn-row mt2" },
-        el("button", { class: "btn primary", onclick: () => {
-          root.innerHTML = "";
-          lemonade(root);
-        } }, "\u{1F501} Play again"),
-        el("a", { class: "btn", href: "#/kids" }, "Back to games")
-      ));
-      gameDone("lemonade", "Lemonade insurance mastered");
-    }
-    newDay();
-  }
-  function spinner(root) {
-    root.appendChild(el("div", { class: "crumb" }, el("a", { href: "#/kids" }, "\u2190 Kids Corner")));
-    root.appendChild(el("h1", {}, "\u{1F3A1} Spin to Win?"));
-    root.appendChild(el(
-      "p",
-      { class: "sub", style: "max-width:62ch" },
-      "Three spinner machines, three price tags. You have $100 and 20 spins. Pick the machine you think is the BEST deal. Then we'll check the math together."
-    ));
-    const MACHINES = [
-      { id: "steady", name: "\u{1F422} Steady", cost: 2, desc: "Pays $3 every single time.", spin: () => 3, ev: 1 },
-      { id: "flip", name: "\u{1FA99} Coin Flip", cost: 4, desc: "Half the time pays $10, half the time $0.", spin: () => Math.random() < 0.5 ? 10 : 0, ev: 1 },
-      { id: "jackpot", name: "\u{1F48E} Jackpot", cost: 5, desc: "1 in 10 chance of $30. Otherwise $0.", spin: () => Math.random() < 0.1 ? 30 : 0, ev: -2 }
-    ];
-    const pickRow = el("div", { class: "grid3 mt2" });
-    const board = el("div", { class: "card mt2", style: "max-width:620px;display:none" });
-    root.appendChild(pickRow);
-    root.appendChild(board);
-    for (const m of MACHINES) {
-      pickRow.appendChild(el(
-        "button",
-        { class: "spinner-opt", onclick: () => run(m) },
-        el("div", { style: "font-size:30px" }, m.name.split(" ")[0]),
-        el("div", { style: "font-weight:700" }, m.name.slice(m.name.indexOf(" ") + 1)),
-        el("div", { class: "small" }, m.desc),
-        el("div", { class: "pill brass mt1" }, `${F.usd(m.cost, 0)} per spin`)
-      ));
-    }
-    function run(m) {
-      board.style.display = "";
-      board.innerHTML = "";
-      board.appendChild(el("h3", {}, `You picked ${m.name}`));
-      let money = 100, spins = 0;
-      const log2 = el("div", { style: "font-size:22px;letter-spacing:2px;min-height:60px;word-break:break-all" });
-      const pile = el("div", { class: "coin-pile" }, `\u{1F4B0} ${F.usd(money, 0)}`);
-      board.appendChild(pile);
-      board.appendChild(log2);
-      const timer = setInterval(() => {
-        const won = m.spin();
-        money += won - m.cost;
-        spins++;
-        log2.textContent += won > 0 ? won >= 30 ? "\u{1F48E}" : won >= 10 ? "\u{1F31F}" : "\u2728" : "\u25AB\uFE0F";
-        pile.textContent = `\u{1F4B0} ${F.usd(money, 0)}`;
-        if (spins >= 20) {
-          clearInterval(timer);
-          reveal(m, money);
-        }
-      }, 160);
-    }
-    function reveal(m, money) {
-      board.appendChild(el("div", { class: "big-result" }, money >= 100 ? `You ended with ${F.usd(money, 0)} \u{1F389}` : `You ended with ${F.usd(money, 0)}`));
-      const tbl = el("table", { class: "oa mt1" });
-      tbl.appendChild(el("thead", {}, el("tr", {}, el("th", {}, "Machine"), el("th", {}, "Cost"), el("th", {}, "Average win"), el("th", {}, "Deal?"))));
-      const tb = el("tbody", {});
-      for (const x of MACHINES) {
-        tb.appendChild(el(
-          "tr",
-          {},
-          el("td", {}, x.name),
-          el("td", {}, F.usd(x.cost, 0)),
-          el("td", {}, F.usd(x.cost + x.ev, 0)),
-          el("td", { class: x.ev > 0 ? "up" : "down" }, x.ev > 0 ? `GOOD (+${F.usd(x.ev, 0)}/spin)` : `BAD (${F.usd(x.ev, 0)}/spin)`)
-        ));
-      }
-      tbl.appendChild(tb);
-      board.appendChild(el("div", { class: "tbl-wrap" }, tbl));
-      board.appendChild(el(
-        "div",
-        { class: "takeaways" },
-        el("h3", {}, "\u{1F309} The bridge to trading"),
-        el("p", { style: "margin:6px 0 0" }, `The secret: compare the PRICE with what it pays ON AVERAGE. The Jackpot machine feels exciting but loses $2 per spin on average. Options are priced the same way \u2014 a trader's whole job is spotting when the "ticket price" is better or worse than the average payout. That average is called EXPECTED VALUE.`)
-      ));
-      board.appendChild(el(
-        "div",
-        { class: "btn-row mt2" },
-        el("button", { class: "btn primary", onclick: () => {
-          root.innerHTML = "";
-          spinner(root);
-        } }, "\u{1F501} Try another machine"),
-        el("a", { class: "btn", href: "#/kids" }, "Back to games")
-      ));
-      gameDone("spinner", "Expected value explorer");
-    }
-  }
-  function ladder(root) {
-    const ROUNDS = 8;
-    let round = 0, coins = 10;
-    root.appendChild(el("div", { class: "crumb" }, el("a", { href: "#/kids" }, "\u2190 Kids Corner")));
-    root.appendChild(el("h1", {}, "\u{1FA9C} The Risk Ladder"));
-    root.appendChild(el(
-      "p",
-      { class: "sub", style: "max-width:62ch" },
-      "You have 10 gold coins and 8 rounds. Each round, split your coins between three chests. Grow your pile \u2014 but careful: the Rocket chest eats coins most of the time!"
-    ));
-    const CHESTS = [
-      { id: "safe", name: "\u{1F6E1}\uFE0F Safe", desc: "Always \xD71.2", play: (c) => c * 1.2 },
-      { id: "bal", name: "\u2696\uFE0F Balanced", desc: "55%: \xD72 \xB7 45%: \xD70.5", play: (c) => Math.random() < 0.55 ? c * 2 : c * 0.5 },
-      { id: "rocket", name: "\u{1F680} Rocket", desc: "20%: \xD76 \xB7 80%: \xD70", play: (c) => Math.random() < 0.2 ? c * 6 : 0 }
-    ];
-    const board = el("div", { class: "card mt2", style: "max-width:620px" });
-    root.appendChild(board);
-    function askRound() {
-      board.innerHTML = "";
-      board.appendChild(el(
-        "div",
-        { class: "flex-between" },
-        el("h3", {}, `Round ${round + 1} of ${ROUNDS}`),
-        el("span", { class: "coin-pile" }, `\u{1FA99} ${coins.toFixed(1)}`)
-      ));
-      const inputs = {};
-      const grid = el("div", { class: "grid3 mt1" });
-      for (const ch of CHESTS) {
-        const inp = el("input", { type: "number", min: 0, step: 1, value: 0, style: "width:100%;text-align:center;font-size:18px" });
-        inputs[ch.id] = inp;
-        grid.appendChild(el(
-          "div",
-          { class: "spinner-opt", style: "cursor:default" },
-          el("div", { style: "font-size:26px" }, ch.name.split(" ")[0]),
-          el("div", { style: "font-weight:700" }, ch.name.slice(ch.name.indexOf(" ") + 1)),
-          el("div", { class: "small muted" }, ch.desc),
-          el("div", { class: "field mt1" }, inp)
-        ));
-      }
-      board.appendChild(grid);
-      const err = el("div", { class: "small", style: "color:var(--loss);min-height:18px" });
-      board.appendChild(err);
-      board.appendChild(el(
-        "div",
-        { class: "btn-row" },
-        el("button", { class: "btn primary", onclick: () => {
-          const alloc = {};
-          let total = 0;
-          for (const ch of CHESTS) {
-            alloc[ch.id] = Math.max(0, Math.floor(+inputs[ch.id].value || 0));
-            total += alloc[ch.id];
-          }
-          if (total > Math.floor(coins)) {
-            err.textContent = `That's ${total} coins \u2014 you only have ${Math.floor(coins)} whole coins to place.`;
-            return;
-          }
-          resolve2(alloc, coins - total);
-        } }, "Lock it in! \u{1F512}")
-      ));
-    }
-    function resolve2(alloc, kept) {
-      let result = kept;
-      const lines = [];
-      for (const ch of CHESTS) {
-        const bet = alloc[ch.id];
-        if (!bet) continue;
-        const got = ch.play(bet);
-        result += got;
-        lines.push(`${ch.name}: ${bet} \u2192 ${got.toFixed(1)} ${got > bet ? "\u{1F4C8}" : got === 0 ? "\u{1F4A5}" : "\u{1F4C9}"}`);
-      }
-      coins = result;
-      round++;
-      board.innerHTML = "";
-      board.appendChild(el("h3", {}, "Results"));
-      for (const l of lines) board.appendChild(el("p", { style: "margin:4px 0", class: "mono" }, l));
-      if (kept > 0) board.appendChild(el("p", { style: "margin:4px 0", class: "mono muted" }, `Kept in pocket: ${kept}`));
-      board.appendChild(el("div", { class: "coin-pile mt1" }, `\u{1FA99} ${coins.toFixed(1)}`));
-      if (coins < 0.5) {
-        finish2(true);
-        return;
-      }
-      board.appendChild(el(
-        "div",
-        { class: "btn-row mt2" },
-        el("button", { class: "btn primary", onclick: round >= ROUNDS ? () => finish2(false) : askRound }, round >= ROUNDS ? "See final score" : "Next round \u2192")
-      ));
-    }
-    function finish2(busted) {
-      board.innerHTML = "";
-      board.appendChild(el("div", { class: "big-result" }, busted ? "\u{1F4A5} Busted!" : `Final pile: \u{1FA99} ${coins.toFixed(1)}`));
-      board.appendChild(el("p", {}, busted ? "All the coins went to the Rocket and the Rocket ate them. Even a 6\xD7 payout can't help if one bad round wipes you out." : coins >= 25 ? "Impressive pile! Did you notice the steady chests did the quiet heavy lifting?" : coins >= 10 ? "You grew your pile \u2014 solid! The mix matters more than any single lucky hit." : "Tough rounds. Try again with more in Safe and Balanced \u2014 let Rocket be the sprinkle, not the meal."));
-      board.appendChild(el(
-        "div",
-        { class: "takeaways" },
-        el("h3", {}, "\u{1F309} The bridge to trading"),
-        el("p", { style: "margin:6px 0 0" }, "This is POSITION SIZING and DIVERSIFICATION \u2014 the #1 rule of traders who last. Never put everything on one rocket. Dad's rule from the big book: decide how much you can lose BEFORE you bet, and make sure no single loss can knock you off the ladder.")
-      ));
-      board.appendChild(el(
-        "div",
-        { class: "btn-row mt2" },
-        el("button", { class: "btn primary", onclick: () => {
-          root.innerHTML = "";
-          ladder(root);
-        } }, "\u{1F501} Climb again"),
-        el("a", { class: "btn", href: "#/kids" }, "Back to games")
-      ));
-      gameDone("ladder", "Risk Ladder climbed");
-    }
-    askRound();
-  }
-  var CARDS = [
-    ["What is a stock?", "A tiny piece of a real company. Own a share of Burger Barn and you own a sliver of every burger sold."],
-    ["What is risk?", "The chance things turn out worse than you hoped. More risk can mean more reward \u2014 or a bigger ouch."],
-    ["What is probability?", "How likely something is, from 0% (no way) to 100% (for sure). A coin flip is 50%."],
-    ["What is expected value?", "What you'd win ON AVERAGE if you played a game many, many times. Good deals have positive expected value."],
-    ["What is insurance?", "Paying a small amount now so a big disaster can't hurt you later. Like a Rain Ticket for your lemonade stand."],
-    ["What is a put option?", 'Grown-up insurance for a stock: if the stock falls, the put pays you. You pay a "premium" for that safety.'],
-    ["What is a call option?", "A ticket that lets you buy a stock later at a locked-in price. If the stock zooms up, your ticket gets valuable."],
-    ["What is diversification?", "Not putting all your eggs in one basket. Many different baskets = one bad egg can't ruin breakfast."],
-    ["What is a premium?", "The price of an option ticket. Sellers collect it; buyers pay it hoping the ticket pays off bigger."],
-    ["Why do traders talk about Greeks?", "Greek letters (Delta, Theta\u2026) are the dials that show how an option's price will react when things change."]
-  ];
-  function flashcards(root) {
-    root.appendChild(el("div", { class: "crumb" }, el("a", { href: "#/kids" }, "\u2190 Kids Corner")));
-    root.appendChild(el("h1", {}, "\u{1F0CF} Flash Cards"));
-    root.appendChild(el("p", { class: "sub" }, "Tap a card to flip it. Can you answer before you peek?"));
-    const grid = el("div", { class: "grid2 mt2" });
-    root.appendChild(grid);
-    CARDS.forEach(([q, a]) => {
-      let flipped = false;
-      const inner = el(
-        "div",
-        {},
-        el("div", { style: "font-weight:700;font-size:16px" }, "\u2753 " + q),
-        el("div", { class: "small muted mt1" }, "tap to reveal")
-      );
-      const card = el("button", { class: "game-card", onclick: () => {
-        flipped = !flipped;
-        inner.innerHTML = "";
-        if (flipped) {
-          inner.appendChild(el("div", { style: "font-weight:700;font-size:15px;color:var(--brass-strong)" }, q));
-          inner.appendChild(el("div", { class: "mt1" }, a));
-        } else {
-          inner.appendChild(el("div", { style: "font-weight:700;font-size:16px" }, "\u2753 " + q));
-          inner.appendChild(el("div", { class: "small muted mt1" }, "tap to reveal"));
-        }
-      } }, inner);
-      grid.appendChild(card);
-    });
-  }
-  var view12 = {
-    render(root, params) {
-      if (params[0] === "lemonade") return lemonade(root);
-      if (params[0] === "spinner") return spinner(root);
-      if (params[0] === "ladder") return ladder(root);
-      if (params[0] === "cards") return flashcards(root);
-      const p = active();
-      root.appendChild(el(
-        "div",
-        { class: "kids-hero" },
-        el("span", { class: "big" }, "\u{1F388}"),
-        el(
-          "div",
-          {},
-          el("h1", {}, "Kids Corner"),
-          el("p", { class: "sub", style: "margin:0" }, "Games first. Secrets of trading hidden inside.")
-        )
-      ));
-      const games = [
-        ["lemonade", "\u{1F34B}", "Lemonade & the Rain Ticket", "Run a stand, watch the sky, and discover what insurance is really worth."],
-        ["spinner", "\u{1F3A1}", "Spin to Win?", "Three machines, three prices. Only the math knows which one is the good deal."],
-        ["ladder", "\u{1FA9C}", "The Risk Ladder", "Split your gold between safe and wild chests. Grow the pile without getting wiped out."],
-        ["cards", "\u{1F0CF}", "Flash Cards", "Ten big ideas, kid-sized. Flip and learn."]
-      ];
-      const grid = el("div", { class: "grid2 mt2" });
-      for (const [id, icon2, name, desc] of games) {
-        const played = p && p.games && p.games[id];
-        grid.appendChild(el(
-          "a",
-          { class: "game-card", href: "#/kids/" + id, style: "text-decoration:none;color:inherit" },
-          el("div", { class: "gi" }, icon2),
-          el("div", { style: "font-weight:700;font-size:17px" }, name, played ? el("span", { class: "star" }, " \u2605") : ""),
-          el("div", { class: "sub" }, desc)
-        ));
-      }
-      root.appendChild(grid);
-      root.appendChild(el(
-        "div",
-        { class: "apply-card mt2", style: "max-width:70ch" },
-        el("span", { class: "ic" }, "\u{1F4FA}"),
-        el(
-          "div",
-          { style: "flex:1;min-width:220px" },
-          el("div", { style: "font-weight:700" }, "Ready for the big screen?"),
-          el("div", { class: "sub" }, "The Live Market works for kids too \u2014 buy 10 shares of Lemonade Labs with paper money and watch it wiggle. Ask a grown-up to sit with you!")
-        ),
-        el("a", { class: "btn primary", href: "#/market" }, "Visit the market")
-      ));
-      root.appendChild(el(
-        "p",
-        { class: "small muted mt2", style: "max-width:70ch" },
-        "For grown-ups: these games teach probability, expected value, insurance, and position sizing \u2014 the foundations under every options concept in the adult tracks. The Foundations track in the Curriculum pairs with them."
-      ));
-    }
-  };
-
   // src/ui/views/progress.js
-  var view13 = {
+  var view12 = {
     render(root) {
       const p = active();
       if (!p) {
@@ -11384,7 +11014,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       root.appendChild(el("div", { class: "eyebrow" }, "Progress"));
       root.appendChild(el(
         "div",
-        { class: "kids-hero" },
+        { class: "profile-hero" },
         isFamilyBuild() ? el("span", { class: "big" }, p.emoji) : el("span", { class: "big monogram" }, (p.name || "?").trim().charAt(0).toUpperCase()),
         el(
           "div",
@@ -11435,7 +11065,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         root.appendChild(tr);
       }
       const bCard = el("div", { class: "card mt2" });
-      bCard.appendChild(el("h3", {}, `Badges (${Object.keys(p.badges).length}/${BADGES.length})`));
+      bCard.appendChild(el("h3", {}, `Badges (${BADGES.filter((b) => p.badges[b.id]).length}/${BADGES.length})`));
       const grid = el("div", { class: "badge-grid mt1" });
       for (const b of BADGES) {
         const got = p.badges[b.id];
@@ -11457,7 +11087,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           "button",
           { class: "btn", onclick: () => bus.emit("profile-picker") },
           icon("user"),
-          isFamilyBuild() ? " Switch / add family member" : " Switch profile"
+          " Switch profile"
         )
       ));
       return () => {
@@ -11497,7 +11127,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
     return wrap;
   }
-  var view14 = {
+  var view13 = {
     render(root) {
       root.appendChild(viewHeader("Trade Journal", "Process Score"));
       if (!isFamilyBuild() && tier() === "free") {
@@ -12057,7 +11687,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       }
     };
   }
-  var view15 = {
+  var view14 = {
     render(root, params) {
       if (params[0]) return renderRunner(root, params[0]);
       renderHub(root);
@@ -12066,7 +11696,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
 
   // src/main.js
   function start4() {
-    boot({ home: view6, learn: view7, strategy: view8, greeks: view9, vol: view10, market: view11, kids: view12, progress: view13, journal: view14, missions: view15, legal: view4 });
+    boot({ home: view6, learn: view7, strategy: view8, greeks: view9, vol: view10, market: view11, progress: view12, journal: view13, missions: view14, legal: view4 });
     start3();
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       navigator.serviceWorker.register("./sw.js").catch(() => {
