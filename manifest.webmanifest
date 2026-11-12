@@ -1,0 +1,17 @@
+{
+  "name": "Options Academy",
+  "short_name": "OptionsAcad",
+  "description": "The flight simulator for options trading — learn a concept, apply it on a live simulated market.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#96690a",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
