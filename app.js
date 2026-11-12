@@ -1336,9 +1336,9 @@
     if (!err) return;
     const free = !isFamilyBuild() && tier() === "free";
     if (free && /upgrade/i.test(String(err))) {
-      toast("\u{1F512} " + err, "loss", { label: "Upgrade", href: "#/upgrade" });
+      toast(err, "loss", { label: "Upgrade", href: "#/upgrade" });
     } else {
-      toast("\u26A0\uFE0F " + err, "loss");
+      toast(err, "loss");
     }
   }
   bus.on("toast", (msg, kind) => {
@@ -1395,7 +1395,7 @@
             b.classList.add("wrong");
             opts[it.answer].classList.add("correct");
           }
-          qWrap.appendChild(el("div", { class: "quiz-expl", html: (correct ? "\u2705 <b>Right.</b> " : "\u274C <b>Not quite.</b> ") + mdInline(it.explain) }));
+          qWrap.appendChild(el("div", { class: "quiz-expl", html: (correct ? '<b class="q-right">\u2713 Right.</b> ' : '<b class="q-wrong">\u2717 Not quite.</b> ') + mdInline(it.explain) }));
           answered++;
           if (answered === items.length) onDone && onDone(score, items.length);
         });
@@ -1518,6 +1518,137 @@
     }
   };
 
+  // src/ui/icons.js
+  var P = {
+    home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.5"/><path d="M10 21v-6h4v6"/>',
+    book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    balloon: '<circle cx="12" cy="8" r="5.25"/><path d="M12 13.5c-1.2 1.8-1.2 3 0 4.5s1.2 2.2 0 3"/>',
+    monitor: '<rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
+    layers: '<path d="m12 2.5 9.5 5L12 12.5l-9.5-5z"/><path d="m2.5 12.5 9.5 5 9.5-5"/><path d="m2.5 17 9.5 5 9.5-5"/>',
+    temple: '<path d="M3 21h18"/><path d="M5 18h14"/><path d="M6.5 18V10"/><path d="M10.2 18V10"/><path d="M13.8 18V10"/><path d="M17.5 18V10"/><path d="M3 9.5 12 3l9 6.5z"/>',
+    wave: '<path d="M2 12c2.5 0 2.5-5.5 5-5.5S9.5 17 12 17s2.5-10.5 5-10.5S19.5 12 22 12"/>',
+    notebook: '<rect x="4.5" y="2.5" width="15" height="19" rx="2"/><path d="M8.5 2.5v19"/><path d="M12 7.5h4"/><path d="M12 11.5h4"/><path d="M12 15.5h2.5"/>',
+    compass: '<circle cx="12" cy="12" r="9.25"/><path d="m15.8 8.2-2 5.6-5.6 2 2-5.6z" fill="currentColor" stroke="none"/>',
+    trophy: '<path d="M8 21h8"/><path d="M12 17.5V21"/><path d="M7 4h10v5.5a5 5 0 0 1-10 0z"/><path d="M7 6H4.25C4.25 9 5.5 10.75 7 11"/><path d="M17 6h2.75c0 3-1.25 4.75-2.75 5"/>',
+    gear: '<circle cx="12" cy="12" r="3.25"/><path d="M12 2.5v2.75"/><path d="M12 18.75v2.75"/><path d="M2.5 12h2.75"/><path d="M18.75 12h2.75"/><path d="m5.3 5.3 1.95 1.95"/><path d="m16.75 16.75 1.95 1.95"/><path d="m18.7 5.3-1.95 1.95"/><path d="m7.25 16.75-1.95 1.95"/>',
+    scale: '<path d="M12 3v18"/><path d="M8.5 21h7"/><path d="M12 5.5 5 7.5m7-2 7 2"/><path d="M5 7.5 2.75 13a2.6 2.6 0 0 0 4.5 0z"/><path d="M19 7.5 16.75 13a2.6 2.6 0 0 0 4.5 0z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2"/><path d="M12 19.5v2"/><path d="M2.5 12h2"/><path d="M19.5 12h2"/><path d="m5 5 1.4 1.4"/><path d="m17.6 17.6 1.4 1.4"/><path d="m19 5-1.4 1.4"/><path d="m6.4 17.6-1.4 1.4"/>',
+    moon: '<path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.75 6.75 0 0 0 9.7 9.7z"/>',
+    contrast: '<circle cx="12" cy="12" r="9.25"/><path d="M12 2.75a9.25 9.25 0 0 1 0 18.5z" fill="currentColor" stroke="none"/>',
+    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>',
+    cloud: '<path d="M17.5 19H6.75A4.25 4.25 0 0 1 6 10.55 6.5 6.5 0 0 1 18.7 11.9 3.75 3.75 0 0 1 17.5 19z"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>',
+    sparkle: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/>',
+    grad: '<path d="m12 4 10 5-10 5L2 9z"/><path d="M6.5 11.5V16c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4.5"/><path d="M22 9v5"/>',
+    shield: '<path d="M12 2.75 19.5 5.5v6c0 4.6-3 8.1-7.5 9.75C7.5 19.6 4.5 16.1 4.5 11.5v-6z"/>',
+    umbrella: '<path d="M12 2.75a9.25 9.25 0 0 1 9.25 9.25H2.75A9.25 9.25 0 0 1 12 2.75z"/><path d="M12 12v6.5a2.25 2.25 0 0 0 4.5 0"/>',
+    cart: '<path d="M3 4h2.25L7.5 15h11L21 7H6"/><circle cx="9" cy="19.5" r="1.5"/><circle cx="17" cy="19.5" r="1.5"/>',
+    ruler: '<path d="M3 21V3l18 18z"/><path d="M8 15.5v2"/><path d="M6.5 19H3"/><path d="M10.5 19h2"/>',
+    cube: '<rect x="4.5" y="4.5" width="15" height="15" rx="2.5"/><path d="m9 15 6-6"/>',
+    burst: '<circle cx="12" cy="12" r="2.75"/><path d="M12 2.5v4"/><path d="M12 17.5v4"/><path d="M2.5 12h4"/><path d="M17.5 12h4"/><path d="m5.3 5.3 2.6 2.6"/><path d="m16.1 16.1 2.6 2.6"/><path d="m18.7 5.3-2.6 2.6"/><path d="m7.9 16.1-2.6 2.6"/>',
+    pin: '<path d="M12 21.25S5.25 14.9 5.25 10a6.75 6.75 0 0 1 13.5 0c0 4.9-6.75 11.25-6.75 11.25z"/><circle cx="12" cy="10" r="2.25"/>',
+    scissors: '<circle cx="6" cy="6" r="2.5"/><circle cx="6" cy="18" r="2.5"/><path d="M8.1 7.6 20 18"/><path d="M8.1 16.4 20 6"/>',
+    bolt: '<path d="M13 2.5 4.75 13.25H11L10 21.5l8.25-10.75H13z"/>',
+    bird: '<path d="M2.75 12.5C6.25 5.5 13 3.5 21.25 5c-3.4 1.5-4.4 4-5.9 6.5-2 3.4-6.4 5-12.6 1z"/><path d="M8 18.5c2.5 1 5.5.5 7.5-1"/>',
+    trendDown: '<path d="m3 7 6.5 6.5L13 10l7.5 7.5"/><path d="M15.5 17.5h5v-5"/>',
+    trendUp: '<path d="m3 17 6.5-6.5L13 14l7.5-7.5"/><path d="M15.5 6.5h5v5"/>',
+    bookOpen: '<path d="M2.75 5.25A9.5 9.5 0 0 1 12 6.9a9.5 9.5 0 0 1 9.25-1.65V18.5A9.5 9.5 0 0 0 12 20.1a9.5 9.5 0 0 0-9.25-1.6z"/><path d="M12 6.9v13.2"/>',
+    target: '<circle cx="12" cy="12" r="9.25"/><circle cx="12" cy="12" r="5.25"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/>',
+    ticket: '<path d="M3 7a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 7v3a2 2 0 0 0 0 4v3a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17v-3a2 2 0 0 0 0-4z"/><path d="M14.5 5.5v2.75"/><path d="M14.5 11v2"/><path d="M14.5 15.75v2.75"/>',
+    scroll: '<path d="M8 3h10.5A2.5 2.5 0 0 1 21 5.5v13A2.5 2.5 0 0 1 18.5 21H8"/><path d="M8 3a2.5 2.5 0 0 0-2.5 2.5V18A3 3 0 0 1 8 21"/><path d="M11 8.5h6"/><path d="M11 12.5h6"/>',
+    butterfly: '<path d="M12 6.5v12"/><path d="M12 9C10 4.5 4.5 4 4 8s4 7.5 8 4.5"/><path d="M12 9c2-4.5 7.5-5 8-1s-4 7.5-8 4.5"/><path d="M12 13.5c-1.5 2.5-4.5 4-6 2"/><path d="M12 13.5c1.5 2.5 4.5 4 6 2"/>',
+    blocks: '<rect x="3" y="13.5" width="8" height="6.5" rx="1"/><rect x="13" y="13.5" width="8" height="6.5" rx="1"/><rect x="8" y="4.5" width="8" height="6.5" rx="1"/>',
+    star: '<path d="m12 3.25 2.6 5.3 5.85.85-4.23 4.12 1 5.83L12 16.6l-5.22 2.75 1-5.83-4.23-4.12 5.85-.85z"/>',
+    flame: '<path d="M12 2.75s5.75 4.75 5.75 10.25a5.75 5.75 0 0 1-11.5 0c0-2.5 1.4-4.6 2.75-6.25.4 1.4 1.2 2.4 2.25 3C11.25 7.5 11 5 12 2.75z"/>',
+    gem: '<path d="M7 3.5h10l4 5.5-9 11.5L3 9z"/><path d="M3 9h18"/><path d="m7 3.5 5 5.5 5-5.5"/>',
+    map: '<path d="m9 4.5-5.5 2v13l5.5-2 6 2 5.5-2v-13l-5.5 2z"/><path d="M9 4.5v13"/><path d="M15 6.5v13"/>',
+    bulb: '<path d="M9.5 18h5"/><path d="M10.25 21h3.5"/><path d="M12 3a6 6 0 0 1 3.5 10.9c-.8.6-1 1.3-1 2.1h-5c0-.8-.2-1.5-1-2.1A6 6 0 0 1 12 3z"/>',
+    card: '<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 9.5h19"/><path d="M6 15h4"/>',
+    plus: '<path d="M12 5v14"/><path d="M5 12h14"/>',
+    alert: '<path d="M12 3.5 22 20H2z"/><path d="M12 9.75v4.5"/><path d="M12 17.25h.01"/>',
+    news: '<rect x="3" y="4.5" width="15" height="15" rx="2"/><path d="M18 8.5h1.5A1.5 1.5 0 0 1 21 10v8a1.5 1.5 0 0 1-3 0z"/><path d="M6.5 8.5H14"/><path d="M6.5 12H14"/><path d="M6.5 15.5h5"/>',
+    rocket: '<path d="M12 2.75c3.25 1.75 5 5 5 8.75l-2.25 2.5h-5.5L7 11.5c0-3.75 1.75-7 5-8.75z"/><circle cx="12" cy="9" r="1.75"/><path d="m8.25 15.5-2 5 3.25-1.5 2.5 1.5 2.5-1.5 3.25 1.5-2-5"/>',
+    search: '<circle cx="10.5" cy="10.5" r="6.75"/><path d="m15.5 15.5 5 5"/>',
+    clock: '<circle cx="12" cy="12" r="9.25"/><path d="M12 6.5V12l3.5 2"/>',
+    bell: '<path d="M18 9.5a6 6 0 0 0-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M10.25 19.5a2 2 0 0 0 3.5 0"/>',
+    bars: '<path d="M4.5 20V10"/><path d="M10.5 20V4.5"/><path d="M16.5 20v-7.5"/><path d="M21 20H3"/>',
+    flag: '<path d="M5 21V4"/><path d="M5 4.5c4-2 7 2 11.5.5V13c-4.5 1.5-7.5-2.5-11.5-.5"/>'
+  };
+  var MAP = {
+    "\u{1F6E1}\uFE0F": "shield",
+    "\u{1F6E1}": "shield",
+    "\u{1F9EF}": "shield",
+    "\u2614": "umbrella",
+    "\u{1F6D2}": "cart",
+    "\u{1F4D0}": "ruler",
+    "\u{1F9CA}": "cube",
+    "\u{1F4A5}": "burst",
+    "\u{1F4CC}": "pin",
+    "\u2702\uFE0F": "scissors",
+    "\u2702": "scissors",
+    "\u26A1": "bolt",
+    "\u{1F985}": "bird",
+    "\u{1F4C9}": "trendDown",
+    "\u{1F4C8}": "trendUp",
+    "\u{1F3DB}\uFE0F": "temple",
+    "\u{1F3DB}": "temple",
+    "\u{1F9ED}": "compass",
+    "\u{1F30A}": "wave",
+    "\u{1F4D6}": "bookOpen",
+    "\u{1F9E0}": "bulb",
+    "\u{1F4A1}": "bulb",
+    "\u{1F4AF}": "target",
+    "\u{1F3AF}": "target",
+    "\u{1F3AB}": "ticket",
+    "\u{1F4DC}": "scroll",
+    "\u{1F98B}": "butterfly",
+    "\u{1F9F1}": "blocks",
+    "\u2B50": "star",
+    "\u{1F31F}": "star",
+    "\u{1F525}": "flame",
+    "\u{1F48E}": "gem",
+    "\u{1F5FA}\uFE0F": "map",
+    "\u{1F5FA}": "map",
+    "\u{1F4D8}": "book",
+    "\u{1F4DA}": "book",
+    "\u{1F4D3}": "notebook",
+    "\u{1F393}": "grad",
+    "\u{1F3C6}": "trophy",
+    "\u{1F680}": "rocket",
+    "\u{1F3C1}": "flag",
+    "\u{1F514}": "bell",
+    "\u{1F4CA}": "bars",
+    "\u{1F4F0}": "news",
+    "\u{1F324}\uFE0F": "sun",
+    "\u{1F324}": "sun",
+    "\u2600\uFE0F": "sun",
+    "\u{1F60C}": "sun",
+    "\u{1F4A4}": "moon",
+    "\u{1F570}\uFE0F": "clock",
+    "\u{1F570}": "clock",
+    "\u{1F6A8}": "alert",
+    "\u26A0\uFE0F": "alert",
+    "\u26A0": "alert",
+    "\u{1F52D}": "search",
+    "\u{1F50D}": "search",
+    "\u{1F9F2}": "target",
+    "\u{1F34B}": "sun",
+    "\u{1F388}": "balloon",
+    "\u{1F9E9}": "layers",
+    "\u{1F4FA}": "monitor"
+  };
+  function icon(name, o = {}) {
+    const s2 = document.createElement("span");
+    s2.className = "oi" + (o.cls ? " " + o.cls : "");
+    s2.setAttribute("aria-hidden", "true");
+    s2.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"${o.size ? ` style="width:${o.size}px;height:${o.size}px"` : ""}>${P[name] || P.sparkle}</svg>`;
+    return s2;
+  }
+  function iconFor(val, fallback = "news", o = {}) {
+    const slug = P[val] ? val : MAP[String(val || "").trim()];
+    return icon(slug || fallback, o);
+  }
+
   // src/ui/charts.js
   var registry = /* @__PURE__ */ new Set();
   var isMobile = () => !!(window.matchMedia && matchMedia("(max-width: 640px)").matches);
@@ -1527,7 +1658,7 @@
     registry.forEach((ch) => ch.draw());
   }
   var mo = new MutationObserver(themeChanged);
-  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme", "data-pl"] });
   if (window.matchMedia) {
     try {
       window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", themeChanged);
@@ -1776,7 +1907,7 @@
             ctx.stroke();
           }
           const fx = o.fmtX ? o.fmtX(nearest[0].p.x) : nearest[0].p.x;
-          tip.innerHTML = `<div class="t">${pinX != null ? "\u{1F4CC} " : ""}${o.tipLabel || ""}${fx}</div>` + nearest.map((n) => `<div><span style="color:${resolve(n.s.color)}">\u25CF</span> ${n.s.name}: <b>${o.fmtY ? o.fmtY(n.p.y) : n.p.y}</b></div>`).join("");
+          tip.innerHTML = `<div class="t">${pinX != null ? "\u2316 " : ""}${o.tipLabel || ""}${fx}</div>` + nearest.map((n) => `<div><span style="color:${resolve(n.s.color)}">\u25CF</span> ${n.s.name}: <b>${o.fmtY ? o.fmtY(n.p.y) : n.p.y}</b></div>`).join("");
           tip.style.display = "block";
           const tw = tip.offsetWidth;
           tip.style.left = Math.min(w - tw - 6, Math.max(2, hx + 12)) + "px";
@@ -3513,7 +3644,7 @@
       "aria-hidden": "true",
       title: "Sync",
       hidden: true
-    }, "\u2601");
+    }, icon("cloud"));
     parent.appendChild(cloud);
     function paint() {
       const u = user();
@@ -3546,6 +3677,7 @@
     const u = user();
     if (!u) {
       return [{
+        ic: "cloud",
         icon: "\u2601",
         label: "Create free account",
         onClick: () => openAuthModal()
@@ -3561,6 +3693,7 @@
         }
       },
       {
+        ic: "card",
         icon: "\u{1F4B3}",
         label: "Manage subscription",
         onClick: async () => {
@@ -3781,7 +3914,7 @@
         host.appendChild(el(
           "div",
           { class: "card mt2" },
-          el("div", { style: "font-size:28px" }, "\u{1F9ED}"),
+          el("div", {}, icon("compass", { size: 30 })),
           el("h3", {}, "First Covered Call"),
           el(
             "p",
@@ -4137,7 +4270,7 @@
           "div",
           { class: "flex-between" },
           el("h3", {}, "Real market data"),
-          realDataAllowed() ? null : el("a", { class: "pill brass lock-chip", href: "#/upgrade", style: "text-decoration:none" }, "\u{1F512} Upgrade")
+          realDataAllowed() ? null : el("a", { class: "pill brass lock-chip", href: "#/upgrade", style: "text-decoration:none" }, icon("lock"), " Upgrade")
         ));
         root.appendChild(realCard);
         if (!realDataAllowed()) {
@@ -4307,6 +4440,48 @@
       seg.appendChild(mkBtn("light", "Light"));
       seg.appendChild(mkBtn("dark", "Dark"));
       appearance.appendChild(seg);
+      appearance.appendChild(el("div", { class: "field mt2" }, el("label", {}, "Gain / loss colors")));
+      const plCurrent = (() => {
+        try {
+          return localStorage.getItem("oa.pl") || "default";
+        } catch {
+          return "default";
+        }
+      })();
+      const applyPl = (mode) => {
+        const rootEl = document.documentElement;
+        if (mode === "default") {
+          rootEl.removeAttribute("data-pl");
+          try {
+            localStorage.removeItem("oa.pl");
+          } catch {
+          }
+        } else {
+          rootEl.setAttribute("data-pl", mode);
+          try {
+            localStorage.setItem("oa.pl", mode);
+          } catch {
+          }
+        }
+      };
+      const plSeg = el("div", { class: "seg", role: "group", "aria-label": "Gain and loss colors" });
+      const mkPl = (mode, label) => {
+        const b = el("button", { class: plCurrent === mode ? "on" : "", onclick: () => {
+          applyPl(mode);
+          plSeg.querySelectorAll("button").forEach((x) => x.classList.remove("on"));
+          b.classList.add("on");
+        } }, label);
+        return b;
+      };
+      plSeg.appendChild(mkPl("default", "Green / red"));
+      plSeg.appendChild(mkPl("cvd", "Blue / orange"));
+      plSeg.appendChild(mkPl("inverted", "Inverted"));
+      appearance.appendChild(plSeg);
+      appearance.appendChild(el(
+        "div",
+        { class: "small muted mt1" },
+        "Blue / orange is colorblind-friendly (Okabe\u2013Ito palette). Inverted follows the East Asian convention \u2014 red means up."
+      ));
       root.appendChild(appearance);
       const about = el("div", { class: "card mt2 settings-section" });
       about.appendChild(el("h3", {}, "About"));
@@ -4330,37 +4505,6 @@
       ));
     }
   };
-
-  // src/ui/icons.js
-  var P = {
-    home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.5"/><path d="M10 21v-6h4v6"/>',
-    book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
-    balloon: '<circle cx="12" cy="8" r="5.25"/><path d="M12 13.5c-1.2 1.8-1.2 3 0 4.5s1.2 2.2 0 3"/>',
-    monitor: '<rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
-    layers: '<path d="m12 2.5 9.5 5L12 12.5l-9.5-5z"/><path d="m2.5 12.5 9.5 5 9.5-5"/><path d="m2.5 17 9.5 5 9.5-5"/>',
-    temple: '<path d="M3 21h18"/><path d="M5 18h14"/><path d="M6.5 18V10"/><path d="M10.2 18V10"/><path d="M13.8 18V10"/><path d="M17.5 18V10"/><path d="M3 9.5 12 3l9 6.5z"/>',
-    wave: '<path d="M2 12c2.5 0 2.5-5.5 5-5.5S9.5 17 12 17s2.5-10.5 5-10.5S19.5 12 22 12"/>',
-    notebook: '<rect x="4.5" y="2.5" width="15" height="19" rx="2"/><path d="M8.5 2.5v19"/><path d="M12 7.5h4"/><path d="M12 11.5h4"/><path d="M12 15.5h2.5"/>',
-    compass: '<circle cx="12" cy="12" r="9.25"/><path d="m15.8 8.2-2 5.6-5.6 2 2-5.6z" fill="currentColor" stroke="none"/>',
-    trophy: '<path d="M8 21h8"/><path d="M12 17.5V21"/><path d="M7 4h10v5.5a5 5 0 0 1-10 0z"/><path d="M7 6H4.25C4.25 9 5.5 10.75 7 11"/><path d="M17 6h2.75c0 3-1.25 4.75-2.75 5"/>',
-    gear: '<circle cx="12" cy="12" r="3.25"/><path d="M12 2.5v2.75"/><path d="M12 18.75v2.75"/><path d="M2.5 12h2.75"/><path d="M18.75 12h2.75"/><path d="m5.3 5.3 1.95 1.95"/><path d="m16.75 16.75 1.95 1.95"/><path d="m18.7 5.3-1.95 1.95"/><path d="m7.25 16.75-1.95 1.95"/>',
-    scale: '<path d="M12 3v18"/><path d="M8.5 21h7"/><path d="M12 5.5 5 7.5m7-2 7 2"/><path d="M5 7.5 2.75 13a2.6 2.6 0 0 0 4.5 0z"/><path d="M19 7.5 16.75 13a2.6 2.6 0 0 0 4.5 0z"/>',
-    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2"/><path d="M12 19.5v2"/><path d="M2.5 12h2"/><path d="M19.5 12h2"/><path d="m5 5 1.4 1.4"/><path d="m17.6 17.6 1.4 1.4"/><path d="m19 5-1.4 1.4"/><path d="m6.4 17.6-1.4 1.4"/>',
-    moon: '<path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.75 6.75 0 0 0 9.7 9.7z"/>',
-    contrast: '<circle cx="12" cy="12" r="9.25"/><path d="M12 2.75a9.25 9.25 0 0 1 0 18.5z" fill="currentColor" stroke="none"/>',
-    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>',
-    cloud: '<path d="M17.5 19H6.75A4.25 4.25 0 0 1 6 10.55 6.5 6.5 0 0 1 18.7 11.9 3.75 3.75 0 0 1 17.5 19z"/>',
-    user: '<circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>',
-    sparkle: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/>',
-    grad: '<path d="m12 4 10 5-10 5L2 9z"/><path d="M6.5 11.5V16c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4.5"/><path d="M22 9v5"/>'
-  };
-  function icon(name, o = {}) {
-    const s2 = document.createElement("span");
-    s2.className = "oi" + (o.cls ? " " + o.cls : "");
-    s2.setAttribute("aria-hidden", "true");
-    s2.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"${o.size ? ` style="width:${o.size}px;height:${o.size}px"` : ""}>${P[name] || P.sparkle}</svg>`;
-    return s2;
-  }
 
   // src/ui/legal.js
   var CFTC_441 = "HYPOTHETICAL OR SIMULATED PERFORMANCE RESULTS HAVE CERTAIN LIMITATIONS. UNLIKE AN ACTUAL PERFORMANCE RECORD, SIMULATED RESULTS DO NOT REPRESENT ACTUAL TRADING. ALSO, SINCE THE TRADES HAVE NOT BEEN EXECUTED, THE RESULTS MAY HAVE UNDER-OR-OVER COMPENSATED FOR THE IMPACT, IF ANY, OF CERTAIN MARKET FACTORS, SUCH AS LACK OF LIQUIDITY. SIMULATED TRADING PROGRAMS IN GENERAL ARE ALSO SUBJECT TO THE FACT THAT THEY ARE DESIGNED WITH THE BENEFIT OF HINDSIGHT. NO REPRESENTATION IS BEING MADE THAT ANY ACCOUNT WILL OR IS LIKELY TO ACHIEVE PROFIT OR LOSSES SIMILAR TO THOSE SHOWN.";
@@ -4987,7 +5131,7 @@
       return;
     }
     const lv = levelOf(p.xp);
-    profileEl.appendChild(el("span", { class: "av" }, p.emoji));
+    profileEl.appendChild(avEl(p));
     profileEl.appendChild(el(
       "div",
       { class: "pt" },
@@ -4997,6 +5141,10 @@
     syncCloudCleanup = mountSyncCloud(profileEl);
   }
   var EMOJIS = ["\u{1F981}", "\u{1F98A}", "\u{1F43C}", "\u{1F989}", "\u{1F42C}", "\u{1F984}", "\u{1F42F}", "\u{1F680}", "\u{1F31F}", "\u{1F3AF}", "\u{1F9E0}", "\u{1F3C4}"];
+  function avEl(p, cls = "av") {
+    if (isFamilyBuild()) return el("span", { class: cls }, p.emoji);
+    return el("span", { class: cls + " monogram" }, (p.name || "?").trim().charAt(0).toUpperCase());
+  }
   function profilePicker(firstRun = false) {
     const wrap = el("div", {});
     wrap.appendChild(el("h2", {}, firstRun === true ? "Welcome to Options Academy" : "Who is learning?"));
@@ -5017,7 +5165,7 @@
             route();
           }
         },
-        el("div", { class: "av" }, p.emoji),
+        avEl(p),
         el("div", { class: "pn", style: "font-weight:600" }, p.name),
         el("div", { class: "small muted" }, p.mode === "kid" ? "\u{1F388} Kid explorer" : "Trader"),
         el("div", { class: "small num muted" }, `Lv ${lv.n} \xB7 ${p.xp} XP`)
@@ -5029,7 +5177,7 @@
         m.close();
         addProfileModal();
       } },
-      el("div", { class: "av" }, "\u2795"),
+      el("div", { class: "av" }, icon("plus")),
       el("div", { style: "font-weight:600" }, "New profile")
     ));
     wrap.appendChild(grid);
@@ -5079,7 +5227,7 @@
       {},
       el("h2", {}, "New profile"),
       el("div", { class: "field mt2" }, el("label", {}, "Name"), nameIn),
-      el("div", { class: "mt1" }, el("div", { class: "field" }, el("label", {}, "Avatar")), emojiRow),
+      isFamilyBuild() ? el("div", { class: "mt1" }, el("div", { class: "field" }, el("label", {}, "Avatar")), emojiRow) : null,
       kidsEnabled() ? el("div", { class: "field" }, el("label", {}, "Mode"), modeSeg) : null,
       ackRow,
       el(
@@ -5137,6 +5285,11 @@
     try {
       const th = localStorage.getItem("oa.theme");
       if (th) document.documentElement.setAttribute("data-theme", th);
+    } catch {
+    }
+    try {
+      const pl = localStorage.getItem("oa.pl");
+      if (pl) document.documentElement.setAttribute("data-pl", pl);
     } catch {
     }
     build();
@@ -7274,7 +7427,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     p.journal = p.journal || [];
     const gate = canJournal(p);
     if (gate.err) {
-      bus.emit("toast", "\u{1F512} " + gate.err);
+      bus.emit("toast", gate.err);
       return null;
     }
     const checks = computeChecks(sym, legs);
@@ -7319,7 +7472,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     addXP(30, "trade journaled");
     if ((p.journal || []).filter((x) => x.status === "closed").length === 1) {
       grant("first-journal");
-      bus.emit("toast", "\u{1F4D3} First trade fully journaled \u2014 this habit is the real edge.", "gain");
+      bus.emit("toast", "First trade fully journaled \u2014 this habit is the real edge.", "gain");
     }
     return e;
   }
@@ -7388,11 +7541,11 @@ This is why the simulator matters more than the formula sheet. Run the same path
           }
         }
       }
-      contCard.appendChild(el("h3", {}, "\u{1F4DA} Continue learning"));
+      contCard.appendChild(el("h3", {}, "Continue learning"));
       if (nextLesson) {
         contCard.appendChild(el("div", { class: "small muted" }, trackTitle));
         contCard.appendChild(el("h2", { class: "mt1" }, nextLesson.title));
-        contCard.appendChild(el("p", { class: "sub" }, "\u{1F3AF} " + nextLesson.objective));
+        contCard.appendChild(el("p", { class: "sub" }, nextLesson.objective));
         contCard.appendChild(el(
           "div",
           { class: "btn-row" },
@@ -7409,7 +7562,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         contCard.appendChild(el(
           "div",
           { class: "apply-card mt2" },
-          el("span", { class: "ic" }, "\u{1F388}"),
+          icon("balloon", { cls: "ic" }),
           el(
             "div",
             { style: "flex:1;min-width:200px" },
@@ -7428,7 +7581,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         sideCol.appendChild(el(
           "div",
           { class: "card" },
-          el("h3", {}, "\u{1F3C6} " + p.name),
+          el("h3", {}, p.name),
           el("div", { class: "small muted" }, `Level ${lv.n} \u2014 ${lv.name}`),
           el(
             "div",
@@ -7440,7 +7593,8 @@ This is why the simulator matters more than the formula sheet. Run the same path
           sess && sess.status === "active" ? el(
             "a",
             { class: "pill brass mt1", href: "#/missions/" + sess.def.id, style: "margin-top:10px;display:inline-flex;text-decoration:none" },
-            `\u{1F9ED} Resume: ${sess.def.title}`
+            icon("compass"),
+            ` Resume: ${sess.def.title}`
           ) : null,
           el("a", { class: "btn sm mt1", href: "#/progress", style: "margin-top:10px;display:inline-flex" }, "View progress")
         ));
@@ -7448,7 +7602,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       sideCol.appendChild(el(
         "div",
         { class: "card" },
-        el("h3", {}, "\u{1F4A1} Floor wisdom"),
+        el("h3", {}, "Floor wisdom"),
         el("p", { class: "sub", style: "margin-bottom:0" }, TIPS[Math.floor(Math.random() * TIPS.length)])
       ));
       if (realDataReady()) {
@@ -7480,7 +7634,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       mkCard.appendChild(el(
         "div",
         { class: "flex-between" },
-        el("h3", {}, "\u{1F4FA} Market snapshot \u2014 " + market.clockLabel()),
+        el("h3", {}, "Market snapshot \u2014 " + market.clockLabel()),
         el("a", { class: "btn sm", href: "#/market" }, "Open Live Market")
       ));
       const snap = el("div", { class: "row mt1" });
@@ -7493,7 +7647,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           snap.appendChild(el(
             "a",
             { class: "stat", style: "flex:1 1 130px;text-decoration:none;color:inherit", href: "#/market/" + t.sym },
-            el("div", { class: "k" }, `${t.emoji} ${t.sym}`),
+            el("div", { class: "k" }, t.sym),
             el("div", { class: "v", style: "font-size:17px" }, F.usd(q.S)),
             el("div", { class: "d " + (up ? "up" : "down") }, (up ? "\u25B2 " : "\u25BC ") + F.pctSigned(q.chgPct))
           ));
@@ -7503,16 +7657,16 @@ This is why the simulator matters more than the formula sheet. Run the same path
       const unTick = market.on("tick", renderSnap);
       const labs = el("div", { class: "grid3 mt2" });
       root.appendChild(labs);
-      const lab = (href, icon2, name, desc) => el(
+      const lab = (href, slug, name, desc) => el(
         "a",
         { class: "card", href, style: "text-decoration:none;color:inherit" },
-        el("div", { style: "font-size:24px" }, icon2),
+        el("div", { class: "lab-ic" }, icon(slug, { size: 24 })),
         el("h3", { class: "mt1" }, name),
         el("p", { class: "sub", style: "margin:0" }, desc)
       );
-      labs.appendChild(lab("#/strategy", "\u{1F9E9}", "Strategy Lab", "Build spreads, see payoff curves and breakevens before you trade."));
-      labs.appendChild(lab("#/greeks", "\u{1F3DB}\uFE0F", "Greeks Lab", "Sliders for delta, gamma, theta, vega \u2014 build the intuition."));
-      labs.appendChild(lab("#/vol", "\u{1F30A}", "Volatility Lab", "Gamma-scalp a straddle; learn the realized-vs-implied game."));
+      labs.appendChild(lab("#/strategy", "layers", "Strategy Lab", "Build spreads, see payoff curves and breakevens before you trade."));
+      labs.appendChild(lab("#/greeks", "temple", "Greeks Lab", "Sliders for delta, gamma, theta, vega \u2014 build the intuition."));
+      labs.appendChild(lab("#/vol", "wave", "Volatility Lab", "Gamma-scalp a straddle; learn the realized-vs-implied game."));
       return () => unTick();
     }
   };
@@ -7955,7 +8109,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         bannerHost.appendChild(el(
           "div",
           { class: "placement-banner" },
-          el("span", { style: "font-size:22px" }, "\u{1F4CD}"),
+          icon("pin", { size: 22 }),
           el(
             "div",
             { style: "flex:1;min-width:200px" },
@@ -7979,7 +8133,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       card.appendChild(el(
         "div",
         { class: "flex-between" },
-        el("h3", { style: "margin:0" }, (st.unlocked ? "" : "\u{1F512} ") + m.title),
+        el("h3", { style: "margin:0" }, st.unlocked ? m.title : el("span", { class: "locked-title" }, icon("lock"), " " + m.title)),
         st.complete ? el("span", { class: "pill gain" }, "\u2713 Complete") : st.unlocked ? el("span", { class: "pill brass" }, "Unlocked") : el("span", { class: "pill" }, "Locked")
       ));
       if (!st.unlocked) {
@@ -8011,7 +8165,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           list2.appendChild(el(
             "div",
             { class: "lesson-item", role: "text" },
-            el("span", { class: "lcheck" }, "\u{1F512}"),
+            el("span", { class: "lcheck" }, icon("lock", { size: 13 })),
             el(
               "span",
               {},
@@ -8092,8 +8246,8 @@ This is why the simulator matters more than the formula sheet. Run the same path
       return;
     }
     root.appendChild(el("h1", {}, l.title));
-    root.appendChild(el("p", { class: "sub", style: "max-width:68ch" }, "\u{1F3AF} " + l.objective));
-    if (l.source) root.appendChild(el("div", { class: "pill mt1" }, "\u{1F4D6} " + l.source));
+    root.appendChild(el("p", { class: "sub", style: "max-width:68ch" }, l.objective));
+    if (l.source) root.appendChild(el("div", { class: "pill mt1" }, icon("bookOpen"), " " + l.source));
     const prose = el("div", { class: "lesson-prose mt2", html: md(l.body) });
     if (l.key_takeaways && l.key_takeaways.length) {
       prose.appendChild(el(
@@ -8109,7 +8263,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       root.appendChild(el(
         "div",
         { class: "apply-card", style: "max-width:68ch" },
-        el("span", { class: "ic" }, s2.icon),
+        iconFor(s2.icon, "book", { cls: "ic" }),
         el(
           "div",
           { style: "flex:1;min-width:220px" },
@@ -8131,7 +8285,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     quiz(quizBox, l.quiz || [], {
       onDone: (score, total) => {
         quizDone(l.id, score, total);
-        quizBox.appendChild(el("div", { class: "big-result" }, `${score}/${total} ${score === total ? "\u2014 perfect! \u{1F4AF}" : score >= total * 0.6 ? "\u2014 nice work" : "\u2014 review and retry anytime"}`));
+        quizBox.appendChild(el("div", { class: "big-result" }, `${score}/${total} ${score === total ? "\u2014 perfect!" : score >= total * 0.6 ? "\u2014 nice work" : "\u2014 review and retry anytime"}`));
         refreshDoneBtn(true);
       }
     });
@@ -8545,12 +8699,12 @@ This is why the simulator matters more than the formula sheet. Run the same path
         });
         const res = openPosition(sym, fillLegs, label);
         if (res.err) {
-          toast("\u26A0\uFE0F " + res.err, "loss");
+          toast(res.err, "loss");
           return;
         }
-        toast(`\u{1F3AB} Opened ${label} on ${sym}. Watch it in the Live Market.`, "gain");
+        toast(`Opened ${label} on ${sym}. Watch it in the Live Market.`, "gain");
         addXP(15, "strategy deployed");
-      } }, "\u{1F3AB} Send to Live Market");
+      } }, "Send to Live Market");
       controls.appendChild(el(
         "div",
         { class: "row" },
@@ -8949,7 +9103,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         const t = TABS.find((x) => x.id === tab);
         blurbEl.textContent = t.blurb;
         tryEl.innerHTML = "";
-        tryEl.appendChild(el("span", { class: "ic" }, "\u{1F50D}"));
+        tryEl.appendChild(icon("search", { cls: "ic" }));
         tryEl.appendChild(el("div", {}, el("div", { style: "font-weight:700" }, "Try this"), el("div", { class: "sub" }, t.tryIt)));
         const cfg = seriesFor();
         const opts = {
@@ -9034,7 +9188,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       root.appendChild(simDisclaimer());
       const card = el("div", { class: "card mt2" });
       root.appendChild(card);
-      card.appendChild(el("h2", {}, "\u{1F501} Gamma scalping simulator"));
+      card.appendChild(el("h2", {}, "Gamma scalping simulator"));
       card.appendChild(el(
         "p",
         { class: "sub", style: "max-width:70ch" },
@@ -9093,7 +9247,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         edge.textContent = diff > 0.02 ? `Edge: realized ${F.pct(P2.rv, 0)} > implied ${F.pct(P2.iv, 0)} \u2014 long gamma should win on average` : diff < -0.02 ? `Edge: realized ${F.pct(P2.rv, 0)} < implied ${F.pct(P2.iv, 0)} \u2014 you overpaid; theta should win` : "Fair fight: realized \u2248 implied \u2014 expect P&L near zero on average";
         edge.className = "pill mt1 " + (diff > 0.02 ? "gain" : diff < -0.02 ? "loss" : "");
       }
-      btnRow.appendChild(el("button", { class: "btn primary", onclick: rerun }, "\u{1F3B2} Run another path"));
+      btnRow.appendChild(el("button", { class: "btn primary", onclick: rerun }, "Run another path"));
       const trialBtn = el("button", { class: "btn" }, "Run 60 trials");
       const trialOut = el("span", { class: "small muted num" });
       btnRow.appendChild(trialBtn);
@@ -9112,7 +9266,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       rerun();
       const smileCard = el("div", { class: "card mt2" });
       root.appendChild(smileCard);
-      smileCard.appendChild(el("h2", {}, "\u{1F642} The volatility smile"));
+      smileCard.appendChild(el("h2", {}, "The volatility smile"));
       smileCard.appendChild(el(
         "p",
         { class: "sub", style: "max-width:70ch" },
@@ -9158,7 +9312,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       smileCard.appendChild(el(
         "div",
         { class: "apply-card mt2", style: "max-width:70ch" },
-        el("span", { class: "ic" }, "\u{1F50D}"),
+        icon("search", { cls: "ic" }),
         el(
           "div",
           {},
@@ -9980,7 +10134,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         el("button", { class: "btn primary", onclick: () => {
           closeDebrief(entry.id, { followedPlan, lesson: lessonIn.value.trim() }, pnl);
           m.close();
-          toast("\u{1F4D3} Trade journaled \u2014 Process Score updated.", "gain");
+          toast("Trade journaled \u2014 Process Score updated.", "gain");
           onDone && onDone();
         } }, "Save debrief")
       )
@@ -10094,9 +10248,9 @@ This is why the simulator matters more than the formula sheet. Run the same path
                 "div",
                 { style: "font-weight:700", class: "mono" },
                 t.sym,
-                locked ? el("span", { class: "pill brass lock-chip", style: "margin-left:4px" }, "\u{1F512}") : null
+                locked ? el("span", { class: "pill brass lock-chip", style: "margin-left:4px" }, icon("lock")) : null
               ),
-              el("div", { class: "small muted" }, t.emoji + " " + t.sector)
+              el("div", { class: "small muted" }, (isFamilyBuild() ? t.emoji + " " : "") + t.sector)
             ),
             cv,
             el("div", { class: "num", style: "text-align:right" }, F.usd(q.S)),
@@ -10143,15 +10297,15 @@ This is why the simulator matters more than the formula sheet. Run the same path
       function drawPrice() {
         const t = market.tickers[sym];
         const q = market.quote(sym);
-        detailTitle.textContent = `${t.emoji} ${t.sym} \u2014 ${F.usd(q.S)}`;
+        detailTitle.textContent = `${isFamilyBuild() ? t.emoji + " " : ""}${t.sym} \u2014 ${F.usd(q.S)}`;
         detailStats.innerHTML = "";
         const up = q.chg >= 0;
         detailStats.appendChild(el("span", { class: up ? "up" : "down" }, `${up ? "\u25B2" : "\u25BC"} ${F.usdSigned(q.chg)} (${F.pctSigned(q.chgPct)}) today`));
         detailStats.appendChild(el("span", {}, `IV ${F.pct(t.vol, 0)}`));
-        if (t.nextEarnings) detailStats.appendChild(el("span", {}, `\u{1F4CA} Earnings: Day ${t.nextEarnings} (${t.nextEarnings - market.day}d)`));
+        if (t.nextEarnings) detailStats.appendChild(el("span", {}, `Earnings: Day ${t.nextEarnings} (${t.nextEarnings - market.day}d)`));
         detailStats.appendChild(el("span", { class: "muted" }, t.name));
         if (showFreemium() && !freeSym(sym)) {
-          detailStats.appendChild(el("a", { class: "pill brass", href: "#/upgrade", style: "text-decoration:none" }, "\u{1F512} Upgrade to trade"));
+          detailStats.appendChild(el("a", { class: "pill brass", href: "#/upgrade", style: "text-decoration:none" }, icon("lock"), " Upgrade to trade"));
         }
         let pts;
         if (range === "day") pts = t.intraday.map((p) => ({ x: p.m, y: p.p }));
@@ -10392,7 +10546,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         into.innerHTML = "";
         if (!compact) {
           into.appendChild(el("div", { class: "oa-sheet-handle", "aria-hidden": "true" }));
-          into.appendChild(el("h3", {}, "\u{1F3AB} Order ticket"));
+          into.appendChild(el("h3", {}, "Order ticket"));
         }
         if (!ticket.length) {
           into.appendChild(el(
@@ -10464,7 +10618,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       }
       function fillDesktopTicket() {
         ticketCard.innerHTML = "";
-        ticketCard.appendChild(el("h3", {}, "\u{1F3AB} Order ticket"));
+        ticketCard.appendChild(el("h3", {}, "Order ticket"));
         if (!ticket.length) {
           ticketCard.appendChild(el(
             "p",
@@ -10529,7 +10683,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           const { cost } = ticketNet(sym, ticket);
           if (chipEl) {
             chipEl.style.display = sheetOpen ? "none" : "flex";
-            chipEl.textContent = `\u{1F3AB} ${ticket.length} leg${ticket.length === 1 ? "" : "s"} \xB7 net ${cost >= 0 ? "" : "\u2212"}${F.usd(Math.abs(cost))}`;
+            chipEl.textContent = `${ticket.length} leg${ticket.length === 1 ? "" : "s"} \xB7 net ${cost >= 0 ? "" : "\u2212"}${F.usd(Math.abs(cost))}`;
           }
           if (sheetBg) sheetBg.style.display = sheetOpen ? "block" : "none";
           if (sheetEl) {
@@ -10563,9 +10717,9 @@ This is why the simulator matters more than the formula sheet. Run the same path
               const j = attachThesis(res.pos.id, sym, legs, label, thesis);
               if (!j && showFreemium()) {
               }
-              toast(`\u{1F3AB} Order filled with thesis: ${label} on ${sym}`, "gain");
+              toast(`Order filled with thesis: ${label} on ${sym}`, "gain");
             } else {
-              toast(`\u{1F3AB} Order filled (no thesis): ${label} on ${sym}`, "gain");
+              toast(`Order filled (no thesis): ${label} on ${sym}`, "gain");
             }
             completeStep(2);
             ticket = [];
@@ -10739,7 +10893,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
             "div",
             { class: "event-item" },
             el("span", { class: "et" }, `Day ${e.day}`),
-            el("span", {}, e.icon + " " + e.text)
+            el("span", { class: "ev-row" }, iconFor(e.icon, "news", { cls: "ev-ic" }), " " + e.text)
           ));
         }
         acctCard.appendChild(feed2);
@@ -11231,7 +11385,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       root.appendChild(el(
         "div",
         { class: "kids-hero" },
-        el("span", { class: "big" }, p.emoji),
+        isFamilyBuild() ? el("span", { class: "big" }, p.emoji) : el("span", { class: "big monogram" }, (p.name || "?").trim().charAt(0).toUpperCase()),
         el(
           "div",
           { style: "flex:1" },
@@ -11288,7 +11442,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         grid.appendChild(el(
           "div",
           { class: "badge-tile" + (got ? "" : " locked"), title: b.desc },
-          el("div", { class: "bi" }, b.icon),
+          el("div", { class: "bi" }, iconFor(b.icon, "star")),
           el("div", { class: "bn" }, b.name),
           el("div", { class: "bd" }, b.desc)
         ));
@@ -11298,8 +11452,13 @@ This is why the simulator matters more than the formula sheet. Run the same path
       root.appendChild(el(
         "div",
         { class: "btn-row mt2" },
-        el("a", { class: "btn", href: "#/settings" }, "\u2699\uFE0F Settings"),
-        el("button", { class: "btn", onclick: () => bus.emit("profile-picker") }, "\u{1F46A} Switch / add family member")
+        el("a", { class: "btn", href: "#/settings" }, icon("gear"), " Settings"),
+        el(
+          "button",
+          { class: "btn", onclick: () => bus.emit("profile-picker") },
+          icon("user"),
+          isFamilyBuild() ? " Switch / add family member" : " Switch profile"
+        )
       ));
       return () => {
         cleanups.forEach((c) => {
@@ -11521,14 +11680,14 @@ This is why the simulator matters more than the formula sheet. Run the same path
     const rest = all.filter((m) => !week1.includes(m) && !week2.includes(m));
     function missionCard(m) {
       const locked = free && !FREE_LIMITS.missions.includes(m.id);
-      const statusPill = m.done ? el("span", { class: "pill gain" }, "\u2713 Done") : locked ? el("a", { class: "pill brass lock-chip", href: "#/upgrade", style: "text-decoration:none" }, "\u{1F512} Upgrade") : el("span", { class: "pill brass" }, m.skill || "mission");
+      const statusPill = m.done ? el("span", { class: "pill gain" }, "\u2713 Done") : locked ? el("a", { class: "pill brass lock-chip", href: "#/upgrade", style: "text-decoration:none" }, icon("lock"), " Upgrade") : el("span", { class: "pill brass" }, m.skill || "mission");
       return el(
         "div",
         { class: "card mission-card" },
         el(
           "div",
           { class: "flex-between" },
-          el("span", { class: "mi" }, m.icon || "\u{1F9ED}"),
+          iconFor(m.icon, "compass", { cls: "mi" }),
           statusPill
         ),
         el("h3", { style: "margin:0" }, m.title),
@@ -11657,7 +11816,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         shell.appendChild(el(
           "div",
           { class: "mission-banner" + (pass2 ? "" : " fail") },
-          el("div", { style: "font-size:28px" }, pass2 ? "\u{1F3C6}" : "\u{1F4A5}"),
+          el("div", {}, icon(pass2 ? "trophy" : "burst", { size: 34 })),
           el("h2", { style: "margin:8px 0 4px" }, pass2 ? "Mission passed" : "Mission failed"),
           pass2 ? el("p", { class: "sub", html: md(S2.def.debriefPass || "") }) : el(
             "div",
@@ -11697,7 +11856,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           } }, "\u2190 Missions")
         ),
         el("div", { class: "eyebrow" }, "Mission"),
-        el("h1", {}, `${S2.def.icon || ""} ${S2.def.title}`)
+        el("h1", {}, S2.def.title)
       ));
       head.appendChild(el("button", { class: "btn sm", onclick: leave }, "Abandon"));
       shell.appendChild(head);
@@ -11736,7 +11895,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       mktCard.appendChild(el(
         "div",
         { class: "flex-between" },
-        el("h3", {}, `${t?.emoji || ""} ${sym}`),
+        el("h3", {}, sym),
         el("span", { class: "pill brass num" }, `Day ${S2.market.day} / ${S2.def.endDay}`)
       ));
       mktCard.appendChild(el(
@@ -11846,7 +12005,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
             const label = PRESETS2.find((p) => p.id === presetId)?.name || "Mission trade";
             const res = trade(sym, legsSpec, label);
             if (res.err) gateToast(res.err);
-            else toast(`\u{1F3AB} ${label} opened`, "gain");
+            else toast(`${label} opened`, "gain");
           } }, "Trade")
         ));
       } else {
@@ -11869,7 +12028,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
             ),
             el("button", { class: "btn sm", onclick: () => {
               const res = closePos(pos.id);
-              if (res?.err) toast("\u26A0\uFE0F " + res.err, "loss");
+              if (res?.err) toast(res.err, "loss");
             } }, "Close")
           ));
         }
@@ -11881,7 +12040,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           "div",
           { class: "event-item" },
           el("span", { class: "et" }, `Day ${row.day}`),
-          el("span", {}, `${row.icon} ${row.text}`)
+          el("span", { class: "ev-row" }, iconFor(row.icon, "news", { cls: "ev-ic" }), " " + row.text)
         ));
       }
       posCard.appendChild(feed2);

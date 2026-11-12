@@ -14,7 +14,7 @@
   /* ink */
   --ink: #0b0b0b;
   --ink-2: #52514e;
-  --ink-3: #898781;
+  --ink-3: #6e6c66; /* 4.98:1 on page (AA) */
   --hairline: #e1e0d9;
   --border: rgba(11, 11, 11, 0.10);
   --baseline: #c3c2b7;
@@ -30,12 +30,12 @@
   --gain: #006300;
   --gain-mark: #0ca30c;
   --gain-soft: rgba(12, 163, 12, 0.10);
-  --loss: #d03b3b;
+  --loss: #c53232; /* 4.83:1 on card-2 hover (AA) */
   --loss-soft: rgba(208, 59, 59, 0.10);
   --warn: #fab219;
   /* chart series (validated categorical order) */
-  --s1: #2a78d6; --s2: #008300; --s3: #e87ba4; --s4: #eda100;
-  --s5: #1baf7a; --s6: #eb6834; --s7: #4a3aa7; --s8: #e34948;
+  --s1: #2a78d6; --s2: #0b7285; --s3: #e87ba4; --s4: #eda100;
+  --s5: #1baf7a; --s6: #eb6834; --s7: #4a3aa7; --s8: #5f6b7a;
   --grid: #e1e0d9;
   /* type */
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
@@ -65,13 +65,13 @@
     --amber: #f0bc55;
     --brass-grad: linear-gradient(135deg, var(--brass) 0%, var(--amber) 100%);
     --brass-glow: 0 0 14px rgba(227, 169, 60, 0.35);
-    --gain: #0ca30c;
-    --gain-mark: #0ca30c;
-    --gain-soft: rgba(12, 163, 12, 0.14);
+    --gain: #45c16a; /* lifted: luminance gap vs loss for CVD */
+    --gain-mark: #45c16a;
+    --gain-soft: rgba(69, 193, 106, 0.16);
     --loss: #e66767;
     --loss-soft: rgba(230, 103, 103, 0.14);
-    --s1: #3987e5; --s2: #008300; --s3: #d55181; --s4: #c98500;
-    --s5: #199e70; --s6: #d95926; --s7: #9085e9; --s8: #e66767;
+    --s1: #3987e5; --s2: #35b5c9; --s3: #d55181; --s4: #c98500;
+    --s5: #199e70; --s6: #d95926; --s7: #9085e9; --s8: #9aa7b8;
     --grid: #2c2c2a;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);
   }
@@ -95,13 +95,13 @@
   --amber: #f0bc55;
   --brass-grad: linear-gradient(135deg, var(--brass) 0%, var(--amber) 100%);
   --brass-glow: 0 0 14px rgba(227, 169, 60, 0.35);
-  --gain: #0ca30c;
-  --gain-mark: #0ca30c;
-  --gain-soft: rgba(12, 163, 12, 0.14);
+  --gain: #45c16a; /* lifted: luminance gap vs loss for CVD */
+  --gain-mark: #45c16a;
+  --gain-soft: rgba(69, 193, 106, 0.16);
   --loss: #e66767;
   --loss-soft: rgba(230, 103, 103, 0.14);
-  --s1: #3987e5; --s2: #008300; --s3: #d55181; --s4: #c98500;
-  --s5: #199e70; --s6: #d95926; --s7: #9085e9; --s8: #e66767;
+  --s1: #3987e5; --s2: #35b5c9; --s3: #d55181; --s4: #c98500;
+  --s5: #199e70; --s6: #d95926; --s7: #9085e9; --s8: #9aa7b8;
   --grid: #2c2c2a;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);
 }
@@ -113,7 +113,7 @@
   --inset: #eeede8;
   --ink: #0b0b0b;
   --ink-2: #52514e;
-  --ink-3: #898781;
+  --ink-3: #6e6c66; /* 4.98:1 on page (AA) */
   --hairline: #e1e0d9;
   --border: rgba(11, 11, 11, 0.10);
   --baseline: #c3c2b7;
@@ -127,10 +127,10 @@
   --gain: #006300;
   --gain-mark: #0ca30c;
   --gain-soft: rgba(12, 163, 12, 0.10);
-  --loss: #d03b3b;
+  --loss: #c53232; /* 4.83:1 on card-2 hover (AA) */
   --loss-soft: rgba(208, 59, 59, 0.10);
-  --s1: #2a78d6; --s2: #008300; --s3: #e87ba4; --s4: #eda100;
-  --s5: #1baf7a; --s6: #eb6834; --s7: #4a3aa7; --s8: #e34948;
+  --s1: #2a78d6; --s2: #0b7285; --s3: #e87ba4; --s4: #eda100;
+  --s5: #1baf7a; --s6: #eb6834; --s7: #4a3aa7; --s8: #5f6b7a;
   --grid: #e1e0d9;
   --shadow: 0 1px 2px rgba(11, 11, 11, 0.05), 0 4px 16px rgba(11, 11, 11, 0.05);
 }
@@ -452,7 +452,7 @@ input[type="range"] { accent-color: var(--brass); width: 100%; }
 .lesson-item .lt { font-weight: 600; font-size: 14px; }
 .lesson-item .lo { font-size: 12.5px; color: var(--ink-3); }
 
-.lesson-prose { max-width: 68ch; font-size: 15.5px; line-height: 1.68; }
+.lesson-prose { max-width: 68ch; font-size: 16px; line-height: 1.68; } /* 16px+ floor for long-form adult reading */
 .lesson-prose p { margin: 0 0 14px; }
 .lesson-prose strong { color: var(--brass-strong); }
 .lesson-prose .takeaways {
@@ -1225,3 +1225,69 @@ body.oa-landing .oa-content {
   .fd-price-row { grid-template-columns: minmax(0, 1fr); }
 }
 /* reduced motion: the card tilt is static composition, not motion — keep it; JS freezes the spark */
+
+/* ---------- content-icon pass: emoji -> SVG rendering ---------- */
+.oi.mi svg { width: 24px; height: 24px; color: var(--brass); }
+.ev-row { display: inline-flex; align-items: baseline; gap: 6px; }
+.oi.ev-ic { align-self: center; }
+.oi.ev-ic svg { width: 13px; height: 13px; opacity: 0.75; }
+.bi .oi svg { width: 26px; height: 26px; color: var(--brass); }
+.lab-ic .oi svg { width: 24px; height: 24px; color: var(--brass); }
+.locked-title { display: inline-flex; align-items: center; gap: 6px; }
+.pill .oi svg { width: 12px; height: 12px; }
+.btn .oi svg { width: 15px; height: 15px; }
+.q-right { color: var(--gain); }
+.q-wrong { color: var(--loss); }
+.monogram {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--brass-soft); color: var(--brass-strong);
+  border: 1px solid var(--brass-ring); border-radius: 50%;
+  font-weight: 700; font-family: var(--sans); line-height: 1;
+}
+.av.monogram { width: 30px; height: 30px; font-size: 14px; }
+.profile-tile .av.monogram { width: 44px; height: 44px; font-size: 19px; }
+.big.monogram { width: 52px; height: 52px; font-size: 23px; flex: 0 0 auto; }
+
+/* ---------- P&L color semantics (Settings -> Appearance -> Gain/loss colors) ----------
+   default: green/red · cvd: Okabe-Ito blue/orange (red-green colorblind-safe)
+   · inverted: East Asian convention (red = up, green = down).
+   Order + specificity: these sit at file end so they beat theme blocks; the
+   [data-pl][data-theme=dark] and media rules beat the base [data-pl] rule. */
+:root[data-pl="cvd"] {
+  --gain: #0072b2; --gain-mark: #0072b2; --gain-soft: rgba(0, 114, 178, 0.10);
+  --loss: #c2410c; --loss-soft: rgba(194, 65, 12, 0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-pl="cvd"]:where(:not([data-theme="light"])) {
+    --gain: #56b4e9; --gain-mark: #56b4e9; --gain-soft: rgba(86, 180, 233, 0.14);
+    --loss: #e69f00; --loss-soft: rgba(230, 159, 0, 0.14);
+  }
+}
+:root[data-pl="cvd"][data-theme="dark"] {
+  --gain: #56b4e9; --gain-mark: #56b4e9; --gain-soft: rgba(86, 180, 233, 0.14);
+  --loss: #e69f00; --loss-soft: rgba(230, 159, 0, 0.14);
+}
+:root[data-pl="inverted"] {
+  --gain: #c53232; --gain-mark: #c53232; --gain-soft: rgba(197, 50, 50, 0.10);
+  --loss: #006300; --loss-soft: rgba(0, 99, 0, 0.10);
+}
+@media (prefers-color-scheme: dark) {
+  :root[data-pl="inverted"]:where(:not([data-theme="light"])) {
+    --gain: #e66767; --gain-mark: #e66767; --gain-soft: rgba(230, 103, 103, 0.14);
+    --loss: #45c16a; --loss-soft: rgba(69, 193, 106, 0.16);
+  }
+}
+:root[data-pl="inverted"][data-theme="dark"] {
+  --gain: #e66767; --gain-mark: #e66767; --gain-soft: rgba(230, 103, 103, 0.14);
+  --loss: #45c16a; --loss-soft: rgba(69, 193, 106, 0.16);
+}
+
+/* ---------- dark-mode small-numeral compensation ----------
+   Positive-polarity advantage grows as text shrinks (Piepenbrock 2013):
+   bump the smallest price text slightly in dark themes. */
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) table.oa td { font-size: 13px; }
+  :root:where(:not([data-theme="light"])) .oa-tq { font-size: 13px; }
+}
+:root[data-theme="dark"] table.oa td { font-size: 13px; }
+:root[data-theme="dark"] .oa-tq { font-size: 13px; }
