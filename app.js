@@ -5351,169 +5351,163 @@
       {
         "id": "foundations",
         "title": "Money & Risk Foundations",
-        "audience": "Ages 9+ and all beginners",
-        "description": "Probability, expected value, risk vs reward, diversification, and insurance \u2014 the big ideas behind every smart money decision, taught with games and stories instead of jargon.",
+        "audience": "First-principles primer",
+        "description": "Probability, expected value, asymmetric payoffs, portfolio correlation, and the economics of insurance \u2014 the quantitative mental models behind every sound option trade.",
         "modules": [
           {
             "id": "f-chance",
-            "title": "Thinking in Chances",
+            "title": "Thinking in Probabilities",
             "lessons": [
               {
                 "id": "f-what-is-probability",
-                "title": "What Are the Chances?",
-                "objective": "Understand probability as a number between 0 and 1 that measures how likely something is, and practice estimating it.",
-                "body": `Some things are certain: the sun will rise tomorrow. Some things are impossible: your dog will do your homework. But most interesting things live in between \u2014 will it rain Saturday? Will your team win? **Probability** is just a number we give to that in-between feeling, from 0 (no way) to 1 (for sure). A coin flip landing heads is 0.5, or 50% \u2014 right in the middle.
+                "title": "Base Rates, Sample Size, and the Law of Large Numbers",
+                "objective": "Treat probability as a long-run frequency between 0 and 1, separate single-trade noise from statistical edge, and avoid the gambler's fallacy.",
+                "body": `Every market decision lives between certainty (1.0) and impossibility (0.0). When an option chain implies a 25% probability that Lumend Brands (LMND, trading near $42) finishes above $45 by expiration, the market is quoting a **base rate**: across hundreds of comparable setups with identical volatility and time remaining, roughly one in four finishes in-the-money. Probability does not predict what happens on Friday; it prices the distribution of outcomes across a large sample.
 
-Here is the key trick: probability is about **counting the ways**. A spinner with 4 equal slices, where 1 slice is gold, lands on gold 1 time out of 4 \u2014 a probability of 1/4, or 25%. It does not mean gold comes up exactly once every 4 spins. It means that over *lots* of spins \u2014 100, 1,000 \u2014 gold shows up close to a quarter of the time.
+That distinction separates disciplined traders from tourists. Over a small sample \u2014 five or ten trades \u2014 **variance dominates**. A 25%-probability trade can easily win three times in a row or fail twelve times straight without anything being broken in your model. Only as the sample grows toward 100 or 1,000 independent trials does the realized win rate converge toward the true probability. Statisticians call this convergence the **law of large numbers**; trading desks call it surviving long enough for your edge to show up.
 
-That difference matters more than anything else in this course. In a few spins, **anything can happen** \u2014 you might hit gold three times in a row, or not at all for ten spins. The spinner isn't broken and it isn't "due." Each spin is fresh. Probability only shows its true face over many, many tries. Grown-up traders call this the **law of large numbers**, and forgetting it is how people lose money at casinos.
+Forgetting sample size breeds two opposite errors. The first is the **gambler's fallacy**: assuming that after four consecutive losses on independent setups, a win is "due" and increasing position size. The market keeps no memory of your P&L ledger; the fifth trade carries the exact same probability as the first. The second error is abandoning a sound strategy after a normal three-trade drawdown, mistaking routine statistical noise for a broken thesis.
 
-So when someone says "there's a 70% chance of rain," they are not promising rain. They are saying: on 10 days exactly like this one, about 7 would get rain. Learning to hear probabilities that way \u2014 as "out of many tries" \u2014 is a real superpower.`,
+When you read a probability on a trading screen \u2014 whether a 70% historical earnings-beat rate or a 30-delta call option \u2014 translate it immediately into frequency language: "In ten independent occurrences under these conditions, roughly three pay off and seven expire worthless." Thinking in distributions rather than single-outcome prophecies is the foundation of risk management.`,
                 "key_takeaways": [
-                  "Probability is a number from 0 (impossible) to 1 (certain) that measures how likely something is.",
-                  "You find it by counting the ways: 1 gold slice out of 4 equal slices = 25%.",
-                  "Short runs are streaky and surprising; probability only becomes reliable over many tries.",
-                  "A spinner is never 'due' \u2014 each spin starts fresh."
+                  "Probability (0 to 1) measures long-run frequency across many independent trials, never a guarantee for the next trade.",
+                  "Small samples are dominated by variance; convergence to the true odds requires a large sample (the law of large numbers).",
+                  "Independent trades have no memory \u2014 a losing streak never makes the next trade 'due' (the gambler's fallacy).",
+                  "Read market probabilities as base rates ('3 out of 10 setups like this'), not forecasts of a single outcome."
                 ],
                 "sim": "market",
-                "sim_task": "Open the Probability Spinner game. Set the spinner to 1 gold slice out of 4, predict how many golds you'll get in 20 spins, then run 20 spins and compare. Now run 200 spins \u2014 which run landed closer to 25%?",
+                "sim_task": "On the Live Market, open the option chain for Lumend Brands (LMND, ~$42) and locate an out-of-the-money call near 0.25 delta (roughly a 25% implied probability of finishing in-the-money). Paper-trade one contract and step the clock forward to expiration across five separate sessions, logging how streaky short-run outcomes can be even when the underlying odds hold steady.",
                 "quiz": [
                   {
-                    "q": "A spinner has 10 equal slices and 3 are blue. What is the probability of landing on blue?",
+                    "q": "An option setup has a 30% probability of finishing in-the-money. What does that figure actually mean?",
                     "choices": [
-                      "3%",
-                      "30%",
-                      "3 out of every 10 spins, guaranteed",
-                      "You can't know"
+                      "The option will gain 30% in price",
+                      "Across a large sample of identical setups, roughly 30% finish in-the-money",
+                      "Exactly 3 out of every 10 trades are guaranteed to win",
+                      "The probability cannot be estimated until expiration"
                     ],
                     "answer": 1,
-                    "explain": "3 blue slices out of 10 equal slices is 3/10 = 30%. It's a long-run average, not a guarantee for any 10 spins."
+                    "explain": "A 30% probability describes the long-run frequency over many comparable trials \u2014 roughly 30 winners per 100 trades \u2014 not a quota for any 10-trade stretch."
                   },
                   {
-                    "q": "You flip a fair coin and get heads 4 times in a row. What is the chance of heads on the next flip?",
+                    "q": "You take four independent 50%-probability trades and lose all four. What is the probability of winning on the fifth independent setup?",
                     "choices": [
-                      "Less than 50% \u2014 tails is due",
-                      "More than 50% \u2014 heads is on a streak",
-                      "Exactly 50%",
+                      "Greater than 50% \u2014 a win is statistically overdue",
+                      "Less than 50% \u2014 the strategy is in a cold streak",
+                      "Still 50%",
                       "Zero"
                     ],
                     "answer": 2,
-                    "explain": "Each flip is fresh. The coin has no memory, so it's still 50%. Believing in 'due' outcomes is called the gambler's fallacy."
+                    "explain": "Independent trials have no memory. Assuming a win is 'due' after a streak of losses is the gambler's fallacy and leads traders to oversize at the worst time."
                   },
                   {
-                    "q": "The weather app says 80% chance of rain. What does that really mean?",
+                    "q": "A macro model assigns an 80% probability that the Academy 500 Index (FAM500) holds above support this week. How should a trader interpret that number?",
                     "choices": [
-                      "It will rain for 80% of the day",
-                      "On about 8 out of 10 days like this one, it rains",
-                      "It will definitely rain",
-                      "The forecaster is 80% good at their job"
+                      "The index will spend 80% of the week above support",
+                      "In roughly 8 out of 10 weeks with identical macro conditions, support holds \u2014 and in 2 out of 10 it breaks",
+                      "Support is guaranteed to hold",
+                      "The analyst is 80% confident in their career"
                     ],
                     "answer": 1,
-                    "explain": "Probabilities describe what happens over many similar situations \u2014 about 8 in 10 days with these conditions get rain."
+                    "explain": "Probabilistic forecasts describe an ensemble of similar regimes: 80% means failure still occurs roughly one time in five, so position sizing must survive the 20% tail."
                   }
                 ]
               },
               {
                 "id": "f-expected-value",
-                "title": "Is This Game Worth Playing?",
-                "objective": "Learn to compute expected value \u2014 the average result per play \u2014 and use it to decide whether a deal is good or bad.",
-                "body": "Imagine a carnival game: pay $1 to spin a wheel with 10 equal slices. One slice pays $5; the other nine pay nothing. Should you play? Most people guess by feeling. You're going to **calculate**.\n\nHere's the tool: **expected value (EV)** is what you'd win *on average per play* if you played many times. Multiply each outcome by its probability and add them up. For the wheel: 1/10 of the time you win $5, so the average prize is $5 \xD7 0.10 = $0.50 per spin. But each spin costs $1.00. On average you lose 50 cents every single time you play. Play 100 times and you should expect to be down about $50 \u2014 even though you'll have some exciting wins along the way.\n\nThat's the sneaky part: a **negative-EV** game still produces winners sometimes, and the wins are loud and memorable. Casinos and lotteries are built entirely out of this trick. A positive-EV deal is the reverse: pay $1 to spin a wheel where 3 slices out of 10 pay $5. Now the average prize is $1.50 per $1 spent \u2014 a money machine if you can play it over and over.\n\nOne last idea: EV tells you the *average*, not what happens *today*. A positive-EV game can still lose five times in a row. That's why smart players never bet so much on one play that a bad streak knocks them out. **Good decision, bad outcome** is a real thing \u2014 and so is the opposite. Judge the decision by its EV, not by one result.",
+                "title": "Expected Value: Pricing the Edge",
+                "objective": "Calculate expected value (EV) across discrete outcomes, separate process quality from single-trade results, and size positions to survive variance.",
+                "body": "Consider a short-dated directional trade on Burgess Restaurant Group (BRGR, ~$67): you pay $200 in premium for a setup that has a 20% probability of returning $750 at expiration and an 80% probability of expiring worthless ($0). Should you take the trade? Intuition gets distracted by the 3.75-to-1 payout; a professional computes **expected value (EV)**.\n\n**Expected value** is the probability-weighted average outcome per trade over a large sample. Multiply each scenario's payoff by its probability and sum the parts: here, the expected gross payoff is ($750 \xD7 0.20) + ($0 \xD7 0.80) = $150. Subtract the $200 entry cost, and your net EV is **\u2212$50 per trade**. Run that exact setup 100 times and you should expect to bleed roughly $5,000 before fees \u2014 even though you will celebrate around twenty dramatic $550 net winners along the way.\n\nThat is the trap that sustains overpriced speculative markets: **negative-EV trades still produce vivid, memorable winners.** Conversely, suppose the market reprices that contract to $110 while the 20% payoff probability holds steady. Now your $150 expected payoff costs $110, yielding **+$40 of positive EV** per trade. Over 100 repetitions, that edge compounds into roughly $4,000 of expected profit.\n\nTwo desk rules follow immediately. First, expected value describes the *long-run average*, never today's print: a +$40-EV trade still loses 80% of the time in our example, meaning five or six consecutive losses are completely routine. If you risk 25% of your account on each try, a normal losing streak bankrupts you before the positive expectancy ever materializes. Second, never judge a decision by a single outcome: **good trade, bad result** (and bad trade, lucky result) happens every day. Audit your process by its expected value, not by the last ticket.",
                 "key_takeaways": [
-                  "Expected value = (each prize \xD7 its probability) added up \u2014 the average result per play.",
-                  "Compare EV to the cost: a $0.50 average prize on a $1 game loses 50 cents per play on average.",
-                  "Negative-EV games still produce occasional winners \u2014 that's how casinos and lotteries survive.",
-                  "Judge decisions by their EV over many plays, not by a single lucky or unlucky result."
+                  "Expected value (EV) = sum of (each outcome \xD7 its probability) minus the cost of entry.",
+                  "A $150 expected payoff that costs $200 has a net EV of \u2212$50 per trade \u2014 a long-run loser regardless of occasional big wins.",
+                  "Negative-EV strategies still produce loud winners; positive-EV strategies still suffer routine losing streaks.",
+                  "Keep position size small enough that a statistically normal drawdown cannot knock you out of the market."
                 ],
                 "sim": "market",
-                "sim_task": "In the Probability Spinner game, build the $1 carnival wheel (1 winning slice of $5 out of 10). Play 50 spins and watch your bankroll. Then rebuild it with 3 winning slices and play 50 more. Which wheel would you want to OWN, and which would you want to PLAY?",
+                "sim_task": "On the Live Market, inspect the option chain for Burgess Restaurant Group (BRGR, ~$67). Compare an expensive far-OTM call (around 0.10 delta) against a near-the-money call (around 0.50 delta): estimate the move required for each to break even, paper-trade one contract of each across several simulated weeks, and track how entry price dictates net expected value.",
                 "quiz": [
                   {
-                    "q": "A game costs $2. You have a 25% chance to win $6, otherwise nothing. What is the average result per play?",
+                    "q": "A trade costs $200 to enter. It has a 25% probability of paying out $600 and a 75% probability of expiring at $0. What is the net expected value per trade?",
                     "choices": [
-                      "Win $1.50 per play",
-                      "Lose $0.50 per play",
-                      "Break even",
-                      "Win $4 per play"
+                      "+$150 per trade",
+                      "\u2212$50 per trade",
+                      "$0 (breakeven)",
+                      "+$400 per trade"
                     ],
                     "answer": 1,
-                    "explain": "Average prize = $6 \xD7 0.25 = $1.50. You paid $2.00, so on average you lose $0.50 each play."
+                    "explain": "Expected gross payoff = $600 \xD7 0.25 = $150. Subtracting the $200 entry cost leaves \u2212$50 per trade on average."
                   },
                   {
-                    "q": "Your friend won $100 in a lottery and says it proves lotteries are a good deal. What's the best reply?",
+                    "q": "A trader buys a far out-of-the-money weekly option, triples their money on an unexpected headline, and claims the setup is a proven money-maker. What is the flaw in that reasoning?",
                     "choices": [
-                      "She's right \u2014 winning is proof",
-                      "One win doesn't change the EV; on average players lose",
-                      "Lotteries are good deals only on weekends",
-                      "She should bet more now that she's lucky"
+                      "None \u2014 a profitable outcome proves positive EV",
+                      "One outcome never establishes expected value; negative-EV setups regularly produce isolated winners",
+                      "Weekly options only work on Fridays",
+                      "They should double their size on the next trade while hot"
                     ],
                     "answer": 1,
-                    "explain": "A single outcome never changes the math. Lotteries pay out less than they take in, so the average player loses \u2014 some winners are expected and even necessary for the trick to work."
+                    "explain": "A single realization cannot validate expectancy. Negative-EV lottery-style trades must pay off occasionally or no one would buy them; over a full sample, the overpriced premium erodes capital."
                   },
                   {
-                    "q": "A game has positive expected value but you just lost 3 times in a row. What should you conclude?",
+                    "q": "You have a rigorously tested strategy with positive expected value, but your first three trades all lose. What is the disciplined response?",
                     "choices": [
-                      "The math was wrong",
-                      "Losing streaks happen even in good games; keep bets small enough to survive them",
-                      "You should double your bet to win it back",
-                      "Positive EV means you can't lose"
+                      "Scrap the model immediately",
+                      "Recognize that losing streaks are normal even with positive EV, and keep position sizing small enough to weather them",
+                      "Double your position size on trade four to recover the drawdown at once",
+                      "Positive EV means three losses in a row are mathematically impossible"
                     ],
                     "answer": 1,
-                    "explain": "EV describes the long-run average. Streaks are normal; the skill is sizing your plays so a streak can't wipe you out. Doubling after losses is a classic way to go broke."
+                    "explain": "Expectancy governs the long run, not three trials. Martingale-style doubling after losses turns a survivable streak into account ruin."
                   }
                 ]
               },
               {
                 "id": "f-risk-vs-reward",
-                "title": "Risk vs. Reward: The Great Trade-Off",
-                "objective": "See why bigger possible rewards almost always come with bigger possible losses, and learn to compare deals by both.",
-                "body": `Would you rather have $10 for sure, or flip a coin for $25-or-nothing? There's no single right answer \u2014 the coin flip has a higher expected value ($12.50), but the sure thing has **zero risk**. How you choose depends on how much a loss would hurt you. If $10 is your whole allowance for the week, the sure thing might be the smarter pick even though the math says the flip pays more on average.
-
-**Risk** is the chance that things go worse than you hoped \u2014 and *how much* worse. **Reward** is what you get when they go well. In almost every honest deal in the world, the two are chained together: to get a shot at a bigger reward, you must accept a bigger or likelier loss. When someone offers you huge reward with "no risk," that is the sound of a trap.
-
-Here's a grown-up habit you can learn right now: before any deal, ask two questions. **"What's the worst that can happen?"** and **"Can I afford that worst case?"** A good deal you can't survive is a bad deal. Traders say it this way: *first make sure you stay in the game; only then worry about winning it.*
-
-One more tool: compare deals by their **downside-to-upside shape**, not just their odds. A game you win 9 times out of 10 sounds amazing \u2014 but if each win pays $1 and the one loss costs $20, it's a losing game (EV = 9 \xD7 $1 \u2212 1 \xD7 $20 = \u2212$11 per 10 plays). High win rates can hide ugly losses. Always look at the whole shape.`,
+                "title": "Risk, Reward, and Payoff Asymmetry",
+                "objective": "Evaluate trades by their full payoff distribution rather than win rate alone, and anchor every decision on worst-case survival.",
+                "body": 'Suppose you can allocate $10,000 into a risk-free Treasury bill yielding a guaranteed $500, or into an equity position with a 50% chance of gaining $1,250 and a 50% chance of losing $0 (breaking even). The equity allocation has the higher expected value ($625 vs. $500), yet a trader who needs that exact $500 to meet a fixed liability next month may rationally choose the Treasury bill. **Expected value is only half of capital allocation; the other half is dispersion and worst-case survival.**\n\nIn liquid markets, **risk** (the magnitude and probability of adverse outcomes) and **reward** (the compensation for bearing that uncertainty) are structurally linked. Higher expected returns exist precisely because investors demand compensation for enduring drawdowns. Whenever a promoter pitches high, steady returns with "near-zero risk," they are either concealing a catastrophic tail risk or running a fraud.\n\nBefore entering any position on a professional desk, two questions come before the profit target: **"What is the maximum possible loss?"** and **"Can my capital base survive that worst case intact?"** A positive-EV trade whose worst-case scenario forces a margin call or liquidates your account is an uninvestable trade. Rule one of compounding is staying solvent.\n\nFinally, never confuse **win rate** with low risk. Consider a strategy that collects $100 ninety times out of 100, and loses $2,000 the other ten times. A 90% win rate looks seductive on a marketing sheet, yet its net expectancy is (90 \xD7 $100) \u2212 (10 \xD7 $2,000) = **\u2212$11,000 per 100 trades**. Unhedged option selling often hides exactly this **negative skew**: frequent small credits punctuated by rare, account-erasing blowups. Always inspect the full payoff shape \u2014 both the probability of loss and the severity of the tail.',
                 "key_takeaways": [
-                  "Bigger potential reward almost always means bigger or likelier potential loss.",
-                  "Always ask: what's the worst case, and can I survive it?",
-                  "A high win rate means nothing by itself \u2014 one big loss can erase many small wins.",
-                  "'Huge reward, no risk' is the slogan of every scam ever invented."
+                  "Expected return and risk are structurally linked; outsized reward requires bearing real drawdown risk.",
+                  "Always ask two questions first: What is the worst-case loss, and can my account survive it?",
+                  "High win rate is meaningless without payoff magnitude \u2014 one tail loss can erase dozens of small wins.",
+                  "Any pitch promising high returns with zero risk is either hiding a fat left tail or selling fraud."
                 ],
                 "sim": "market",
-                "sim_task": "Open the Risk-vs-Reward game. Play the 'Steady' ladder (small sure gains) and the 'Daredevil' ladder (big wins, big busts) for 10 rounds each with the same starting coins. Which one ever knocked you to zero? Which felt better \u2014 and which left you richer?",
+                "sim_task": "On the Live Market, compare low-volatility Galaxy Media (GLXY, ~$23.50) with high-volatility Rocket Robotics (RCKT, ~$182). Size an equal-dollar stock position (~$3,600: 150 shares of GLXY vs. 20 shares of RCKT), step forward ten trading days, and compare the daily P&L swings and worst single-day drawdown of each position.",
                 "quiz": [
                   {
-                    "q": "A deal wins $1 ninety times out of 100 and loses $20 ten times out of 100. Is it a good deal?",
+                    "q": "A trading strategy wins $100 on 90% of its trades and loses $2,000 on the remaining 10%. Over 100 trades, what is its expected net P&L?",
                     "choices": [
-                      "Yes \u2014 90% win rate!",
-                      "No \u2014 it loses $110 per 100 plays on average",
-                      "Yes, if you stop after a win",
-                      "Can't tell"
+                      "Profitable \u2014 a 90% win rate guarantees an edge",
+                      "\u2212$11,000 per 100 trades",
+                      "Breakeven if you stop after a winning week",
+                      "Impossible to determine without knowing the ticker"
                     ],
                     "answer": 1,
-                    "explain": "Per 100 plays: +$90 from wins, \u2212$200 from losses = \u2212$110. Win rate alone is misleading; the size of wins and losses matters just as much."
+                    "explain": "90 wins \xD7 $100 = +$9,000; 10 losses \xD7 $2,000 = \u2212$20,000. Net result = \u2212$11,000. Win rate without loss severity tells you nothing about expectancy."
                   },
                   {
-                    "q": "Why might someone sensibly take $10 for sure instead of a coin flip for $25?",
+                    "q": "Why might a portfolio manager rationally prefer a guaranteed $500 Treasury return over a volatile position with a $625 expected value?",
                     "choices": [
-                      "They're bad at math",
-                      "Because the worst case of the flip ($0) might hurt more than the extra average is worth",
-                      "Sure things always have higher EV",
-                      "Coins are usually rigged"
+                      "Portfolio managers ignore math",
+                      "If failing to clear $500 triggers a costly constraint or margin liability, eliminating downside variance outweighs the extra $125 of EV",
+                      "Guaranteed returns always have higher expected value",
+                      "Volatile positions never pay out"
                     ],
                     "answer": 1,
-                    "explain": "The flip has higher EV ($12.50), but if you really need that $10, the risk of ending with nothing can outweigh the extra $2.50 of average value. Risk tolerance is personal and situational."
+                    "explain": "Utility depends on constraints and ruin thresholds. When a shortfall carries severe consequences, variance reduction is worth paying for in forgone EV."
                   },
                   {
-                    "q": "A stranger promises to double your money every month with zero risk. What do you know for sure?",
+                    "q": "An online newsletter advertises a 'guaranteed 8% monthly options income strategy with zero downside risk.' What can you conclude immediately?",
                     "choices": [
-                      "It's a rare great opportunity",
-                      "It's either a scam or he's confused \u2014 real reward requires real risk",
-                      "You should invest a small amount to test it",
-                      "Doubling is normal for good investors"
+                      "It is a rare institutional inefficiency worth testing",
+                      "It is either fraudulent or concealing severe tail risk \u2014 market returns require bearing commensurate risk",
+                      "You should allocate 5% of your portfolio to verify the track record",
+                      "8% per month is standard for covered call writing"
                     ],
                     "answer": 1,
-                    "explain": "Honest deals chain risk and reward together. Guaranteed huge returns are the signature of fraud \u2014 even 'testing with a little' is how scams grow."
+                    "explain": "No liquid market pays ~150% annualized returns risk-free. Strategies marketed this way either fabricate results or sell deep out-of-the-money tail risk that eventually blows up."
                   }
                 ]
               }
@@ -5521,109 +5515,103 @@ One more tool: compare deals by their **downside-to-upside shape**, not just the
           },
           {
             "id": "f-markets",
-            "title": "Stocks, Markets & Not Putting All Your Eggs in One Basket",
+            "title": "Equities, Price Discovery & Portfolio Correlation",
             "lessons": [
               {
                 "id": "f-what-is-a-stock",
-                "title": "Owning a Slice: What Stocks and Markets Are",
-                "objective": "Understand that a stock is a small ownership slice of a real business, and that a market is just a place where buyers and sellers agree on prices.",
-                "body": "Imagine your lemonade stand becomes amazing \u2014 the best on the street. You want to buy a second stand, but it costs $100 and you only have $20. So you offer a deal: your four friends each put in $20, and in return each friend owns **one fifth of the business** \u2014 one fifth of every future profit. Congratulations: you just invented the **stock**. A share of Apple or Nintendo is exactly this, just with millions of slices.\n\nWhy would your friends do it? Because if the two stands together earn $50 a summer, each one-fifth owner gets $10 a year, maybe forever, for a one-time $20 payment. They own a piece of a **real machine that makes money**. That's what investing is: buying a slice of something productive \u2014 not a lottery ticket, a slice.\n\nNow suppose one friend needs her $20 back for a bike. She can sell her slice to someone else. What's it worth? Whatever a buyer and seller **agree on** \u2014 maybe $25 if the stand is booming, maybe $15 after a rainy summer. A **market** is simply the place where lots of these buyers and sellers meet, shout their prices, and shake hands. The stock market does this for millions of business-slices every day.\n\nSo why do prices wiggle every day? Because people keep updating their guesses about the future: a sunny forecast, a new competitor, a famous person tweeting about lemonade. The price is a living **group guess** about what the slice will earn later. Sometimes the crowd guesses well, sometimes badly \u2014 but the price is always just today's handshake point between optimists and pessimists.",
+                "title": "Equity Ownership and How Markets Price the Future",
+                "objective": "Understand a common share as a residual claim on a business's cash flows and assets, and see how continuous two-sided markets aggregate expectations into price.",
+                "body": "Suppose Burgess Restaurant Group (BRGR) operates a profitable regional chain and wants $10 million to build twenty new locations. Management can borrow the capital from a bank \u2014 taking on mandatory interest payments that could sink the company during a recession \u2014 or it can issue **common stock**: dividing ownership of the enterprise into fractional shares and selling them to investors. Every share represents a proportional **residual claim** on the company's net assets and future earnings.\n\nWhy do investors part with cash for equity? Because if the expanded chain generates strong free cash flow year after year, each share entitles its holder to a proportional claim on those compounding earnings \u2014 paid out via dividends or retained to grow intrinsic value. Equity investing is not a wager on ticker symbols; it is the purchase of a productive cash-flow engine.\n\nOnce issued, those shares trade in a **secondary market** \u2014 an electronic order book where buyers post **bids** (the highest price they will pay) and sellers post **asks** (the lowest price they will accept). When a holder wants liquidity, they do not ask Burgess Restaurant Group for their money back; they sell their shares to another participant at the current market-clearing price. With BRGR trading near $67, that figure is simply the live equilibrium where marginal optimists and marginal pessimists agree to exchange cash for equity.\n\nWhy does BRGR trade at $67 in the morning and $65.80 by the close? Because market prices are **forward-looking discounting machines**. Every commodity cost report, consumer spending print, competitor announcement, or interest-rate shift alters investors' projections of future cash flows. Price movement is the continuous repricing of collective expectations.",
                 "key_takeaways": [
-                  "A stock is a slice of ownership in a real business and its future profits.",
-                  "A market is any place where buyers and sellers meet and agree on prices.",
-                  "A price is the current handshake between buyers and sellers \u2014 a group guess about the future.",
-                  "Investing means buying productive slices, not lottery tickets."
+                  "A share of common stock is a fractional ownership claim on a real business's net assets and future cash flows.",
+                  "Secondary markets match buyers (bids) and sellers (asks) to provide continuous liquidity without tapping the company's treasury.",
+                  "The market price is the live clearing point between optimists and pessimists \u2014 a discounting of future cash flows.",
+                  "Prices move continuously as new information changes consensus expectations about earnings and risk."
                 ],
                 "sim": "market",
-                "sim_task": "In the Lemonade Stand game, sell one-fifth slices of your stand to raise $100 for a second location. After the summer season runs, check what each friend's slice earned \u2014 then see what price slices trade at after a rainy week versus a heat wave.",
+                "sim_task": "On the Live Market, pull up Burgess Restaurant Group (BRGR, ~$67) and Lumend Brands (LMND, ~$42). Buy 50 shares of BRGR, observe the bid-ask spread on the order ticket, and advance the simulation through several days of news headlines to watch how the market reprices the equity in real time.",
                 "quiz": [
                   {
-                    "q": "When you buy one share of a company, what do you actually own?",
+                    "q": "When you purchase 100 shares of Burgess Restaurant Group (BRGR), what do you legally own?",
                     "choices": [
-                      "A loan the company must repay",
-                      "A tiny slice of the business and its future profits",
-                      "A coupon for the company's products",
-                      "Nothing \u2014 it's just a ticket to gamble"
+                      "A senior debt contract that the company must repay with interest",
+                      "A fractional ownership claim on the company's net assets and future earnings",
+                      "A revenue voucher redeemable at company locations",
+                      "A purely synthetic betting slip with no tie to the underlying business"
                     ],
                     "answer": 1,
-                    "explain": "A share is partial ownership. If the business earns money, your slice of those earnings is what gives the share real value."
+                    "explain": "Common stock is residual equity ownership. Shareholders participate in the business's compounding earnings and asset value after debt obligations are met."
                   },
                   {
-                    "q": "Why does a stock's price change every day?",
+                    "q": "Why does a publicly traded stock's price fluctuate throughout the trading session?",
                     "choices": [
-                      "The government sets a new price each morning",
-                      "Buyers and sellers keep updating their guesses about the business's future",
-                      "Prices are random, like dice",
-                      "Companies change the price when they want money"
+                      "Exchanges reset official valuations every hour",
+                      "Buyers and sellers continuously update their valuations as new information alters future cash-flow expectations",
+                      "Share prices follow a purely mechanical random-number generator",
+                      "The issuing company reprices its shares whenever it needs working capital"
                     ],
                     "answer": 1,
-                    "explain": "The price is where buyers and sellers currently agree. New information \u2014 weather, news, competition \u2014 changes people's guesses, so the handshake point moves."
+                    "explain": "Price discovery is continuous. Every shift in macro data, sector news, or order flow changes where marginal buyers and sellers meet on the order book."
                   },
                   {
-                    "q": "Your friend's slice of the lemonade stand cost $20. After a record-hot summer, what is it worth?",
+                    "q": "An investor bought shares of Lumend Brands (LMND) at $38 last quarter. Following a strong earnings beat, what are those shares worth today?",
                     "choices": [
-                      "Exactly $20 \u2014 prices don't change",
-                      "Whatever a willing buyer will now pay, probably more than $20",
-                      "Nothing, because she already got paid",
-                      "The price of a lemonade"
+                      "Exactly $38 \u2014 book cost determines market value",
+                      "Whatever price a willing buyer currently bids in the secondary market, likely above $38",
+                      "Nothing until the company liquidates its factories",
+                      "The book value of inventory per share"
                     ],
                     "answer": 1,
-                    "explain": "Value is set by agreement between buyer and seller. A business earning more than expected usually attracts buyers willing to pay more for a slice."
+                    "explain": "Historical cost is irrelevant to current value; a security is worth the current market-clearing bid where a buyer and seller agree to transact."
                   }
                 ]
               },
               {
                 "id": "f-diversification",
-                "title": "Don't Put All Your Eggs in One Basket",
-                "objective": "Learn why spreading money across different things (diversification) lowers risk without necessarily lowering reward.",
-                "body": `Here's a puzzle. Umbrella stands make money on rainy days. Lemonade stands make money on sunny days. Each business alone is a coin flip against the weather. But what if you owned **half of each**? Rain or shine, one of your two businesses has a great day. Your summer income stops swinging wildly \u2014 not because either business changed, but because their good and bad days **cancel out**. That is **diversification**, and it's the closest thing to a free lunch in all of money.
-
-The key is that the two businesses respond *differently* to the same event. Owning five lemonade stands on five different streets is NOT diversified \u2014 one rainy month hurts all five at once. Owning a lemonade stand, an umbrella stand, and a board-game caf\xE9 spreads you across sun, rain, and "stuck inside" days. Grown-up investors do the same thing with companies from different industries and countries.
-
-Why does this matter so much? Remember the worst-case question from the risk lesson. With everything in one basket, one bad event can take you to zero \u2014 and from zero, you can't play anymore. Diversification makes your **worst case survivable**. You give up a little of the dream ("what if I'd put EVERYTHING in the one that boomed?") to kill the nightmare ("everything in the one that went bust").
-
-One warning: diversification smooths the ride; it doesn't guarantee profits. If every business in town has a terrible year, a basket of them still has a bad year \u2014 just less terrible than the single worst one. It's a seatbelt, not a force field.`,
+                "title": "Correlation, Variance Reduction, and Diversification",
+                "objective": "Understand how combining imperfectly correlated assets reduces portfolio variance without sacrificing expected return, and recognize when apparent diversification fails.",
+                "body": "Consider an airline and an energy producer such as PowerSun Energy (PWRS, ~$95). When crude oil and wholesale energy prices spike, the airline's operating margins compress while the energy producer's cash flows surge; when energy prices slump, the tailwinds reverse. Held in isolation, each equity exposes you to violent macro swings. Held together in a balanced portfolio, the energy windfalls cushion the airline drawdowns. Your combined equity curve smooths out \u2014 not because either business became less volatile, but because their shocks **offset**. That variance reduction is **diversification**.\n\nThe mathematical engine behind diversification is **correlation** \u2014 how closely two assets move together in response to the same shock. Owning five high-growth robotics companies alongside Rocket Robotics (RCKT, ~$182) is **not** diversification: a single spike in interest rates or a tech-sector valuation reset hammers all five simultaneously. True diversification requires combining exposures driven by genuinely different economic factors \u2014 pairing consumer staples like Lumend Brands (LMND, ~$42), energy (PWRS, ~$95), and broad index exposure (FAM500, ~$500).\n\nWhy do professionals call diversification the closest thing to a free lunch in finance? Because portfolio expected return is the weighted average of the holdings' expected returns, while portfolio volatility \u2014 thanks to imperfect correlation \u2014 is **strictly less** than the weighted average of their individual volatilities. You improve your return-to-risk ratio and keep your worst-case drawdown survivable.\n\nOne critical caveat: **correlations are not static.** In a severe liquidity crisis or broad market panic, correlations across equities often spike toward 1.0 as leveraged funds liquidate everything at once. Diversification dampens idiosyncratic and sector shocks \u2014 a vital seatbelt \u2014 but capping systemic market crash risk requires explicit hedging tools like index puts, which we introduce next.",
                 "key_takeaways": [
-                  "Diversification means owning things that react differently to the same events.",
-                  "Five identical baskets is still one basket \u2014 true diversification needs variety.",
-                  "Spreading out makes your worst case survivable, which keeps you in the game.",
-                  "It smooths the ride but doesn't guarantee gains \u2014 a seatbelt, not a force field."
+                  "Diversification reduces portfolio variance by combining assets that react differently to the same economic shocks.",
+                  "Owning multiple stocks in the same high-beta sector is concentration in disguise; correlation matters more than ticker count.",
+                  "Imperfect correlation lowers portfolio volatility without lowering expected return \u2014 improving risk-adjusted performance.",
+                  "In systemic market sell-offs, equity correlations rise; diversification smooths sector shocks but does not replace explicit crash protection."
                 ],
                 "sim": "market",
-                "sim_task": "In the Lemonade Stand game, run three summers: (1) all coins in lemonade, (2) all in umbrellas, (3) half and half. Compare the biggest single-summer loss of each plan. Which plan never had a disaster summer?",
+                "sim_task": "On the Live Market, construct a two-asset portfolio by pairing 50 shares of PowerSun Energy (PWRS, ~$95) with 70 shares of Burgess Restaurant Group (BRGR, ~$67), and compare its daily P&L fluctuations over ten simulated sessions against putting the entire ~$9,500 into high-beta Rocket Robotics (RCKT, ~$182).",
                 "quiz": [
                   {
-                    "q": "Which of these is the MOST diversified?",
+                    "q": "Which portfolio achieves the strongest genuine diversification?",
                     "choices": [
-                      "Ten lemonade stands on ten streets",
-                      "A lemonade stand and an umbrella stand",
-                      "Two lemonade stands with different names",
-                      "One giant lemonade stand"
+                      "Five high-volatility robotics and AI hardware stocks",
+                      "An energy producer (PWRS), a consumer staple brand (LMND), and a restaurant operator (BRGR)",
+                      "Two share classes of the same media company",
+                      "A single concentrated position in Rocket Robotics (RCKT)"
                     ],
                     "answer": 1,
-                    "explain": "Lemonade and umbrellas respond oppositely to weather, so their results offset. Ten lemonade stands all suffer together in a rainy month \u2014 same basket, more eggs."
+                    "explain": "Energy, consumer staples, and restaurants respond differently to inflation, fuel costs, and rate cycles. Five robotics stocks share the same factor exposure and sell off together."
                   },
                   {
-                    "q": "What does diversification mainly protect you from?",
+                    "q": "What risk does equity diversification primarily mitigate?",
                     "choices": [
-                      "Ever having a down year",
-                      "One single bad event wiping you out",
-                      "Paying taxes",
-                      "Boring investments"
+                      "All possible portfolio declines in every market environment",
+                      "Idiosyncratic and single-sector blowups that could otherwise cripple a concentrated account",
+                      "Brokerage transaction fees",
+                      "Short-term capital gains taxes"
                     ],
                     "answer": 1,
-                    "explain": "It can't prevent bad years, but it prevents any single disaster from taking you to zero \u2014 and staying in the game is rule number one."
+                    "explain": "Diversification prevents a single earnings disaster, regulatory ruling, or sector slump from destroying your capital base, keeping drawdowns survivable."
                   },
                   {
-                    "q": "Why is diversification called a 'free lunch'?",
+                    "q": "Why is diversification described as improving risk-adjusted return?",
                     "choices": [
-                      "It costs nothing to set up",
-                      "It lowers risk without necessarily lowering your average reward",
-                      "It guarantees profit",
-                      "Restaurants give discounts to investors"
+                      "It eliminates commissions",
+                      "When imperfectly correlated assets are combined, portfolio volatility drops below the average volatility of the parts while expected return stays equal to the weighted average",
+                      "It guarantees positive returns every quarter",
+                      "Diversified stocks always have higher dividend yields"
                     ],
                     "answer": 1,
-                    "explain": "Mixing assets that move differently reduces the swings while the average return of the mix stays about the same \u2014 less risk for similar reward."
+                    "explain": "Offsetting fluctuations cancel out part of the variance without diluting the combined expected return \u2014 delivering less risk per unit of expected reward."
                   }
                 ]
               }
@@ -5631,109 +5619,103 @@ One warning: diversification smooths the ride; it doesn't guarantee profits. If 
           },
           {
             "id": "f-insurance",
-            "title": "Insurance: Paying a Little to Avoid Losing a Lot",
+            "title": "The Economics of Insurance & Risk Transfer",
             "lessons": [
               {
                 "id": "f-lemonade-insurance",
-                "title": "The Rainy-Day Deal",
-                "objective": "Understand insurance as trading a small, certain cost (the premium) for protection against a big, uncertain loss.",
-                "body": "Your lemonade stand earns about $30 on a sunny Saturday \u2014 but a surprise rainstorm means $0, and you've already spent $8 on lemons and cups. One rainy Saturday stings. Three in a row could end your business. Then your neighbor Maya offers a deal: **pay me $3 every Saturday morning, rain or shine, and if it rains, I'll pay you $20.** Should you take it?\n\nThis deal is called **insurance**. The $3 is the **premium** \u2014 a small, certain cost you pay every time. The $20 is the **payout** \u2014 protection that only shows up when the bad thing happens. Notice the trade you're making: you're giving up a little bit of every sunny day to make rainy days survivable. Your best case gets slightly worse; your worst case gets *much* better.\n\nIs it worth it? Check with expected value! If rain happens 1 Saturday in 10, Maya collects $3 \xD7 10 = $30 per ten weeks and pays out $20 once. She earns about $10 per ten weeks *on average* \u2014 insurance is profitable to sell. So why would YOU still buy it? Because EV isn't the whole story when the downside can knock you out of business. You happily pay a small fee to delete the disaster. **Both sides can be making a smart choice at the same time** \u2014 that's why insurance exists everywhere, from cars to houses to ships.\n\nRemember this picture: *small certain cost, big uncertain protection*. When you meet options later in this academy, you'll discover that a **put option** is exactly Maya's deal, written for a stock instead of a lemonade stand. You already understand the hardest idea in options \u2014 you just learned it with lemonade.",
+                "title": "Risk Transfer: Why Both Sides of an Insurance Contract Win",
+                "objective": "Analyze insurance as an asymmetric risk transfer: paying a small, certain premium to eliminate a ruinous tail loss while the underwriter profits on average across a pooled book.",
+                "body": "Consider a commercial orchard expecting $300,000 in net harvest revenue \u2014 unless a late spring freeze hits, wiping out the crop and leaving the grower with $80,000 in unrecoverable input costs. One freeze hurts; two consecutive freezes trigger foreclosure. An agricultural insurer offers a frost policy: **pay a $15,000 fixed premium before the season starts, and if temperatures drop below the threshold, the policy pays out $120,000.**\n\nEvery risk-transfer contract has this exact anatomy. The $15,000 is the **premium** \u2014 a known, prepaid expense absorbed in every scenario. The $120,000 is the **contingent payout** \u2014 capital that arrives only when the adverse tail event occurs. By purchasing the policy, the grower deliberately trims their best-case sunny-year profit from $300,000 to $285,000 in exchange for lifting their worst-case freeze outcome from a ruinous \u2212$80,000 to a survivable +$25,000.\n\nNow run the expected-value math from the underwriter's desk. If meteorological data shows a 1-in-10 annual probability of a severe freeze, the insurer collects $15,000 per year ($150,000 per decade) and expects to pay out $120,000 once per decade \u2014 earning a **+$30,000 expected underwriting margin** by pooling thousands of uncorrelated farms across regions. For the grower, buying the policy has a *negative* standalone dollar EV (\u2212$3,000 per year), yet signing it is completely rational: **expected value is the wrong objective when the tail event causes bankruptcy.**\n\nHold on to this economic symmetry: **the hedger pays a small, certain drag to amputate a catastrophic left tail; the underwriter collects a risk premium for warehousing that tail across a diversified book.** Both parties improve their position. When you step onto an options desk in the next lesson, you will see that an equity put option is this exact underwriting contract standardized for the stock market.",
                 "key_takeaways": [
-                  "Insurance trades a small, certain cost (the premium) for protection against a big, uncertain loss.",
-                  "The seller profits on average; the buyer deletes a disaster \u2014 both can be acting wisely.",
-                  "Insurance makes your worst case survivable, which matters more than maximizing average profit.",
-                  "A put option on a stock works exactly like rain insurance on a lemonade stand."
+                  "Insurance trades a small, certain upfront cost (the premium) for a contingent payout that caps a catastrophic loss.",
+                  "Underwriters earn positive EV by pooling risks; hedgers rationally pay negative EV to eliminate ruinous tail outcomes.",
+                  "Hedging reshapes the return distribution: it trims the upside slightly to place a hard floor under the downside.",
+                  "Every put option in financial markets is built on this exact risk-transfer bargain between hedger and underwriter."
                 ],
                 "sim": "market",
-                "sim_task": "In the Lemonade Stand insurance game, run one summer with no insurance and one buying Maya's $3 rain policy every week. Compare your worst single week in each run. Then switch roles and BE Maya for a summer \u2014 track whether selling insurance made money on average.",
+                "sim_task": "On the Live Market, inspect the option chain for PowerSun Energy (PWRS, ~$95). Compare the quoted premiums of a 30-day 90-strike put and an 85-strike put: calculate what percentage of the $95 share price each 'deductible' level costs to insure for one month.",
                 "quiz": [
                   {
-                    "q": "In Maya's deal, what is the 'premium'?",
+                    "q": "In a commercial frost or property insurance contract, what is the 'premium'?",
                     "choices": [
-                      "The $20 rain payout",
-                      "The $3 you pay every Saturday no matter what",
-                      "The $30 you earn on sunny days",
-                      "The cost of lemons"
+                      "The contingent payout received after a loss occurs",
+                      "The fixed, upfront cost paid by the hedger regardless of whether a loss occurs",
+                      "The net profit earned in a loss-free year",
+                      "The deductible absorbed by the business owner"
                     ],
                     "answer": 1,
-                    "explain": "The premium is the small, certain payment made up front for protection \u2014 paid whether or not the bad event happens."
+                    "explain": "The premium is the known, certain cost paid up front to transfer tail risk to the underwriter, kept by the seller whether or not the insured event happens."
                   },
                   {
-                    "q": "If Maya earns money on average from selling rain insurance, why is buying it still smart?",
+                    "q": "If an insurance underwriter prices policies to earn a positive expected profit margin, why do businesses and investors still rationally buy coverage?",
                     "choices": [
-                      "It isn't \u2014 never buy negative-EV deals",
-                      "Because the buyer is paying to eliminate a loss they couldn't survive, not to win on average",
-                      "Because Maya might forget to collect",
-                      "Because rain is impossible"
+                      "They shouldn't \u2014 rational actors never accept negative dollar EV",
+                      "Because paying a small, survivable fee to eliminate a bankruptcy-inducing tail loss is rational even at negative standalone EV",
+                      "Because underwriters usually miscalculate the odds",
+                      "Because insurance policies guarantee positive investment returns"
                     ],
                     "answer": 1,
-                    "explain": "EV is the right tool for repeatable games you can afford to lose. For disasters that could end your business, paying a small fee to cap the damage is rational even at negative EV."
+                    "explain": "Maximizing raw EV only applies when you can survive every outcome and repeat the bet indefinitely. When a tail loss threatens solvency, paying a risk premium to cap the downside is optimal."
                   },
                   {
-                    "q": "What happens to your best-case and worst-case weeks when you buy insurance?",
+                    "q": "How does purchasing insurance reshape a business's or portfolio's distribution of outcomes?",
                     "choices": [
-                      "Both get better",
-                      "Best case slightly worse, worst case much better",
-                      "Both get worse",
-                      "Nothing changes"
+                      "Both best-case and worst-case outcomes improve",
+                      "The best case is reduced by the premium paid, while the worst case is floored at a survivable level",
+                      "Both best-case and worst-case outcomes worsen",
+                      "The distribution stays identical"
                     ],
                     "answer": 1,
-                    "explain": "Sunny weeks earn $3 less (the premium), but rainy weeks go from devastating to manageable. Insurance reshapes your outcomes: it trims the top to lift the floor."
+                    "explain": "In quiet periods you trail an uninsured peer by the premium paid; in a crisis the payout floors your loss. Insurance trims the right tail slightly to cut off the left tail."
                   }
                 ]
               },
               {
                 "id": "f-bridge-to-options",
-                "title": "From Rain Policies to Put Options",
-                "objective": "Connect the insurance idea to financial markets: see how a put option is insurance for a stock, and why 'protection' is the right first way to think about options.",
-                "body": `You own a slice of a business \u2014 say, shares worth $100. You're happy to own them for years, but you'd hate for a crash to cut them to $60 right before you need the money. Wouldn't it be nice if a 'Maya' existed for stocks? She does. A **put option** is a contract that says: *pay a premium today, and you get the right to sell your shares at an agreed price \u2014 no matter how far they fall.*
-
-Say you pay $4 for a put that lets you sell at $95 any time in the next three months. If the stock sails to $120, your put expires unused \u2014 exactly like a sunny Saturday where Maya keeps your $3. You "wasted" $4 and should feel fine about it; that's what protection costs. If the stock crashes to $60, you can still sell at $95. Your loss is capped at $5 of stock drop plus the $4 premium \u2014 instead of $40. Same shape as the lemonade deal: **small certain cost, disaster deleted**.
-
-Who's on the other side? Someone acting like Maya \u2014 collecting premiums, paying out in crashes, and aiming to profit *on average* across many policies. Markets are full of both roles, and just like with lemonade insurance, **both sides can be reasonable**. The price of the put rises when people are more worried (more demand for insurance) and when the stock is jumpier (storms more likely) \u2014 exactly how hurricane insurance costs more in hurricane season.
-
-Here's the mindset to carry into the rest of this academy: options are not primarily lottery tickets, even though some people use them that way. They are **tools for reshaping risk** \u2014 trimming a top to lift a floor, or renting out your own umbrella for a fee. If you always ask "what insurance deal is really being made here, and who's paying whom for what?", you will understand options better than most adults ever do.`,
+                "title": "From Commercial Insurance to Equity Put Options",
+                "objective": "Map insurance mechanics directly onto listed put options: strike as deductible floor, expiration as policy term, premium as cost, and implied volatility as storm-season pricing.",
+                "body": "Suppose you hold 100 shares of PowerSun Energy (PWRS) trading at $95 \u2014 a $9,500 equity position. You want to hold the shares for long-term appreciation, but an upcoming regulatory ruling and earnings print could trigger a 30% gap down. Rather than liquidating your core holding, you turn to the options market and buy one **PWRS 90-strike put option** expiring in 60 days for a premium of $3.00 per share ($300 total, since one standard contract covers 100 shares).\n\nMap the contract terms directly to an insurance policy. The **$90 strike price** is your guaranteed floor: no matter how far PWRS falls before the 60-day **expiration**, you hold the contractual right to sell your 100 shares at $90 ($9,000). The **$5 gap** between today's $95 price and the $90 strike acts like your **deductible** \u2014 the first $500 of decline you absorb yourself. If PWRS rallies to $115, the put expires worthless; your shares are worth $11,500 and the $300 premium was simply the cost of two months' protection. If PWRS crashes to $65 on bad news, you exercise (or sell) the put, capping your maximum loss at $500 of share decline plus $300 of premium = **$800 total**, instead of a $3,000 drawdown.\n\nWho stands on the other side of your trade? An **option writer** acting as the underwriter: collecting your $300 premium up front and accepting the legal obligation to buy 100 shares at $90 if PWRS breaks below the strike. Just like coastal property insurance in hurricane season, option premiums are not fixed \u2014 when market turbulence rises or traders scramble for protection ahead of a major catalyst, put premiums expand across the board (a force you will soon measure as **implied volatility**).\n\nCarry this institutional framing through every track ahead: options are not casino chips. They are **precision instruments for transferring and reshaping risk** \u2014 whether you are buying a floor under an equity position, renting out upside you do not need, or underwriting protection for a fee.",
                 "key_takeaways": [
-                  "A put option is insurance for shares: a premium buys the right to sell at a set price.",
-                  "If nothing bad happens, the premium is 'wasted' \u2014 exactly like unused insurance, and that's okay.",
-                  "Put prices rise when markets are stormier or people are more worried, just like hurricane insurance.",
-                  "Options are risk-reshaping tools first, lottery tickets never (at least not on this desk)."
+                  "A protective put is listed equity insurance: paying a premium buys the contractual right to sell 100 shares at the strike price until expiration.",
+                  "If the stock rallies and the put expires worthless, the premium was not a mistake \u2014 it was the cost of a floored worst case.",
+                  "Put premiums expand when expected turbulence and hedging demand rise, just like property coverage ahead of storm season.",
+                  "Approach every option trade by asking: what risk is being transferred here, and who is paying whom to warehouse it?"
                 ],
                 "sim": "market",
-                "sim_task": "In the Lemonade Stand game's 'Stock Mode', own a $100 share through a 12-week season. Buy the $95-protection policy for $4 in one run and skip it in another. Write down your worst week in each run \u2014 then explain to a parent which run you'd choose with real money and why.",
+                "sim_task": "On the Live Market, buy 100 shares of Lumend Brands (LMND, ~$42) and simultaneously buy one 60-day 40-strike put option. Advance the simulator through two weeks of trading, observing how the put's value responds on down days versus up days and verifying that your combined position's worst-case loss stays strictly capped.",
                 "quiz": [
                   {
-                    "q": "A put option on a stock is most like which of these?",
+                    "q": "Buying a protective put option against 100 shares of stock you own is economically equivalent to:",
                     "choices": [
-                      "A lottery ticket",
-                      "Rain insurance on a lemonade stand",
-                      "A loan from a bank",
-                      "A coupon for free shares"
+                      "Buying a lottery ticket on the company's earnings",
+                      "Purchasing a casualty insurance policy with a fixed term, a deductible (spot minus strike), and a prepaid premium",
+                      "Taking out a margin loan from your broker",
+                      "Short-selling the company's bonds"
                     ],
                     "answer": 1,
-                    "explain": "Both trade a small certain premium for a payout when the bad event (rain / price crash) happens, capping your worst case."
+                    "explain": "A protective put transfers downside tail risk below the strike price to the option writer for a fixed term in exchange for an upfront premium."
                   },
                   {
-                    "q": "You paid $4 for protection and the stock went UP all year. Was buying the put a mistake?",
+                    "q": "You pay $300 for a 90-strike put to protect 100 shares of PWRS at $95, and the stock rallies to $110 through expiration. Was buying the put an error?",
                     "choices": [
-                      "Yes \u2014 you lost $4",
-                      "No \u2014 protection you didn't need isn't a mistake, it's the cost of safety",
-                      "Yes \u2014 you should always guess right",
-                      "Only if the stock doubled"
+                      "Yes \u2014 the $300 expired worthless",
+                      "No \u2014 unused protection is the normal cost of capping downside risk during a window of uncertainty",
+                      "Yes \u2014 you should only buy puts when you are certain a crash will occur",
+                      "Only if the stock failed to pay a dividend"
                     ],
                     "answer": 1,
-                    "explain": "Judge the decision, not the outcome. You don't regret unused fire insurance on your house. The $4 bought a cap on disaster, which was valuable even though the disaster didn't come."
+                    "explain": "Judge hedges ex-ante, not ex-post. Just as you do not regret an accident-free year on an insured property, the $300 bought a hard floor during a risky window."
                   },
                   {
-                    "q": "When would stock 'insurance' (puts) get more expensive?",
+                    "q": "Under what market conditions do put option premiums become significantly more expensive, even before the stock price falls?",
                     "choices": [
-                      "When markets are calm and happy",
-                      "When the stock is jumpier and people are more worried",
-                      "Premiums never change",
-                      "Only in December"
+                      "When volatility is low and investor sentiment is complacent",
+                      "When expected turbulence rises and institutional demand for downside protection increases",
+                      "Option premiums are fixed by the exchange and never change for a given strike",
+                      "Only on the final day of the calendar year"
                     ],
                     "answer": 1,
-                    "explain": "Just like hurricane insurance in storm season: more expected turbulence and more anxious buyers push insurance premiums up. Later you'll learn this is called implied volatility."
+                    "explain": "Just like coastal insurance ahead of hurricane season, heightened uncertainty and hedging demand bid up option premiums \u2014 an increase in implied volatility."
                   }
                 ]
               }
@@ -5951,7 +5933,7 @@ Two discipline rules before your first real call purchase. First, size by max lo
                 "id": "c-puts-protective",
                 "title": "Buying Puts & Protective Puts: Profit from Falls, Insure What You Own",
                 "objective": "Use puts two ways: as a defined-risk bearish position, and as portfolio insurance attached to stock you own.",
-                "body": "A **long put** is the mirror of a long call: defined-risk exposure to a *falling* stock. LMND at $100; the 60-day 95 put costs $2.50. Breakeven at expiration is **strike \u2212 premium = $92.50**; below that you profit roughly dollar-for-dollar, down to a maximum if the stock somehow hit zero. Compare this to short-selling stock: the short seller has unlimited risk if LMND rallies, margin requirements, and borrow costs. The put buyer risks exactly $250, known in advance. That's the structural trade: you pay melting time value in exchange for a capped, prepaid worst case.\n\nThe second use is the one McMillan treats as fundamental for investors: the **protective put**. You own 100 LMND shares at $100 and buy the 95 put for $2.50. Now assemble the worst case: if LMND crashes to $70, you can still sell at $95. Total damage = $5 of stock decline + $2.50 premium = $750, versus $3,000 unprotected. Your upside remains open \u2014 at $120 you've made $2,000 on the stock minus the $250 insurance cost. You've reshaped the outcome: trimmed the top to put a hard floor under the bottom. This is the lemonade-stand rain policy, contract for contract.\n\nWhen does protection earn its keep? Around identifiable dangers: concentrated positions you can't or won't sell (tax reasons, founder stock), earnings announcements, or simply sleep-at-night value when a position has grown large. The cost is real \u2014 spend 2.5% per quarter on puts forever and you'll surrender roughly 10% a year, which no portfolio survives. Professionals therefore insure *selectively*: specific risks, specific windows, or cheaper partial protection (lower strikes, or spreads you'll meet soon).\n\nNotice what this lesson did to the reputation of options. Used this way, a put doesn't add risk to your life \u2014 it *removes* it, for a fee. The combined position (stock + put) has strictly less risk than the stock alone. Anyone who tells you options are inherently dangerous hasn't understood this trade.",
+                "body": "A **long put** is the mirror of a long call: defined-risk exposure to a *falling* stock. LMND at $100; the 60-day 95 put costs $2.50. Breakeven at expiration is **strike \u2212 premium = $92.50**; below that you profit roughly dollar-for-dollar, down to a maximum if the stock somehow hit zero. Compare this to short-selling stock: the short seller has unlimited risk if LMND rallies, margin requirements, and borrow costs. The put buyer risks exactly $250, known in advance. That's the structural trade: you pay melting time value in exchange for a capped, prepaid worst case.\n\nThe second use is the one McMillan treats as fundamental for investors: the **protective put**. You own 100 LMND shares at $100 and buy the 95 put for $2.50. Now assemble the worst case: if LMND crashes to $70, you can still sell at $95. Total damage = $5 of stock decline + $2.50 premium = $750, versus $3,000 unprotected. Your upside remains open \u2014 at $120 you've made $2,000 on the stock minus the $250 insurance cost. You've reshaped the outcome: trimmed the top to put a hard floor under the bottom. This is the commercial frost-insurance policy from Foundations, contract for contract.\n\nWhen does protection earn its keep? Around identifiable dangers: concentrated positions you can't or won't sell (tax reasons, founder stock), earnings announcements, or simply sleep-at-night value when a position has grown large. The cost is real \u2014 spend 2.5% per quarter on puts forever and you'll surrender roughly 10% a year, which no portfolio survives. Professionals therefore insure *selectively*: specific risks, specific windows, or cheaper partial protection (lower strikes, or spreads you'll meet soon).\n\nNotice what this lesson did to the reputation of options. Used this way, a put doesn't add risk to your life \u2014 it *removes* it, for a fee. The combined position (stock + put) has strictly less risk than the stock alone. Anyone who tells you options are inherently dangerous hasn't understood this trade.",
                 "key_takeaways": [
                   "Long put breakeven = strike \u2212 premium; max loss = premium; a defined-risk alternative to shorting.",
                   "Protective put = stock + put: upside kept (minus premium), downside floored at the strike.",
@@ -6310,15 +6292,15 @@ Here's the practical payoff for your existing toolkit: every strategy you've lea
                 "sim_task": "In the Market Lab, scan the option chains of three SIM tickers and rank each one's IV against its 52-week range. Pick the richest name and paper-trade a defined-risk premium sale (credit spread); pick the cheapest and buy a straddle. Track both for five simulated sessions.",
                 "quiz": [
                   {
-                    "q": "LMND's IV is 35%. Its one-year IV range is 20%-40%. BIOTK's IV is 55% with a range of 50%-110%. Whose options are relatively cheap?",
+                    "q": "LMND's IV is 35%. Its one-year IV range is 20%-40%. RCKT's IV is 55% with a range of 50%-110%. Whose options are relatively cheap?",
                     "choices": [
                       "LMND's",
-                      "BIOTK's",
+                      "RCKT's",
                       "Both equally",
                       "Neither \u2014 higher IV always means more expensive"
                     ],
                     "answer": 1,
-                    "explain": "LMND sits near the top of its own range (rich); BIOTK near the bottom of its own (cheap). IV is only meaningful relative to the same underlying's history."
+                    "explain": "LMND sits near the top of its own range (rich); RCKT near the bottom of its own (cheap). IV is only meaningful relative to the same underlying's history."
                   },
                   {
                     "q": "IV on a stock doubles the day before a major FDA ruling. The best characterization is:",
@@ -6802,7 +6784,7 @@ Why can't implied and realized drift apart forever? Arbitrage-ish pressure tethe
                 "id": "g-iv-as-price",
                 "title": "Thinking in Vol: IV as the True Price of an Option",
                 "objective": "Complete the shift from dollar-thinking to vol-thinking: strip out delta noise, compare value in vol points, and treat resting dollar orders as floating vol quotes.",
-                "body": "A call trades at $3.15. An hour later it's $3.25. Did options get more expensive? **You cannot answer from the dollar prices.** If LMND rallied 20 cents and the call carries 50 delta, the entire dime is explained by spot drift \u2014 the option's optionality costs exactly what it did an hour ago. Its IV is unchanged; to a volatility trader, its *price* is unchanged. Dollar prices bundle two things: intrinsic/delta content (hedgeable noise) and extrinsic value (the actual product). IV isolates the product.\n\nThis is why put-call parity lets professionals halve the board: a delta-hedged ITM put and OTM call at the same strike are the same trade, so desks quote and think entirely in the OTM option at every strike \u2014 everything above spot is 'a call,' everything below is 'a put.' Intrinsic value is mechanical, hedgeable, and carries no disagreement; **all trading opinion lives in extrinsic value, and extrinsic value is denominated in vol.** When your brothers talk shop, notice: they never say they bought an option for $1.52 \u2014 they say they bought vol at 24.\n\nThe conversion toolkit is vega, both directions. Price difference \u2192 vol difference: an option fair at $1.50 on 25% IV with vega 5 (per point), bought at $1.40, was bought at **23 vol** \u2014 two points of edge. Vol view \u2192 dollar target: expecting IV to rise 3 points on a 12-vega position means expecting +$36 per contract. Practice until the translation is reflexive; every lesson in the Pro track assumes it.\n\nOne elegant consequence to cement the mindset: a resting dollar-denominated order is a **floating vol quote**. You left a bid at $1.40 when fair value was $1.50 (bidding 23 vol against a 25 market \u2014 reasonable). Overnight, the market's IV drops to 23: your untouched $1.40 bid is now bidding *fair value* \u2014 and if IV keeps sliding, you're the highest vol bid on the screen, first in line to buy what everyone's selling. The dollar number never moved; its vol meaning did. Traders who think in dollars get picked off by traders who think in vol. From here on, you think in vol.",
+                "body": "A call trades at $3.15. An hour later it's $3.25. Did options get more expensive? **You cannot answer from the dollar prices.** If LMND rallied 20 cents and the call carries 50 delta, the entire dime is explained by spot drift \u2014 the option's optionality costs exactly what it did an hour ago. Its IV is unchanged; to a volatility trader, its *price* is unchanged. Dollar prices bundle two things: intrinsic/delta content (hedgeable noise) and extrinsic value (the actual product). IV isolates the product.\n\nThis is why put-call parity lets professionals halve the board: a delta-hedged ITM put and OTM call at the same strike are the same trade, so desks quote and think entirely in the OTM option at every strike \u2014 everything above spot is 'a call,' everything below is 'a put.' Intrinsic value is mechanical, hedgeable, and carries no disagreement; **all trading opinion lives in extrinsic value, and extrinsic value is denominated in vol.** When volatility traders talk shop, notice: they never say they bought an option for $1.52 \u2014 they say they bought vol at 24.\n\nThe conversion toolkit is vega, both directions. Price difference \u2192 vol difference: an option fair at $1.50 on 25% IV with vega 5 (per point), bought at $1.40, was bought at **23 vol** \u2014 two points of edge. Vol view \u2192 dollar target: expecting IV to rise 3 points on a 12-vega position means expecting +$36 per contract. Practice until the translation is reflexive; every lesson in the Pro track assumes it.\n\nOne elegant consequence to cement the mindset: a resting dollar-denominated order is a **floating vol quote**. You left a bid at $1.40 when fair value was $1.50 (bidding 23 vol against a 25 market \u2014 reasonable). Overnight, the market's IV drops to 23: your untouched $1.40 bid is now bidding *fair value* \u2014 and if IV keeps sliding, you're the highest vol bid on the screen, first in line to buy what everyone's selling. The dollar number never moved; its vol meaning did. Traders who think in dollars get picked off by traders who think in vol. From here on, you think in vol.",
                 "key_takeaways": [
                   "Dollar price changes driven by spot movement (delta) carry zero information about option expensiveness.",
                   "All disagreement lives in extrinsic value; parity means only the OTM side of each strike matters.",
