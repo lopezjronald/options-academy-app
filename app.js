@@ -203,9 +203,9 @@
   };
   var DEFS = [
     { sym: "FAM500", name: "Academy 500 Index", emoji: "\u{1F3DB}\uFE0F", sector: "Index", S0: 500, drift: 0.07, baseVol: 0.15, beta: 0.5, skew: 0.45, earnings: false },
-    { sym: "LMND", name: "Lemonade Labs", emoji: "\u{1F34B}", sector: "Consumer", S0: 42, drift: 0.1, baseVol: 0.42, beta: 1.1, skew: 0.25 },
+    { sym: "LMND", name: "Lumend Brands", emoji: "\u{1F6CD}\uFE0F", sector: "Consumer", S0: 42, drift: 0.1, baseVol: 0.42, beta: 1.1, skew: 0.25 },
     { sym: "RCKT", name: "Rocket Robotics", emoji: "\u{1F680}", sector: "Tech", S0: 182, drift: 0.14, baseVol: 0.62, beta: 1.8, skew: 0.2 },
-    { sym: "BRGR", name: "Burger Barn", emoji: "\u{1F354}", sector: "Consumer", S0: 67, drift: 0.07, baseVol: 0.24, beta: 0.7, skew: 0.3 },
+    { sym: "BRGR", name: "Burgess Restaurant Group", emoji: "\u{1F37D}\uFE0F", sector: "Consumer", S0: 67, drift: 0.07, baseVol: 0.24, beta: 0.7, skew: 0.3 },
     { sym: "GLXY", name: "Galaxy Media", emoji: "\u{1F3AC}", sector: "Media", S0: 23.5, drift: 0.05, baseVol: 0.55, beta: 1.4, skew: 0.22 },
     { sym: "PWRS", name: "PowerSun Energy", emoji: "\u2600\uFE0F", sector: "Energy", S0: 95, drift: 0.09, baseVol: 0.38, beta: 1.2, skew: 0.28 }
   ];
@@ -386,6 +386,14 @@
         st.tickers = saved2.tickers;
         st.events = saved2.events || [];
         for (const d of DEFS) if (!st.tickers[d.sym]) st.tickers[d.sym] = mkTicker(d);
+        for (const d of DEFS) {
+          const t = st.tickers[d.sym];
+          if (t) {
+            t.name = d.name;
+            t.emoji = d.emoji;
+            t.sector = d.sector;
+          }
+        }
       } else {
         for (const d of DEFS) st.tickers[d.sym] = mkTicker(d);
         for (let day = -60; day < 0; day++) {
@@ -4258,7 +4266,7 @@
     toast("Backup downloaded.", "gain");
   }
   function versionLabel() {
-    const build2 = isFamilyBuild() ? "family" : "commercial";
+    const build2 = isFamilyBuild() ? "founder" : "commercial";
     const hash = (
       /** @type {any} */
       "2026-11-12"
@@ -8065,7 +8073,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     root.appendChild(el(
       "p",
       { class: "sub", style: "max-width:68ch" },
-      "Four tracks, built from your family's reference library \u2014 the McMillan topic arc plus the Volcube series on gamma, volatility, market making, and the Greeks. Every lesson ends with a task on the live simulator: learn it, then do it."
+      "Four tracks, built on the desk reference library \u2014 the McMillan topic arc plus the Volcube series on gamma, volatility, market making, and the Greeks. Every lesson ends with a task on the live simulator: learn it, then do it."
     ));
     const wrap = el("div", { class: "grid2 mt2" });
     for (const t of curriculum.tracks) {
