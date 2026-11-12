@@ -178,7 +178,7 @@
   ];
   function getScenario(id) {
     if (!id) return null;
-    return SCENARIOS.find((s) => s.id === id) || null;
+    return SCENARIOS.find((s2) => s2.id === id) || null;
   }
 
   // src/engine/sim.js
@@ -803,8 +803,8 @@
   function subStatus() {
     return db.subStatus || "none";
   }
-  function setSubStatus(s) {
-    db.subStatus = s;
+  function setSubStatus(s2) {
+    db.subStatus = s2;
     save();
   }
   function _dbForSync() {
@@ -939,6 +939,24 @@
   function loadMarketSnapshot() {
     return db.market || null;
   }
+  function exportJson() {
+    return JSON.stringify({ ...db, exportedAt: (/* @__PURE__ */ new Date()).toISOString() }, null, 1);
+  }
+  function importJson(text) {
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      return { err: "That file is not valid JSON." };
+    }
+    if (!data || !Array.isArray(data.profiles)) return { err: "Not an Options Academy backup (no profiles found)." };
+    if ((data.schemaVersion || 0) > SCHEMA_VERSION) return { err: "Backup is from a newer app version \u2014 update the app first." };
+    db = data;
+    db.schemaVersion = db.schemaVersion || SCHEMA_VERSION;
+    db.activeId = db.activeId && db.profiles.some((p) => p.id === db.activeId) ? db.activeId : db.profiles[0]?.id || null;
+    save();
+    return { ok: true, profiles: db.profiles.length };
+  }
 
   // src/state/entitlements.js
   var BUILD = (
@@ -1014,10 +1032,10 @@
     return feed.optQuote(sym, leg.strike, leg.expDay, leg.kind).mid;
   }
   function posValue(pos) {
-    return pos.legs.reduce((s, l) => s + l.side * l.qty * mult(l) * legValue(pos.sym, l), 0);
+    return pos.legs.reduce((s2, l) => s2 + l.side * l.qty * mult(l) * legValue(pos.sym, l), 0);
   }
   function posCost(pos) {
-    return pos.legs.reduce((s, l) => s + l.side * l.qty * mult(l) * l.entry, 0);
+    return pos.legs.reduce((s2, l) => s2 + l.side * l.qty * mult(l) * l.entry, 0);
   }
   function posPnl(pos) {
     return posValue(pos) - posCost(pos) + (pos.settledLegs || []).reduce((sum, l) => sum + l.settled.pnlContribution, 0);
@@ -1089,7 +1107,7 @@
   function marginRequirement(sym, legs) {
     const S2 = feed.quote(sym).S;
     let req = 0;
-    let longStock = legs.filter((l) => l.kind === "stock" && l.side > 0).reduce((s, l) => s + l.qty, 0);
+    let longStock = legs.filter((l) => l.kind === "stock" && l.side > 0).reduce((s2, l) => s2 + l.qty, 0);
     for (const type of ["call", "put"]) {
       const shorts = legs.filter((l) => l.kind === type && l.side < 0).flatMap((l) => Array(l.qty).fill(l.strike)).sort((a, b) => a - b);
       const longs = legs.filter((l) => l.kind === type && l.side > 0).flatMap((l) => Array(l.qty).fill(l.strike)).sort((a, b) => a - b);
@@ -1118,7 +1136,7 @@
     return req;
   }
   function reservedTotal(p) {
-    return Object.values(p.reserved || {}).reduce((s, x) => s + x, 0);
+    return Object.values(p.reserved || {}).reduce((s2, x) => s2 + x, 0);
   }
   function buyingPower(p) {
     return p.cash - reservedTotal(p);
@@ -1126,8 +1144,8 @@
   function openPosition(sym, legs, label) {
     const p = active();
     if (!p) return { err: "No profile" };
-    const cost = legs.reduce((s, l) => s + l.side * l.qty * mult(l) * l.entry, 0);
-    const fees = legs.filter((l) => l.kind !== "stock").reduce((s, l) => s + FEE * l.qty, 0);
+    const cost = legs.reduce((s2, l) => s2 + l.side * l.qty * mult(l) * l.entry, 0);
+    const fees = legs.filter((l) => l.kind !== "stock").reduce((s2, l) => s2 + FEE * l.qty, 0);
     const req = marginRequirement(sym, legs);
     if (p.mode === "kid" && legs.some((l) => l.kind !== "stock" && l.side < 0)) {
       return { err: "Selling options is locked in kid mode \u2014 learn with long options and stock first." };
@@ -1221,7 +1239,7 @@
   }
   function equity(p = active()) {
     if (!p) return 0;
-    return p.cash + p.positions.reduce((s, pos) => s + posValue(pos), 0);
+    return p.cash + p.positions.reduce((s2, pos) => s2 + posValue(pos), 0);
   }
   function markEquity() {
     const p = active();
@@ -1260,9 +1278,9 @@
     }
     return n;
   }
-  var esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-  function mdInline(s) {
-    return esc(s).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>").replace(/`(.+?)`/g, "<code>$1</code>");
+  var esc = (s2) => String(s2).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  function mdInline(s2) {
+    return esc(s2).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>").replace(/`(.+?)`/g, "<code>$1</code>");
   }
   function md(text) {
     const blocks = String(text || "").split(/\n\s*\n/);
@@ -1462,8 +1480,8 @@
     return setStep(TOTAL, id);
   }
   function incomplete(id) {
-    const s = get(id);
-    return !s.done && s.step < TOTAL;
+    const s2 = get(id);
+    return !s2.done && s2.step < TOTAL;
   }
   function currentStep(id) {
     return get(id).step;
@@ -1526,12 +1544,15 @@
   }
   function fingerprint(opts) {
     try {
-      return JSON.stringify(opts.series?.map((s) => ({
-        n: s.name,
-        c: s.color,
-        w: s.width,
-        p: s.points?.map((p) => [p.x, p.y])
-      })));
+      return JSON.stringify({
+        series: opts.series?.map((s2) => ({
+          n: s2.name,
+          c: s2.color,
+          w: s2.width,
+          p: s2.points?.map((p) => [p.x, p.y])
+        })),
+        vbands: opts.vbands?.map((v) => [v.lo, v.hi, v.color, v.opacity])
+      });
     } catch {
       return String(Date.now());
     }
@@ -1561,7 +1582,7 @@
     const PIN_HIT_PX = 18;
     function bounds() {
       let xlo = Infinity, xhi = -Infinity, ylo = Infinity, yhi = -Infinity;
-      for (const s of o.series) for (const p of s.points) {
+      for (const s2 of o.series) for (const p of s2.points) {
         if (p.x < xlo) xlo = p.x;
         if (p.x > xhi) xhi = p.x;
         if (p.y < ylo) ylo = p.y;
@@ -1626,6 +1647,17 @@
         ctx.lineTo(w - P.r, Y(0));
         ctx.stroke();
       }
+      for (const vb of o.vbands || []) {
+        const lo = Math.max(vb.lo, b.xlo);
+        const hi = Math.min(vb.hi, b.xhi);
+        if (!(hi > lo)) continue;
+        const x0 = X(lo), x1 = X(hi);
+        ctx.save();
+        ctx.globalAlpha = vb.opacity != null ? vb.opacity : 0.35;
+        ctx.fillStyle = resolve(vb.color || "--brass-soft");
+        ctx.fillRect(x0, P.t, x1 - x0, h - P.t - P.b);
+        ctx.restore();
+      }
       for (const hl of o.hlines || []) {
         ctx.strokeStyle = resolve(hl.color || "--ink-3");
         ctx.lineWidth = 1;
@@ -1659,53 +1691,53 @@
           ctx.fillText(vl.label, X(vl.x), P.t + 10);
         }
       }
-      for (const s of o.series) {
-        if (!s.points.length) continue;
-        if (s.area === "pnl") {
+      for (const s2 of o.series) {
+        if (!s2.points.length) continue;
+        if (s2.area === "pnl") {
           const y0 = Y(Math.max(b.ylo, Math.min(b.yhi, 0)));
           for (const sign of [1, -1]) {
             ctx.beginPath();
-            ctx.moveTo(X(s.points[0].x), y0);
-            for (const p of s.points) ctx.lineTo(X(p.x), Y(sign > 0 ? Math.max(0, p.y) : Math.min(0, p.y)));
-            ctx.lineTo(X(s.points[s.points.length - 1].x), y0);
+            ctx.moveTo(X(s2.points[0].x), y0);
+            for (const p of s2.points) ctx.lineTo(X(p.x), Y(sign > 0 ? Math.max(0, p.y) : Math.min(0, p.y)));
+            ctx.lineTo(X(s2.points[s2.points.length - 1].x), y0);
             ctx.closePath();
             ctx.fillStyle = sign > 0 ? resolve("--gain-soft") : resolve("--loss-soft");
             ctx.fill();
           }
-        } else if (s.area) {
+        } else if (s2.area) {
           ctx.beginPath();
           const yb = Y(b.ylo);
-          ctx.moveTo(X(s.points[0].x), yb);
-          for (const p of s.points) ctx.lineTo(X(p.x), Y(p.y));
-          ctx.lineTo(X(s.points[s.points.length - 1].x), yb);
+          ctx.moveTo(X(s2.points[0].x), yb);
+          for (const p of s2.points) ctx.lineTo(X(p.x), Y(p.y));
+          ctx.lineTo(X(s2.points[s2.points.length - 1].x), yb);
           ctx.closePath();
-          const c = resolve(s.color);
+          const c = resolve(s2.color);
           ctx.fillStyle = c + "22";
           ctx.fill();
         }
       }
-      for (const s of o.series) {
-        if (!s.points.length) continue;
-        ctx.strokeStyle = resolve(s.color);
-        ctx.lineWidth = s.width || 2;
-        ctx.setLineDash(s.dash ? [6, 5] : []);
+      for (const s2 of o.series) {
+        if (!s2.points.length) continue;
+        ctx.strokeStyle = resolve(s2.color);
+        ctx.lineWidth = s2.width || 2;
+        ctx.setLineDash(s2.dash ? [6, 5] : []);
         ctx.beginPath();
-        s.points.forEach((p, i) => i ? ctx.lineTo(X(p.x), Y(p.y)) : ctx.moveTo(X(p.x), Y(p.y)));
+        s2.points.forEach((p, i) => i ? ctx.lineTo(X(p.x), Y(p.y)) : ctx.moveTo(X(p.x), Y(p.y)));
         ctx.stroke();
         ctx.setLineDash([]);
       }
       const cx = activeX();
       if (cx != null) {
-        const nearest = o.series.map((s) => {
+        const nearest = o.series.map((s2) => {
           let best = null, bd = Infinity;
-          for (const p of s.points) {
+          for (const p of s2.points) {
             const d = Math.abs(p.x - cx);
             if (d < bd) {
               bd = d;
               best = p;
             }
           }
-          return { s, p: best };
+          return { s: s2, p: best };
         }).filter((n) => n.p);
         if (nearest.length) {
           const hx = X(nearest[0].p.x);
@@ -1935,7 +1967,7 @@
     const calls = legs.filter((l) => l.kind === "call");
     const puts = legs.filter((l) => l.kind === "put");
     const opt = calls.length + puts.length;
-    const longStock = stocks.reduce((s, l) => s + l.side * l.qty, 0);
+    const longStock = stocks.reduce((s2, l) => s2 + l.side * l.qty, 0);
     if (opt === 0 && longStock > 0) return "long-stock";
     if (opt === 1 && calls.length === 1) {
       const c = calls[0];
@@ -2201,6 +2233,106 @@
       ],
       debriefPass: "You traded through a \u22124% flash selloff and two days of forced-liquidation aftershocks without blowing your risk limits. Surviving a panic regime comes down to defined-risk structure selection and disciplined position sizing before the storm hits.",
       debriefFail: "Crash Week punishes oversized bullish bets and unhedged short volatility when Day 2 panic hits. Re-enter with a smaller defined-risk structure \u2014 such as a put vertical, protective put, or tight iron condor \u2014 and hold through Day 4."
+    },
+    {
+      id: "w2-strangle-shock-catcher",
+      title: "Convexity Before the Shock",
+      icon: "\u26A1",
+      skill: "long-strangle",
+      lessonId: "c-straddles-strangles",
+      scenarioId: "short-vol-blowup",
+      seed: 21101,
+      startCash: 25e3,
+      endDay: 6,
+      brief: "In Week 1 you learned to cut a long strangle when a slow-bleed tape starved it of volatility. Now see the other side of long-strangle discipline: buying out-of-the-money wings when implied volatility is compressed to cycle lows and a regime shock hits.\n\n**Open a long strangle on PWRS** during the calm window, **hold it through the Day 5 volatility blowup**, and **close the position to be flat by Day 6** while keeping your drawdown under 10%.",
+      hints: [
+        "A long strangle pairs +1 OTM call and +1 OTM put at different strikes in the same expiration on PWRS.",
+        "Size modestly during Days 1\u20134 so four sessions of calm theta decay stay well inside your 10% drawdown ceiling.",
+        "Let the Day 5 \u22126% panic shock reprice both implied volatility and your put wing, then close the strangle before Day 6."
+      ],
+      objectives: [
+        { type: "open", strategy: "long-strangle", sym: "PWRS", label: "Open a long strangle on PWRS" },
+        { type: "holdThrough", day: 5, sym: "PWRS", label: "Hold the strangle through Day 5" },
+        { type: "flatBy", day: 6, label: "Harvest the spike and be flat by Day 6" },
+        { type: "maxDrawdown", pct: 0.1, label: "Keep max drawdown under 10%" }
+      ],
+      debriefPass: "That is textbook long-strangle discipline: you bought cheap convexity during a low-IV drought, sized small enough to endure four quiet sessions of theta bleed, and monetized the Day 5 panic move before time decay resumed.",
+      debriefFail: "Make sure you opened +1 OTM call and +1 OTM put on PWRS, held through the Day 5 volatility expansion, and closed the trade before Day 6 without over-sizing into a 10% drawdown."
+    },
+    {
+      id: "w2-condor-range-harvest",
+      title: "Fencing the Quiet Range",
+      icon: "\u{1F985}",
+      skill: "iron-condor",
+      lessonId: "c-vertical-spreads",
+      scenarioId: "slow-bleed",
+      seed: 21102,
+      startCash: 25e3,
+      endDay: 10,
+      brief: "When realized volatility stays well below implied volatility across a ten-day drift, range traders can collect theta from both sides of the distribution while keeping tail risk strictly capped.\n\n**Open an iron condor on BRGR**, **hold the spread through Day 8** as time decay erodes both short verticals, keep your drawdown under 8%, and **finish with at least +$15 net profit**.",
+      hints: [
+        "An iron condor combines a short OTM put vertical (\u22121 higher-strike OTM put, +1 lower-strike OTM put) with a short OTM call vertical (\u22121 lower-strike OTM call, +1 higher-strike OTM call) in the same expiration.",
+        "Place your short strikes outside the expected drift range of BRGR so spot stays between your inner wings through Day 8.",
+        "Keep contract quantity small so your defined max loss reserves only a fraction of your $25,000 ledger."
+      ],
+      objectives: [
+        { type: "open", strategy: "iron-condor", sym: "BRGR", label: "Open an iron condor on BRGR" },
+        { type: "holdThrough", day: 8, sym: "BRGR", label: "Hold the condor through Day 8" },
+        { type: "maxDrawdown", pct: 0.08, label: "Keep max drawdown under 8%" },
+        { type: "profit", min: 15, label: "Finish with at least +$15 net profit" }
+      ],
+      debriefPass: "By fencing BRGR inside wide out-of-the-money wings and capping both tails with long protection legs, you turned ten sleepy sessions into steady two-sided theta carry without taking naked short-volatility risk.",
+      debriefFail: "Verify that all four legs of the BRGR iron condor share the same expiration and that your short strikes sit outside the mild downward drift so you can hold through Day 8 with at least +$15 net profit."
+    },
+    {
+      id: "w2-crash-put-vertical",
+      title: "Defined-Risk Bear Hedge",
+      icon: "\u{1F4C9}",
+      skill: "put-vertical",
+      lessonId: "c-vertical-spreads",
+      scenarioId: "crash-week",
+      seed: 21103,
+      startCash: 25e3,
+      endDay: 6,
+      brief: "Buying outright puts for a selloff requires overcoming steep extrinsic cost, whereas a put vertical sells a lower-strike put to help finance the hedge and define your target zone.\n\n**Open a put vertical on GLXY**, **hold it through Day 4** across the Crash Week selloff and aftershocks, and **close all positions by Day 5** with a drawdown under 8%.",
+      hints: [
+        "Build a bearish put vertical on GLXY by buying 1 near-the-money put (+1 put) and selling 1 lower-strike out-of-the-money put (\u22121 put) in the same expiration.",
+        "Enter on Day 1 before the Day 2 panic gap down pushes GLXY toward your lower strike.",
+        "Hold through the Day 3\u20134 aftershocks, then close the spread before Day 5 so the flatBy objective latches green."
+      ],
+      objectives: [
+        { type: "open", strategy: "put-vertical", sym: "GLXY", label: "Open a put vertical on GLXY" },
+        { type: "holdThrough", day: 4, sym: "GLXY", label: "Hold the spread through Day 4" },
+        { type: "flatBy", day: 5, label: "Close the spread and be flat by Day 5" },
+        { type: "maxDrawdown", pct: 0.08, label: "Keep max drawdown under 8%" }
+      ],
+      debriefPass: "Your long put captured the directional slide across Days 2\u20134 while the short lower-strike put reduced your upfront debit and insulated the position when volatility plateaued into Day 5.",
+      debriefFail: "Check that you opened a two-leg put vertical (+1 higher-strike put, \u22121 lower-strike put) on GLXY, held it through Day 4, and closed it completely before Day 5."
+    },
+    {
+      id: "w2-fam500-index-discipline",
+      title: "Index Discipline on FAM500",
+      icon: "\u{1F9ED}",
+      skill: "index-discipline",
+      lessonId: "c-using-iv",
+      scenarioId: "crash-week",
+      seed: 21104,
+      startCash: 25e3,
+      endDay: 6,
+      brief: "Single-name stocks carry idiosyncratic jump risk, while broad index options on FAM500 let you express macro regime discipline directly on the benchmark.\n\nTrade **FAM500 only**: **open any defined-risk position on FAM500**, **hold active FAM500 exposure through Day 4** as the Crash Week shocks unfold, and **be completely flat by Day 6** with a max drawdown under 8%.",
+      hints: [
+        "Stick strictly to the FAM500 index chain \u2014 a bearish put vertical or protective put structure handles the Day 2 \u22124% index gap and Days 3\u20134 aftershocks cleanly.",
+        "Size your FAM500 contracts so the $500 index spot multiplier stays comfortably inside the 8% drawdown budget.",
+        "Hold your FAM500 structure through Day 4 and close all legs before Day 6."
+      ],
+      objectives: [
+        { type: "open", sym: "FAM500", label: "Open a defined-risk position on FAM500" },
+        { type: "holdThrough", day: 4, sym: "FAM500", label: "Hold FAM500 exposure through Day 4" },
+        { type: "flatBy", day: 6, label: "Close all positions and be flat by Day 6" },
+        { type: "maxDrawdown", pct: 0.08, label: "Keep max drawdown under 8%" }
+      ],
+      debriefPass: "You demonstrated clean index discipline on FAM500 \u2014 sizing for a high-notional benchmark, surviving three sessions of macro panic and forced liquidation, and flattening on schedule inside an 8% drawdown envelope.",
+      debriefFail: "Make sure your trade is opened on FAM500, sized for a $500 index underlying so drawdown stays under 8%, held through Day 4, and closed before Day 6."
     }
   ];
 
@@ -2239,16 +2371,16 @@
   }
   var mult3 = (l) => l.kind === "stock" ? 1 : 100;
   function positionValue(pos) {
-    return pos.legs.reduce((s, l) => {
+    return pos.legs.reduce((s2, l) => {
       const px = l.kind === "stock" ? S.market.quote(pos.sym).S : S.market.optQuote(pos.sym, l.strike, l.expDay, l.kind).mid;
-      return s + l.side * l.qty * mult3(l) * px;
+      return s2 + l.side * l.qty * mult3(l) * px;
     }, 0);
   }
   function equity2() {
     if (!S) return 0;
-    return S.cash + S.positions.reduce((s, p) => s + positionValue(p), 0) + reservedTotal2();
+    return S.cash + S.positions.reduce((s2, p) => s2 + positionValue(p), 0) + reservedTotal2();
   }
-  var reservedTotal2 = () => S.positions.reduce((s, p) => s + (p.reserved || 0), 0);
+  var reservedTotal2 = () => S.positions.reduce((s2, p) => s2 + (p.reserved || 0), 0);
   function trade(sym, legsSpec, label) {
     if (!S || S.status !== "active") return { err: "No active mission" };
     const legs = legsSpec.map((l) => {
@@ -2258,7 +2390,7 @@
     });
     if (!isDefinedRisk(legs)) return { err: "Missions allow defined-risk positions only \u2014 cap your downside first." };
     const cost = entryCost(legs);
-    const fees = legs.filter((l) => l.kind !== "stock").reduce((s, l) => s + FEE2 * l.qty, 0);
+    const fees = legs.filter((l) => l.kind !== "stock").reduce((s2, l) => s2 + FEE2 * l.qty, 0);
     const Sref = S.market.quote(sym).S;
     const ml = maxLossAtExpiry(legs, Sref);
     const reserved = cost < 0 ? Math.max(0, -ml.amount) : 0;
@@ -2276,12 +2408,12 @@
     const i = S.positions.findIndex((p) => p.id === id);
     if (i < 0) return { err: "Unknown position" };
     const pos = S.positions[i];
-    const val = pos.legs.reduce((s, l) => {
-      if (l.kind === "stock") return s + l.side * l.qty * S.market.quote(pos.sym).S;
+    const val = pos.legs.reduce((s2, l) => {
+      if (l.kind === "stock") return s2 + l.side * l.qty * S.market.quote(pos.sym).S;
       const q = S.market.optQuote(pos.sym, l.strike, l.expDay, l.kind);
-      return s + l.side * l.qty * 100 * (l.side > 0 ? q.bid : q.ask);
+      return s2 + l.side * l.qty * 100 * (l.side > 0 ? q.bid : q.ask);
     }, 0);
-    const fees = pos.legs.filter((l) => l.kind !== "stock").reduce((s, l) => s + FEE2 * l.qty, 0);
+    const fees = pos.legs.filter((l) => l.kind !== "stock").reduce((s2, l) => s2 + FEE2 * l.qty, 0);
     S.cash += val - fees + (pos.reserved || 0);
     S.positions.splice(i, 1);
     log("\u{1F3C1}", `Closed ${pos.label}`);
@@ -2896,8 +3028,8 @@
         headers: restHeaders(token)
       });
       if (!res.ok) return subStatus();
-      const rows = await res.json().catch(() => []);
-      const sub = Array.isArray(rows) && rows[0]?.status ? String(rows[0].status) : "none";
+      const rows2 = await res.json().catch(() => []);
+      const sub = Array.isArray(rows2) && rows2[0]?.status ? String(rows2[0].status) : "none";
       applyingRemote = true;
       try {
         setSubStatus(sub);
@@ -2971,8 +3103,8 @@
         setStatus("error");
         return { ok: false, err: `Pull failed (${progRes.status})` };
       }
-      const rows = await progRes.json().catch(() => []);
-      const remotePayload = Array.isArray(rows) && rows[0]?.payload ? rows[0].payload : null;
+      const rows2 = await progRes.json().catch(() => []);
+      const remotePayload = Array.isArray(rows2) && rows2[0]?.payload ? rows2[0].payload : null;
       const localDb = _dbForSync();
       const merged = mergeDb(localDb, remotePayload);
       merged.subStatus = subStatus();
@@ -3091,11 +3223,11 @@
         headers: h.value
       });
       if (!response.ok) return { err: "Unable to refresh your subscription. Please try again." };
-      const rows = await response.json();
-      if (!Array.isArray(rows) || rows.length && typeof rows[0]?.status !== "string") {
+      const rows2 = await response.json();
+      if (!Array.isArray(rows2) || rows2.length && typeof rows2[0]?.status !== "string") {
         return { err: "Unable to refresh your subscription. Please try again." };
       }
-      const status2 = rows[0]?.status || "none";
+      const status2 = rows2[0]?.status || "none";
       setSubStatus(status2);
       return status2;
     } catch {
@@ -3338,23 +3470,23 @@
     };
   }
   function syncStatusChip(status2) {
-    const s = SYNC_LABEL[status2] ? status2 : "off";
+    const s2 = SYNC_LABEL[status2] ? status2 : "off";
     return el(
       "span",
       {
-        class: "sync-chip sync-" + s,
-        title: "Sync: " + (SYNC_LABEL[s] || s)
+        class: "sync-chip sync-" + s2,
+        title: "Sync: " + (SYNC_LABEL[s2] || s2)
       },
       el("span", { class: "sync-dot", "aria-hidden": "true" }),
-      el("span", { class: "sync-label" }, SYNC_LABEL[s] || s)
+      el("span", { class: "sync-label" }, SYNC_LABEL[s2] || s2)
     );
   }
   function updateSyncChip(chip, status2) {
-    const s = SYNC_LABEL[status2] ? status2 : "off";
-    chip.className = "sync-chip sync-" + s;
-    chip.title = "Sync: " + (SYNC_LABEL[s] || s);
+    const s2 = SYNC_LABEL[status2] ? status2 : "off";
+    chip.className = "sync-chip sync-" + s2;
+    chip.title = "Sync: " + (SYNC_LABEL[s2] || s2);
     const lab = chip.querySelector(".sync-label");
-    if (lab) lab.textContent = SYNC_LABEL[s] || s;
+    if (lab) lab.textContent = SYNC_LABEL[s2] || s2;
   }
   function mountSyncCloud(parent) {
     if (isFamilyBuild()) return () => {
@@ -3373,9 +3505,9 @@
         return;
       }
       cloud.hidden = false;
-      const s = SYNC_LABEL[status()] ? status() : "off";
-      cloud.className = "sync-cloud sync-" + s;
-      cloud.title = "Sync: " + (SYNC_LABEL[s] || s);
+      const s2 = SYNC_LABEL[status()] ? status() : "off";
+      cloud.className = "sync-cloud sync-" + s2;
+      cloud.title = "Sync: " + (SYNC_LABEL[s2] || s2);
     }
     paint();
     const u1 = onChange(paint);
@@ -3848,7 +3980,7 @@
         el("th", {}, "Free"),
         el("th", {}, "Academy")
       )));
-      const rows = [
+      const rows2 = [
         ["Open positions", String(lim.positions), "Unlimited"],
         ["Tradeable symbols", lim.symbols.join(", "), "Every ticker"],
         ["Curriculum tracks", lim.freeTracks.join(", ") + ` (first ${lim.lessonsPerTrack} lessons)`, "All tracks & lessons"],
@@ -3856,7 +3988,7 @@
         ["Journal entries", String(lim.journalEntries), "Unlimited + score history"]
       ];
       const tb = el("tbody", {});
-      for (const [feat, free, pro] of rows) {
+      for (const [feat, free, pro] of rows2) {
         tb.appendChild(el(
           "tr",
           {},
@@ -3908,6 +4040,240 @@
     }
   };
 
+  // src/state/settings.js
+  var KEY2 = "oa.settings";
+  var load = () => {
+    try {
+      return JSON.parse(localStorage.getItem(KEY2)) || {};
+    } catch {
+      return {};
+    }
+  };
+  var s = load();
+  var persist = () => {
+    try {
+      localStorage.setItem(KEY2, JSON.stringify(s));
+    } catch {
+    }
+  };
+  function tradierKey() {
+    return s.tradierKey || "";
+  }
+  function setTradierKey(k) {
+    s.tradierKey = String(k || "").trim();
+    persist();
+  }
+  function clearTradierKey() {
+    delete s.tradierKey;
+    persist();
+  }
+  function realDataAllowed() {
+    const p = active();
+    if (!p || p.mode === "kid") return false;
+    return isFamilyBuild() || tier() === "pro";
+  }
+  function realDataReady() {
+    return realDataAllowed() && !!tradierKey();
+  }
+  function feedMode() {
+    return s.feedMode === "tradier" && realDataReady() ? "tradier" : "sim";
+  }
+  function setFeedMode(m) {
+    s.feedMode = m === "tradier" ? "tradier" : "sim";
+    persist();
+  }
+
+  // src/ui/views/settings.js
+  function downloadBackup() {
+    const json = exportJson();
+    const blob = new Blob([json], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = el("a", { href: url, download: `options-academy-backup-${(/* @__PURE__ */ new Date()).toISOString().slice(0, 10)}.json` });
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast("Backup downloaded.", "gain");
+  }
+  function versionLabel() {
+    const build2 = isFamilyBuild() ? "family" : "commercial";
+    const hash = (
+      /** @type {any} */
+      "2026-11-12"
+    );
+    return `${hash} \xB7 ${build2}`;
+  }
+  var view3 = {
+    render(root) {
+      const p = active();
+      const isKid = p?.mode === "kid";
+      root.appendChild(el("div", { class: "eyebrow" }, "Settings"));
+      root.appendChild(el("h1", {}, "Device settings"));
+      root.appendChild(el(
+        "p",
+        { class: "sub", style: "max-width:68ch" },
+        "Keys and backups stay on this device. Nothing here is synced to the cloud."
+      ));
+      if (!isKid) {
+        const realCard = el("div", { class: "card mt2 settings-section" });
+        realCard.appendChild(el(
+          "div",
+          { class: "flex-between" },
+          el("h3", {}, "Real market data"),
+          realDataAllowed() ? null : el("a", { class: "pill brass lock-chip", href: "#/upgrade", style: "text-decoration:none" }, "\u{1F512} Upgrade")
+        ));
+        root.appendChild(realCard);
+        if (!realDataAllowed()) {
+          realCard.appendChild(el(
+            "p",
+            { class: "sub", style: "margin-bottom:0" },
+            "Delayed real quotes (Tradier sandbox) are included with Academy. Simulated Live Market stays free."
+          ));
+          realCard.appendChild(el("a", { class: "btn primary mt1", href: "#/upgrade" }, "See plans \u2192"));
+        } else {
+          let paintFeed = function() {
+            const ready = feedReady();
+            simBtn.disabled = false;
+            realBtn.disabled = !ready;
+            simBtn.classList.toggle("on", mode === "sim");
+            realBtn.classList.toggle("on", mode === "tradier");
+            realBtn.title = ready ? "" : "Save a Tradier key first";
+          };
+          realCard.appendChild(el(
+            "p",
+            { class: "sub" },
+            "Paste a Tradier sandbox API key to watch delayed quotes and chains. Stored only on this device \u2014 never synced."
+          ));
+          const keyIn = el("input", {
+            type: "password",
+            autocomplete: "off",
+            spellcheck: "false",
+            "aria-label": "Tradier sandbox API key",
+            placeholder: "Paste sandbox key\u2026",
+            value: tradierKey()
+          });
+          keyIn.addEventListener("keydown", (e) => {
+            if (e.key === "Backspace" || e.key === "Delete" || (e.ctrlKey || e.metaKey) && ["a", "c", "v", "x"].includes(e.key.toLowerCase())) return;
+            if (e.key.length === 1) e.preventDefault();
+          });
+          const feedReady = () => realDataReady();
+          let mode = feedMode();
+          const simBtn = el("button", { type: "button" }, "Sim");
+          const realBtn = el("button", { type: "button" }, "Real (delayed)");
+          const feedSeg = el("div", { class: "seg", role: "group", "aria-label": "Feed mode" }, simBtn, realBtn);
+          simBtn.addEventListener("click", () => {
+            setFeedMode("sim");
+            mode = feedMode();
+            paintFeed();
+            toast("Feed: simulated Live Market.", "gain");
+          });
+          realBtn.addEventListener("click", () => {
+            if (!feedReady()) return;
+            setFeedMode("tradier");
+            mode = feedMode();
+            paintFeed();
+            toast("Feed: real market (delayed ~15 min).", "gain");
+          });
+          paintFeed();
+          realCard.appendChild(el(
+            "div",
+            { class: "field mt1" },
+            el("label", {}, "Tradier sandbox key"),
+            keyIn,
+            el("div", { class: "small muted mt1" }, "Paste only \xB7 stored only on this device")
+          ));
+          realCard.appendChild(el(
+            "div",
+            { class: "btn-row mt1" },
+            el("button", { class: "btn primary", type: "button", onclick: () => {
+              setTradierKey(keyIn.value);
+              keyIn.value = tradierKey();
+              paintFeed();
+              toast(tradierKey() ? "Key saved on this device." : "Key cleared.", "gain");
+            } }, "Save"),
+            el("button", { class: "btn", type: "button", onclick: () => {
+              clearTradierKey();
+              keyIn.value = "";
+              setFeedMode("sim");
+              mode = "sim";
+              paintFeed();
+              toast("Tradier key cleared.", "gain");
+            } }, "Clear")
+          ));
+          realCard.appendChild(el(
+            "div",
+            { class: "field mt2" },
+            el("label", {}, "Feed mode"),
+            feedSeg,
+            el(
+              "div",
+              { class: "small muted mt1" },
+              "Real mode is watch + analyze only (no paper fills). Quotes delayed ~15 minutes."
+            )
+          ));
+          realCard.appendChild(el(
+            "p",
+            { class: "small mt1", style: "margin-bottom:0" },
+            el("a", { href: "https://developer.tradier.com/", target: "_blank", rel: "noopener" }, "Get a Tradier sandbox key \u2192")
+          ));
+        }
+      }
+      const dataCard = el("div", { class: "card mt2 settings-section" });
+      dataCard.appendChild(el("h3", {}, "Data"));
+      dataCard.appendChild(el(
+        "p",
+        { class: "sub" },
+        "Export a JSON backup of profiles, journal, and paper accounts. Import replaces data on this device."
+      ));
+      const fileIn = el("input", { type: "file", accept: "application/json,.json", "aria-label": "Import backup file", style: "display:none" });
+      fileIn.addEventListener("change", async () => {
+        const file = fileIn.files && fileIn.files[0];
+        fileIn.value = "";
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const res = importJson(text);
+          if (res.err) {
+            toast(res.err, "loss");
+            return;
+          }
+          toast(`Imported ${res.profiles} profile${res.profiles === 1 ? "" : "s"} \u2014 reloading\u2026`, "gain");
+          setTimeout(() => location.reload(), 400);
+        } catch {
+          toast("Could not read that file.", "loss");
+        }
+      });
+      dataCard.appendChild(el(
+        "div",
+        { class: "btn-row" },
+        el("button", { class: "btn primary", type: "button", onclick: downloadBackup }, "Export backup"),
+        el("button", { class: "btn", type: "button", onclick: () => fileIn.click() }, "Import\u2026"),
+        fileIn
+      ));
+      root.appendChild(dataCard);
+      const about = el("div", { class: "card mt2 settings-section" });
+      about.appendChild(el("h3", {}, "About"));
+      about.appendChild(el(
+        "div",
+        { class: "pos-greeks" },
+        el("span", {}, "Version"),
+        el("span", { class: "num" }, versionLabel())
+      ));
+      about.appendChild(el(
+        "p",
+        { class: "sub mt1", style: "margin-bottom:0" },
+        "Educational simulation only \u2014 not investment advice. ",
+        el("a", { href: "#/legal" }, "Disclosures")
+      ));
+      root.appendChild(about);
+      root.appendChild(el(
+        "div",
+        { class: "btn-row mt2" },
+        el("a", { class: "btn", href: "#/progress" }, "\u2190 Progress")
+      ));
+    }
+  };
+
   // src/ui/legal.js
   var CFTC_441 = "HYPOTHETICAL OR SIMULATED PERFORMANCE RESULTS HAVE CERTAIN LIMITATIONS. UNLIKE AN ACTUAL PERFORMANCE RECORD, SIMULATED RESULTS DO NOT REPRESENT ACTUAL TRADING. ALSO, SINCE THE TRADES HAVE NOT BEEN EXECUTED, THE RESULTS MAY HAVE UNDER-OR-OVER COMPENSATED FOR THE IMPACT, IF ANY, OF CERTAIN MARKET FACTORS, SUCH AS LACK OF LIQUIDITY. SIMULATED TRADING PROGRAMS IN GENERAL ARE ALSO SUBJECT TO THE FACT THAT THEY ARE DESIGNED WITH THE BENEFIT OF HINDSIGHT. NO REPRESENTATION IS BEING MADE THAT ANY ACCOUNT WILL OR IS LIKELY TO ACHIEVE PROFIT OR LOSSES SIMILAR TO THOSE SHOWN.";
   var ACK_TEXT = "I understand Options Academy is for education only \u2014 it is not investment, financial, or trading advice; it is not a broker or advisor; all markets here are simulated; and options trading involves substantial risk of loss.";
@@ -3919,7 +4285,7 @@
       el("a", { href: "#/legal" }, "Full disclosures")
     );
   }
-  var view3 = {
+  var view4 = {
     render(root) {
       root.appendChild(el("div", { class: "eyebrow" }, "Disclosures & legal"));
       root.appendChild(el("h1", {}, "The fine print, in plain sight"));
@@ -3984,6 +4350,7 @@
     { id: "missions", icon: "\u{1F9ED}", label: "Missions" },
     { sect: "You" },
     { id: "progress", icon: "\u{1F3C6}", label: "Progress" },
+    { id: "settings", icon: "\u2699\uFE0F", label: "Settings" },
     { id: "legal", icon: "\u2696\uFE0F", label: "Disclosures" }
   ];
   var LABS = [
@@ -3994,7 +4361,7 @@
     { id: "journal", icon: "\u{1F4D3}", label: "Journal" }
   ];
   var LAB_IDS = new Set(LABS.map((l) => l.id));
-  var YOU_IDS = /* @__PURE__ */ new Set(["progress", "upgrade", "welcome"]);
+  var YOU_IDS = /* @__PURE__ */ new Set(["progress", "settings", "upgrade", "welcome", "legal"]);
   function navItems() {
     return NAV.filter((n) => !n.kidsOnly || kidsEnabled());
   }
@@ -4045,6 +4412,9 @@
     const items = [
       { icon: "\u{1F3C6}", label: "Progress", onClick: () => {
         location.hash = "#/progress";
+      } },
+      { icon: "\u2699\uFE0F", label: "Settings", onClick: () => {
+        location.hash = "#/settings";
       } },
       { icon: "\u{1F464}", label: "Switch profile", onClick: () => profilePicker() },
       { icon: "\u25D0", label: "Toggle theme", onClick: () => toggleTheme() }
@@ -4330,7 +4700,7 @@
     const hash = location.hash || "#/home";
     const parts = hash.replace(/^#\//, "").split("/");
     const name = (parts[0] || "home").split("?")[0] || "home";
-    const view14 = VIEWS[name] || VIEWS.home;
+    const view15 = VIEWS[name] || VIEWS.home;
     if (currentCleanup) {
       try {
         currentCleanup();
@@ -4342,10 +4712,10 @@
     refreshTabActive(name);
     contentEl.innerHTML = "";
     window.scrollTo(0, 0);
-    currentCleanup = view14.render(contentEl, parts.slice(1)) || null;
+    currentCleanup = view15.render(contentEl, parts.slice(1)) || null;
   }
   function boot(views) {
-    VIEWS = { welcome: view, upgrade: view2, ...views };
+    VIEWS = { welcome: view, upgrade: view2, settings: view3, ...views };
     try {
       const th = localStorage.getItem("oa.theme");
       if (th) document.documentElement.setAttribute("data-theme", th);
@@ -6542,7 +6912,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
   function avgScore(n = 10) {
     const closed = entries().filter((e) => e.status === "closed" && e.score != null).slice(0, n);
     if (!closed.length) return null;
-    return Math.round(closed.reduce((s, e) => s + e.score, 0) / closed.length);
+    return Math.round(closed.reduce((s2, e) => s2 + e.score, 0) / closed.length);
   }
   function scoreBreakdown(e) {
     return [
@@ -6564,7 +6934,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     "Buy the straddle when you expect realized > implied. The Volatility Lab lets you test that bet 60 paths at a time.",
     "A covered call trades your upside above the strike for cash today. Great on stock you'd happily sell there anyway."
   ];
-  var view4 = {
+  var view5 = {
     render(root) {
       const p = active();
       const hour = (/* @__PURE__ */ new Date()).getHours();
@@ -6664,6 +7034,30 @@ This is why the simulator matters more than the formula sheet. Run the same path
         el("h3", {}, "\u{1F4A1} Floor wisdom"),
         el("p", { class: "sub", style: "margin-bottom:0" }, TIPS[Math.floor(Math.random() * TIPS.length)])
       ));
+      if (realDataReady()) {
+        root.appendChild(el(
+          "a",
+          {
+            class: "card mt2 real-data-card",
+            href: "#/market",
+            style: "text-decoration:none;color:inherit",
+            onclick: () => {
+              if (feedMode() !== "tradier") setFeedMode("tradier");
+            }
+          },
+          el(
+            "div",
+            { class: "flex-between", style: "flex-wrap:wrap;gap:8px" },
+            el(
+              "div",
+              {},
+              el("h3", { style: "margin:0" }, "Real market (delayed)"),
+              el("p", { class: "sub", style: "margin:4px 0 0" }, "Watch Tradier sandbox quotes \xB7 analyze in Strategy Lab")
+            ),
+            el("span", { class: "pill real-delayed-badge" }, "REAL \xB7 DELAYED 15 MIN")
+          )
+        ));
+      }
       const mkCard = el("div", { class: "card mt2" });
       root.appendChild(mkCard);
       mkCard.appendChild(el(
@@ -6993,7 +7387,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       if (!total) return 1;
       return Math.min(1, (p.quizzes[l.id] || 0) / total);
     });
-    return ratios.reduce((s, x) => s + x, 0) / Math.max(1, ratios.length);
+    return ratios.reduce((s2, x) => s2 + x, 0) / Math.max(1, ratios.length);
   }
   function moduleComplete(p, mod) {
     return mod.lessons.every((l) => p.lessons[l.id]) && moduleQuizAvg(p, mod) >= QUIZ_PASS_AVG;
@@ -7129,7 +7523,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
     const p = active();
     const statuses = moduleStatus(tid);
-    const statusById = Object.fromEntries(statuses.map((s) => [s.id, s]));
+    const statusById = Object.fromEntries(statuses.map((s2) => [s2.id, s2]));
     const overview = trackOverview(tid);
     root.appendChild(el("div", { class: "crumb" }, el("a", { href: "#/learn" }, "\u2190 Curriculum")));
     root.appendChild(el("div", { class: "eyebrow" }, t.audience));
@@ -7295,18 +7689,18 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
     root.appendChild(prose);
     if (l.sim && SIM_LINKS[l.sim]) {
-      const s = SIM_LINKS[l.sim];
+      const s2 = SIM_LINKS[l.sim];
       root.appendChild(el(
         "div",
         { class: "apply-card", style: "max-width:68ch" },
-        el("span", { class: "ic" }, s.icon),
+        el("span", { class: "ic" }, s2.icon),
         el(
           "div",
           { style: "flex:1;min-width:220px" },
           el("div", { style: "font-weight:700" }, "Apply it on the simulator"),
           el("div", { class: "sub" }, l.sim_task || "Try what you just learned.")
         ),
-        el("a", { class: "btn primary", href: s.href }, s.label)
+        el("a", { class: "btn primary", href: s2.href }, s2.label)
       ));
     }
     const quizBox = el("div", { class: "card mt2", style: "max-width:68ch" });
@@ -7338,7 +7732,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     refreshDoneBtn(already || !(l.quiz || []).length);
     root.appendChild(footer);
   }
-  var view5 = {
+  var view6 = {
     render(root, params) {
       if (!curriculum || !curriculum.tracks?.length) {
         root.appendChild(el("p", { class: "sub" }, "Curriculum loading\u2026"));
@@ -7350,10 +7744,153 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
   };
 
+  // src/engine/analytics.js
+  function coneBands(S2, iv, daysArr, sigmas = [1, 2]) {
+    if (!Array.isArray(daysArr)) return [];
+    const sSafe = Number.isFinite(S2) && S2 > 0 ? S2 : 0;
+    const vSafe = Number.isFinite(iv) && iv > 0 ? iv : 0;
+    const sigList = Array.isArray(sigmas) ? sigmas : [1, 2];
+    return daysArr.map((rawDays) => {
+      const d = Number.isFinite(rawDays) && rawDays > 0 ? rawDays : 0;
+      const volSqrtT = d > 0 && vSafe > 0 ? vSafe * Math.sqrt(d / TRADING_YEAR) : 0;
+      const bands = sigList.map((rawSigma) => {
+        const sigma = Number.isFinite(rawSigma) ? Math.abs(rawSigma) : 0;
+        if (sSafe <= 0 || volSqrtT === 0 || sigma === 0) {
+          return { sigma, lo: sSafe, hi: sSafe };
+        }
+        return {
+          sigma,
+          lo: sSafe * Math.exp(-sigma * volSqrtT),
+          hi: sSafe * Math.exp(sigma * volSqrtT)
+        };
+      });
+      return { days: d, bands };
+    });
+  }
+  function closePrice(c) {
+    return typeof c === "number" ? c : c && typeof c === "object" ? c.p : NaN;
+  }
+  function closeDay(c, idx) {
+    return typeof c === "object" && c !== null && typeof c.day === "number" ? c.day : idx + 1;
+  }
+  function hv(closes, window2 = 20) {
+    if (!Array.isArray(closes) || !Number.isFinite(window2) || window2 <= 0) return 0;
+    const w = Math.floor(window2);
+    if (w <= 0) return 0;
+    const prices = [];
+    for (let i = 0; i < closes.length; i++) {
+      const p = closePrice(closes[i]);
+      if (Number.isFinite(p) && p > 0) prices.push(p);
+    }
+    if (prices.length < 2) return 0;
+    const slice = prices.slice(-(w + 1));
+    const rets = [];
+    for (let i = 1; i < slice.length; i++) {
+      rets.push(Math.log(slice[i] / slice[i - 1]));
+    }
+    if (rets.length === 0) return 0;
+    if (rets.length === 1) return Math.abs(rets[0]) * Math.sqrt(TRADING_YEAR);
+    const mean = rets.reduce((acc, r) => acc + r, 0) / rets.length;
+    const sumSq = rets.reduce((acc, r) => acc + (r - mean) * (r - mean), 0);
+    const variance = sumSq / (rets.length - 1);
+    return Math.sqrt(variance * TRADING_YEAR);
+  }
+  function hvSeries(closes, window2 = 20) {
+    if (!Array.isArray(closes) || !Number.isFinite(window2) || window2 <= 0) return [];
+    const w = Math.floor(window2);
+    if (w <= 0) return [];
+    const valid = [];
+    for (let i = 0; i < closes.length; i++) {
+      const p = closePrice(closes[i]);
+      if (Number.isFinite(p) && p > 0) {
+        valid.push({ day: closeDay(closes[i], i), p });
+      }
+    }
+    if (valid.length <= w) return [];
+    const series = [];
+    for (let i = w; i < valid.length; i++) {
+      series.push({
+        day: valid[i].day,
+        hv: hv(valid.slice(i - w, i + 1), w)
+      });
+    }
+    return series;
+  }
+  function parseIvHistory(ivHistory) {
+    if (!Array.isArray(ivHistory)) return [];
+    const vals = [];
+    for (let i = 0; i < ivHistory.length; i++) {
+      const item = ivHistory[i];
+      const raw = typeof item === "number" ? item : item && typeof item === "object" ? item.iv ?? item.v ?? item.p ?? NaN : NaN;
+      if (typeof raw === "number" && Number.isFinite(raw) && raw >= 0) {
+        vals.push(raw);
+      }
+    }
+    return vals;
+  }
+  function ivRank(currentIv, ivHistory) {
+    if (typeof currentIv !== "number" || !Number.isFinite(currentIv) || currentIv < 0) return null;
+    const vals = parseIvHistory(ivHistory);
+    if (vals.length < 2) return null;
+    let min = vals[0];
+    let max = vals[0];
+    for (let i = 1; i < vals.length; i++) {
+      if (vals[i] < min) min = vals[i];
+      if (vals[i] > max) max = vals[i];
+    }
+    if (max <= min) return null;
+    const raw = (currentIv - min) / (max - min);
+    return Math.max(0, Math.min(1, raw));
+  }
+  function probAbove(S2, K, iv, days) {
+    if (!Number.isFinite(S2) || S2 <= 0) return 0;
+    if (!Number.isFinite(K) || K <= 0) return 1;
+    if (!Number.isFinite(days) || days <= 0 || !Number.isFinite(iv) || iv <= 0) {
+      if (S2 > K) return 1;
+      if (S2 < K) return 0;
+      return 0.5;
+    }
+    const T = days / TRADING_YEAR;
+    const volSqrtT = iv * Math.sqrt(T);
+    const d2 = (Math.log(S2 / K) - 0.5 * iv * iv * T) / volSqrtT;
+    return ncdf(d2);
+  }
+
+  // src/ui/analyze-stash.js
+  var KEY3 = "oa.analyzeStash";
+  function writeAnalyzeStash(payload) {
+    try {
+      sessionStorage.setItem(KEY3, JSON.stringify({ ...payload, at: Date.now() }));
+    } catch {
+    }
+  }
+  function readAnalyzeStash() {
+    try {
+      const raw = sessionStorage.getItem(KEY3);
+      if (!raw) return null;
+      const data = JSON.parse(raw);
+      if (!data || !data.sym || !Array.isArray(data.legs)) return null;
+      return data;
+    } catch {
+      return null;
+    }
+  }
+  function clearAnalyzeStash() {
+    try {
+      sessionStorage.removeItem(KEY3);
+    } catch {
+    }
+  }
+  function takeAnalyzeStash() {
+    const data = readAnalyzeStash();
+    if (data) clearAnalyzeStash();
+    return data;
+  }
+
   // src/ui/views/strategy.js
   var viewState = {};
   var PRESETS = [
-    { id: "long-call", name: "Long Call", legs: (atm, st) => [{ kind: "call", side: 1, qty: 1, k: 0 }] },
+    { id: "long-call", name: "Long Call", legs: () => [{ kind: "call", side: 1, qty: 1, k: 0 }] },
     { id: "long-put", name: "Long Put", legs: () => [{ kind: "put", side: 1, qty: 1, k: 0 }] },
     { id: "covered-call", name: "Covered Call", legs: () => [{ kind: "stock", side: 1, qty: 100 }, { kind: "call", side: -1, qty: 1, k: 1 }] },
     { id: "protective-put", name: "Protective Put", legs: () => [{ kind: "stock", side: 1, qty: 100 }, { kind: "put", side: 1, qty: 1, k: -1 }] },
@@ -7366,12 +7903,46 @@ This is why the simulator matters more than the formula sheet. Run the same path
     { id: "butterfly", name: "Call Butterfly", legs: () => [{ kind: "call", side: 1, qty: 1, k: -2 }, { kind: "call", side: -2, qty: 1, k: 0 }, { kind: "call", side: 1, qty: 1, k: 2 }] },
     { id: "collar", name: "Collar", legs: () => [{ kind: "stock", side: 1, qty: 100 }, { kind: "put", side: 1, qty: 1, k: -2 }, { kind: "call", side: -1, qty: 1, k: 2 }] }
   ];
-  var view6 = {
+  function modelWinOdds(S2, iv, days, valueAtExpiry2, cost) {
+    try {
+      if (!(S2 > 0) || !(iv > 0) || days == null) return null;
+      const lo = S2 * 0.45, hi = S2 * 1.55, N = 160;
+      const cuts = [lo];
+      let prev = valueAtExpiry2(lo) - cost;
+      for (let i = 1; i <= N; i++) {
+        const x = lo + (hi - lo) * i / N;
+        const y = valueAtExpiry2(x) - cost;
+        if (prev <= 0 && y > 0 || prev >= 0 && y < 0) {
+          cuts.push(prev === y ? x : x - (hi - lo) / N + (0 - prev) / (y - prev) * ((hi - lo) / N));
+        }
+        prev = y;
+      }
+      cuts.push(hi);
+      cuts.sort((a, b) => a - b);
+      let p = 0;
+      for (let i = 0; i < cuts.length - 1; i++) {
+        const a = cuts[i], b = cuts[i + 1];
+        if (!(b > a)) continue;
+        const mid = (a + b) / 2;
+        if (valueAtExpiry2(mid) - cost <= 0) continue;
+        const pa = probAbove(S2, a, iv, days);
+        const pb = probAbove(S2, b, iv, days);
+        if (pa == null || pb == null) continue;
+        p += Math.max(0, pa - pb);
+      }
+      if (!isFinite(p)) return null;
+      return Math.max(0, Math.min(1, p));
+    } catch {
+      return null;
+    }
+  }
+  var view7 = {
     render(root) {
       let sym = viewState.sym || "LMND";
       let expIdx = 1;
       let legs = [];
       let chart = null;
+      let realCtx = null;
       root.appendChild(el("div", { class: "eyebrow" }, "Strategy Lab"));
       root.appendChild(el("h1", {}, "Build it, see it, trade it"));
       root.appendChild(el(
@@ -7380,6 +7951,8 @@ This is why the simulator matters more than the formula sheet. Run the same path
         "Pick a strategy or build your own legs. The solid line is profit at expiration; the dashed line is the position today (T+0), repriced live as the market ticks. When it looks right, send it to the Live Market as a paper trade."
       ));
       root.appendChild(simDisclaimer());
+      const realBanner = el("div", {});
+      root.appendChild(realBanner);
       const controls = el("div", { class: "card mt2" });
       const chartCard = el("div", { class: "card mt2" });
       const statsRow = el("div", { class: "stats mt2" });
@@ -7393,43 +7966,122 @@ This is why the simulator matters more than the formula sheet. Run the same path
       chartCard.appendChild(chartBox);
       legend(chartCard, [
         { name: "At expiration", color: "--s1" },
-        { name: "Today (T+0)", color: "--s6" }
+        { name: "Today (T+0)", color: "--s6" },
+        { name: "\xB11\u03C3 / \xB12\u03C3 model cone", color: "--brass" }
       ]);
-      function atmStrike() {
-        const q = market.quote(sym);
-        const strikes = market.strikes(sym);
-        return strikes.reduce((a, b) => Math.abs(b - q.S) < Math.abs(a - q.S) ? b : a);
+      chartCard.appendChild(el(
+        "p",
+        { class: "small muted cone-note", style: "margin:6px 0 0" },
+        "Shaded bands are model-implied expected move (\xB11\u03C3 / \xB12\u03C3) \u2014 not a forecast."
+      ));
+      function spot() {
+        if (realCtx) return realCtx.S;
+        if (market.tickers[sym]) return market.quote(sym).S;
+        return 100;
+      }
+      function strikeList() {
+        if (realCtx || !market.tickers[sym]) {
+          const S2 = spot();
+          const step = S2 >= 200 ? 5 : S2 >= 50 ? 2.5 : 1;
+          const mid = Math.round(S2 / step) * step;
+          const out = [];
+          for (let i = -8; i <= 8; i++) out.push(+(mid + i * step).toFixed(2));
+          for (const L of legs) {
+            if (L.strike != null && !out.includes(L.strike)) out.push(L.strike);
+          }
+          return out.sort((a, b) => a - b);
+        }
+        return market.strikes(sym);
+      }
+      function atmStrike2() {
+        const S2 = spot();
+        const strikes = strikeList();
+        return strikes.reduce((a, b) => Math.abs(b - S2) < Math.abs(a - S2) ? b : a);
       }
       function strikeAt(off) {
-        const strikes = market.strikes(sym);
-        const atm = atmStrike();
+        const strikes = strikeList();
+        const atm = atmStrike2();
         const i = strikes.indexOf(atm);
         return strikes[Math.max(0, Math.min(strikes.length - 1, i + off))];
       }
       function expiry() {
+        if (realCtx) return { day: realCtx.dte, label: realCtx.expDate || `${realCtx.dte}d`, dte: realCtx.dte };
         const e = market.expiries(sym);
         return e[Math.min(expIdx, e.length - 1)];
+      }
+      function posDays() {
+        if (realCtx) return Math.max(0, realCtx.dte);
+        const exp = expiry();
+        return Math.max(0, (exp.day ?? 0) - market.day - market.minute / 390);
+      }
+      function posIv() {
+        if (realCtx) return realCtx.iv || 0.2;
+        const t = market.tickers[sym];
+        return t?.vol || 0.25;
+      }
+      function legMid(L) {
+        if (L.kind === "stock") return spot();
+        if (realCtx || !market.tickers[sym]) return L.entry;
+        try {
+          return market.optQuote(sym, L.strike, L.expDay, L.kind).mid;
+        } catch {
+          return L.entry;
+        }
       }
       function applyPreset(p) {
         const exp = expiry();
         legs = p.legs().map((L) => {
-          if (L.kind === "stock") return { kind: "stock", side: Math.sign(L.side), qty: Math.abs(L.qty), entry: market.quote(sym).S };
+          if (L.kind === "stock") return { kind: "stock", side: Math.sign(L.side), qty: Math.abs(L.qty), entry: spot() };
           const strike = strikeAt(L.k);
-          return { kind: L.kind, side: Math.sign(L.side), qty: Math.abs(L.side) * (L.qty ?? 1), strike, expDay: exp.day, entry: market.optQuote(sym, strike, exp.day, L.kind).mid };
+          let entry = 1;
+          if (!realCtx && market.tickers[sym]) {
+            entry = market.optQuote(sym, strike, exp.day, L.kind).mid;
+          } else {
+            const iv = posIv();
+            const dte = Math.max(0.01, posDays());
+            entry = price({ S: spot(), K: strike, T: dte / 252, v: iv, r: 0.04, type: L.kind });
+          }
+          return { kind: L.kind, side: Math.sign(L.side), qty: Math.abs(L.side) * (L.qty ?? 1), strike, expDay: exp.day, entry };
         });
         drawAll();
       }
+      function clearRealCtx() {
+        realCtx = null;
+        realBanner.innerHTML = "";
+        tradeBtn.disabled = false;
+        tradeBtn.title = "";
+        fillSymOptions();
+        fillExp();
+        drawAll();
+      }
       const symSel = el("select", {});
-      for (const t of market.list()) symSel.appendChild(el("option", { value: t.sym, selected: t.sym === sym }, `${t.sym} \u2014 ${t.name} (${F.usd(t.S)})`));
+      function fillSymOptions() {
+        symSel.innerHTML = "";
+        for (const t of market.list()) {
+          symSel.appendChild(el("option", { value: t.sym, selected: t.sym === sym }, `${t.sym} \u2014 ${t.name} (${F.usd(t.S)})`));
+        }
+        if (realCtx && ![...symSel.options].some((o) => o.value === sym)) {
+          symSel.appendChild(el("option", { value: sym, selected: true }, `${sym} \u2014 real (delayed)`));
+        }
+      }
+      fillSymOptions();
       symSel.addEventListener("change", () => {
         sym = symSel.value;
         viewState.sym = sym;
+        if (realCtx && sym !== realCtx._sym) clearRealCtx();
         legs = [];
         drawAll();
       });
       const expSel = el("select", {});
       function fillExp() {
         expSel.innerHTML = "";
+        if (realCtx) {
+          expSel.appendChild(el("option", { value: 0, selected: true }, realCtx.expDate || `${realCtx.dte} DTE`));
+          expSel.disabled = true;
+          return;
+        }
+        expSel.disabled = false;
+        if (!market.tickers[sym]) return;
         market.expiries(sym).forEach((e, i) => expSel.appendChild(el("option", { value: i, selected: i === expIdx }, e.label)));
       }
       fillExp();
@@ -7448,17 +8100,28 @@ This is why the simulator matters more than the formula sheet. Run the same path
       const legsBox = el("div", { class: "mt2" });
       const addLegBtn = el("button", { class: "btn sm", onclick: () => {
         const exp = expiry();
-        const strike = atmStrike();
-        legs.push({ kind: "call", side: 1, qty: 1, strike, expDay: exp.day, entry: market.optQuote(sym, strike, exp.day, "call").mid });
+        const strike = atmStrike2();
+        let entry = 1;
+        if (!realCtx && market.tickers[sym]) entry = market.optQuote(sym, strike, exp.day, "call").mid;
+        else {
+          const dte = Math.max(0.01, posDays());
+          entry = price({ S: spot(), K: strike, T: dte / 252, v: posIv(), r: 0.04, type: "call" });
+        }
+        legs.push({ kind: "call", side: 1, qty: 1, strike, expDay: exp.day, entry });
         drawAll();
       } }, "+ Add leg");
       const clearBtn = el("button", { class: "btn sm", onclick: () => {
         legs = [];
         presetSel.value = "";
-        drawAll();
+        if (realCtx) clearRealCtx();
+        else drawAll();
       } }, "Clear");
       const tradeBtn = el("button", { class: "btn primary", onclick: () => {
-        if (!legs.length) return;
+        if (!legs.length || realCtx) return;
+        if (!market.tickers[sym]) {
+          toast("Switch to a sim symbol to paper-trade.", "loss");
+          return;
+        }
         const label = presetSel.value ? PRESETS.find((p) => p.id === presetSel.value).name : "Custom strategy";
         const fillLegs = legs.map((L) => {
           if (L.kind === "stock") return { ...L, entry: market.quote(sym).S };
@@ -7488,7 +8151,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           legsBox.appendChild(el("p", { class: "small muted" }, "No legs yet \u2014 pick a preset or add legs manually."));
           return;
         }
-        const strikes = market.strikes(sym);
+        const strikes = strikeList();
         const tbl = el("table", { class: "oa" });
         tbl.appendChild(el("thead", {}, el(
           "tr",
@@ -7529,6 +8192,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
             if (L.kind === "stock") {
               L.qty = Math.max(1, Math.round(L.qty / 1) * 100);
               delete L.strike;
+              L.entry = spot();
             } else if (!L.strike) {
               L.strike = strikes[Math.floor(strikes.length / 2)];
               L.expDay = expiry().day;
@@ -7538,13 +8202,15 @@ This is why the simulator matters more than the formula sheet. Run the same path
           let strikeSel = el("span", { class: "muted" }, "\u2014");
           if (L.kind !== "stock") {
             strikeSel = el("select", {});
-            strikes.forEach((k) => strikeSel.appendChild(el("option", { value: k, selected: k === L.strike }, F.usd(k, 2))));
+            const opts = strikes.slice();
+            if (L.strike != null && !opts.includes(L.strike)) opts.push(L.strike);
+            opts.sort((a, b) => a - b).forEach((k) => strikeSel.appendChild(el("option", { value: k, selected: k === L.strike }, F.usd(k, 2))));
             strikeSel.addEventListener("change", () => {
               L.strike = +strikeSel.value;
               drawAll();
             });
           }
-          const mid = L.kind === "stock" ? market.quote(sym).S : market.optQuote(sym, L.strike, L.expDay, L.kind).mid;
+          const mid = legMid(L);
           const rm = el("button", { class: "btn sm", onclick: () => {
             legs.splice(i, 1);
             drawAll();
@@ -7565,23 +8231,29 @@ This is why the simulator matters more than the formula sheet. Run the same path
       }
       const mult4 = (L) => L.kind === "stock" ? 1 : 100;
       function entryCost2() {
-        return legs.reduce((s, L) => s + L.side * L.qty * mult4(L) * L.entry, 0);
+        return legs.reduce((s2, L) => s2 + L.side * L.qty * mult4(L) * L.entry, 0);
       }
       function valueAtExpiry2(x) {
-        return legs.reduce((s, L) => {
+        return legs.reduce((s2, L) => {
           const v = L.kind === "stock" ? x : L.kind === "call" ? Math.max(0, x - L.strike) : Math.max(0, L.strike - x);
-          return s + L.side * L.qty * mult4(L) * v;
+          return s2 + L.side * L.qty * mult4(L) * v;
         }, 0);
       }
       function valueT0(x) {
         const exp = expiry();
-        return legs.reduce((s, L) => {
-          if (L.kind === "stock") return s + L.side * L.qty * x;
+        const days = Math.max(0.01, posDays());
+        const flatIv = posIv();
+        return legs.reduce((s2, L) => {
+          if (L.kind === "stock") return s2 + L.side * L.qty * x;
+          if (realCtx || !market.tickers[sym]) {
+            const px2 = price({ S: x, K: L.strike, T: days / 252, v: flatIv, r: 0.04, type: L.kind });
+            return s2 + L.side * L.qty * 100 * px2;
+          }
           const t = market.tickers[sym];
           const dte = Math.max(0.01, (L.expDay ?? exp.day) - market.day - market.minute / 390);
           const iv = market.smileIV({ ...t, S: x }, L.strike, dte);
           const px = price({ S: x, K: L.strike, T: dte / 252, v: iv, r: 0.04, type: L.kind });
-          return s + L.side * L.qty * 100 * px;
+          return s2 + L.side * L.qty * 100 * px;
         }, 0);
       }
       function drawAll() {
@@ -7594,7 +8266,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           chart = null;
           return;
         }
-        const S2 = market.quote(sym).S;
+        const S2 = spot();
         const cost = entryCost2();
         const lo = S2 * 0.7, hi = S2 * 1.3, N = 120;
         const expPts = [], t0Pts = [];
@@ -7614,6 +8286,19 @@ This is why the simulator matters more than the formula sheet. Run the same path
         const slopeR = expPts[N].y - expPts[N - 1].y, slopeL = expPts[0].y - expPts[1].y;
         const maxLabel = slopeR > 0.5 ? "Unlimited \u2197" : F.usd(maxP, 0);
         const minLabel = slopeR < -0.5 || slopeL < -0.5 ? minP < 0 ? F.usd(minP, 0) + " (and falling)" : F.usd(minP, 0) : F.usd(minP, 0);
+        const days = posDays();
+        const iv = posIv();
+        let vbands = [];
+        try {
+          const cone = coneBands(S2, iv, [Math.max(0, days)], [1, 2]);
+          const bands = cone?.[0]?.bands || [];
+          const b2 = bands.find((b) => b.sigma === 2);
+          const b1 = bands.find((b) => b.sigma === 1);
+          if (b2) vbands.push({ lo: b2.lo, hi: b2.hi, color: "--brass-soft", opacity: 0.55 });
+          if (b1) vbands.push({ lo: b1.lo, hi: b1.hi, color: "--brass-ring", opacity: 0.4 });
+        } catch {
+          vbands = [];
+        }
         const opts = {
           height: 300,
           series: [
@@ -7627,6 +8312,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
             { x: S2, label: "now " + F.usd(S2), color: "--ink-3" },
             ...bes.map((b) => ({ x: b, label: "BE " + F.usd(b), color: "--s4" }))
           ],
+          vbands,
           tipLabel: sym + " @ "
         };
         if (!chart) chart = line(chartBox, opts);
@@ -7636,10 +8322,27 @@ This is why the simulator matters more than the formula sheet. Run the same path
         statsRow.appendChild(stat("Max profit", maxLabel, "up"));
         statsRow.appendChild(stat("Max loss", minLabel, "down"));
         statsRow.appendChild(stat("Breakeven" + (bes.length > 1 ? "s" : ""), bes.length ? bes.map((b) => F.usd(b, 2)).join(" \xB7 ") : "\u2014"));
+        const pop = modelWinOdds(S2, iv, days, valueAtExpiry2, cost);
+        statsRow.appendChild(el(
+          "div",
+          { class: "stat pop-stat" },
+          el("div", { class: "k" }, "Model-implied win odds"),
+          el("div", { class: "v num" }, pop == null ? "\u2014" : F.pct(pop, 0)),
+          el("div", { class: "small muted", style: "margin-top:4px" }, "Not a forecast \u2014 risk-neutral model only.")
+        ));
         let g = { delta: 0, gamma: 0, theta: 0, vega: 0 };
         for (const L of legs) {
           if (L.kind === "stock") {
             g.delta += L.side * L.qty;
+            continue;
+          }
+          if (realCtx || !market.tickers[sym]) {
+            const dte = Math.max(0.01, posDays());
+            const gk = greeks({ S: S2, K: L.strike, T: dte / 252, v: iv, r: 0.04, type: L.kind });
+            g.delta += L.side * L.qty * 100 * gk.delta;
+            g.gamma += L.side * L.qty * 100 * gk.gamma;
+            g.theta += L.side * L.qty * 100 * gk.theta;
+            g.vega += L.side * L.qty * 100 * gk.vega;
             continue;
           }
           const q = market.optQuote(sym, L.strike, L.expDay, L.kind);
@@ -7648,7 +8351,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           g.theta += L.side * L.qty * 100 * q.theta;
           g.vega += L.side * L.qty * 100 * q.vega;
         }
-        greeksRow.appendChild(el("h3", {}, "Position Greeks (live)"));
+        greeksRow.appendChild(el("h3", {}, realCtx ? "Position Greeks (model)" : "Position Greeks (live)"));
         greeksRow.appendChild(el(
           "div",
           { class: "pos-greeks" },
@@ -7663,10 +8366,38 @@ This is why the simulator matters more than the formula sheet. Run the same path
           "Delta: share-equivalent direction. Theta: what a day of time costs (or pays) you. Vega: P&L for a 1-point implied-vol move."
         ));
       }
+      const stash = takeAnalyzeStash();
+      if (stash && stash.legs?.length) {
+        sym = stash.sym;
+        viewState.sym = sym;
+        realCtx = {
+          S: stash.S,
+          iv: stash.iv || 0.2,
+          dte: stash.dte || 21,
+          expDate: stash.expDate,
+          label: stash.label,
+          _sym: stash.sym
+        };
+        legs = stash.legs.map((L) => ({ ...L }));
+        tradeBtn.disabled = true;
+        tradeBtn.title = "Paper fills stay on Sim feed";
+        realBanner.appendChild(el(
+          "div",
+          { class: "oa-banner info mt1" },
+          el("div", { style: "font-weight:700" }, `Prefill from Real Market \xB7 ${sym}`),
+          el(
+            "p",
+            { class: "sub", style: "margin:4px 0 0" },
+            stash.label || "Legs loaded with delayed mids. Math is educational \u2014 not a trade ticket."
+          ),
+          el("button", { class: "btn sm mt1", type: "button", onclick: clearRealCtx }, "Clear real prefill")
+        ));
+        fillSymOptions();
+      }
       drawAll();
       let n = 0;
       const unTick = market.on("tick", () => {
-        if (++n % 3 === 0 && legs.length) drawAll();
+        if (++n % 3 === 0 && legs.length && !realCtx) drawAll();
       });
       return () => {
         unTick();
@@ -7702,7 +8433,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       tryIt: "Note how the 60-day curve towers over the 5-day curve: if you want to trade a volatility opinion, you trade time. If you want pure gamma, you trade the short end."
     }
   ];
-  var view7 = {
+  var view8 = {
     render(root) {
       let tab = "delta";
       const P = { K: 100, dte: 30, iv: 0.3 };
@@ -7752,7 +8483,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       sliders.appendChild(slider("Days to expiry", 1, 90, 1, () => P.dte, (v) => P.dte = v, (v) => v + "d"));
       sliders.appendChild(slider("Implied vol", 0.08, 0.8, 0.01, () => P.iv, (v) => P.iv = v, (v) => F.pct(v, 0)));
       const xs = [];
-      for (let s = 60; s <= 140; s += 1) xs.push(s);
+      for (let s2 = 60; s2 <= 140; s2 += 1) xs.push(s2);
       const T = (d) => d / 365;
       function seriesFor() {
         const base = { S: 100, K: P.K, r: 0.04 };
@@ -7817,7 +8548,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         };
         if (!chart) chart = line(chartBox, opts);
         else chart.update(opts);
-        legend(legendBox, cfg.series.map((s) => ({ name: s.name, color: s.color })));
+        legend(legendBox, cfg.series.map((s2) => ({ name: s2.name, color: s2.color })));
         const g = greeks({ S: 100, K: P.K, T: T(P.dte), v: P.iv, r: 0.04, type: "call" });
         tiles.innerHTML = "";
         const tile = (k, v, d) => el("div", { class: "stat" }, el("div", { class: "k" }, k), el("div", { class: "v" }, v), el("div", { class: "d muted" }, d));
@@ -7845,8 +8576,8 @@ This is why the simulator matters more than the formula sheet. Run the same path
     const K = 100, r = 0.04;
     let S2 = 100;
     const T0 = days / 365;
-    const px = (type, s, t2) => price({ S: s, K, T: Math.max(t2, 1e-4), v: ivPaid, r, type });
-    const del = (type, s, t2) => greeks({ S: s, K, T: Math.max(t2, 1e-4), v: ivPaid, r, type }).delta;
+    const px = (type, s2, t2) => price({ S: s2, K, T: Math.max(t2, 1e-4), v: ivPaid, r, type });
+    const del = (type, s2, t2) => greeks({ S: s2, K, T: Math.max(t2, 1e-4), v: ivPaid, r, type }).delta;
     const straddle0 = px("call", S2, T0) + px("put", S2, T0);
     let shares = -(del("call", S2, T0) + del("put", S2, T0)) * 100;
     let cash = -shares * S2;
@@ -7876,7 +8607,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       cost: straddle0 * 100
     };
   }
-  var view8 = {
+  var view9 = {
     render(root) {
       root.appendChild(el("div", { class: "eyebrow" }, "Volatility Lab"));
       root.appendChild(el("h1", {}, "Trade movement itself"));
@@ -8027,6 +8758,620 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
   };
 
+  // src/engine/tradier.js
+  var BASE = "https://sandbox.tradier.com/v1";
+  var DAY_MS = 864e5;
+  var TradierError = class extends Error {
+    /** @param {ErrorKind} kind @param {string} message */
+    constructor(kind, message) {
+      super(message);
+      this.name = "TradierError";
+      this.kind = kind;
+    }
+  };
+  function numeric(value) {
+    if (typeof value !== "number" && typeof value !== "string") return null;
+    if (typeof value === "string" && !value.trim()) return null;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  }
+  var num = (value) => numeric(value) ?? 0;
+  var rows = (value) => value == null || value === "null" ? [] : Array.isArray(value) ? value : [value];
+  function optionQuote(option) {
+    const bid = numeric(option.bid), ask = numeric(option.ask);
+    const g = option.greeks || {};
+    return {
+      bid: bid ?? 0,
+      ask: ask ?? 0,
+      mid: num(bid !== null && ask !== null ? bid / 2 + ask / 2 : num(option.last)),
+      iv: num(g.mid_iv),
+      delta: num(g.delta),
+      gamma: num(g.gamma),
+      // Tradier theta is per calendar day; the sim uses per trading day (252/year).
+      theta: num(g.theta),
+      vega: num(g.vega),
+      oi: num(option.open_interest),
+      volume: num(option.volume)
+    };
+  }
+  function createTradier({ key, fetchImpl = fetch, now = () => (/* @__PURE__ */ new Date()).getTime() }) {
+    const pending = /* @__PURE__ */ new Map();
+    let ready = Promise.resolve();
+    function request(path, params) {
+      const url = `${BASE}/markets/${path}?${new URLSearchParams(params)}`;
+      const existing = pending.get(url);
+      if (existing) return existing;
+      const turn = ready;
+      ready = turn.then(() => new Promise((resolve2) => setTimeout(resolve2, 250)));
+      const result = turn.then(async () => {
+        if (!key?.trim()) throw new TradierError("auth", "Enter a Tradier sandbox API key.");
+        try {
+          const response = await fetchImpl(url, {
+            headers: { Authorization: `Bearer ${key.trim()}`, Accept: "application/json" }
+          });
+          if (response.status === 401 || response.status === 403) {
+            throw new TradierError("auth", "Check your Tradier sandbox API key.");
+          }
+          if (response.status === 429) throw new TradierError("rate", "Tradier rate limit reached. Try again shortly.");
+          if (!response.ok) throw new TradierError("network", "Tradier request failed. Check your connection; corporate networks may block Tradier.");
+          const data = await response.json();
+          if (data?.fault || data?.errors) throw new TradierError("network", "Tradier could not return data. Check your connection; corporate networks may block Tradier.");
+          return data;
+        } catch (error) {
+          if (error instanceof TradierError) throw error;
+          throw new TradierError("network", "Unable to read Tradier data. Check your connection; corporate networks or browser CORS restrictions may block Tradier.");
+        }
+      });
+      pending.set(url, result);
+      void result.then(() => pending.delete(url), () => pending.delete(url));
+      return result;
+    }
+    return {
+      /** @param {string} sym */
+      async quote(sym) {
+        const symbol = sym.trim().toUpperCase();
+        const data = await request("quotes", { symbols: symbol });
+        const q = rows(data?.quotes?.quote).find((q2) => q2?.symbol === symbol);
+        if (!q) throw new TradierError("symbol", `No Tradier quote found for ${symbol}.`);
+        const S2 = num(q.last), prevClose = num(q.prevclose);
+        const chg = num(S2 - prevClose);
+        return { sym: symbol, S: S2, prevClose, chg, chgPct: prevClose > 0 ? num(chg / prevClose) : 0, name: q.description || symbol };
+      },
+      /** @param {string} sym */
+      async expirations(sym) {
+        const data = await request("options/expirations", { symbol: sym.trim().toUpperCase(), includeAllRoots: "true", strikes: "false" });
+        const today = Math.floor(now() / DAY_MS);
+        return [...new Set(rows(data?.expirations?.date))].filter((date) => typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date) && Number.isFinite(Date.parse(date))).sort().map((date) => {
+          const dte = Math.max(0, num(Math.floor(Date.parse(date) / DAY_MS) - today));
+          return { date, label: `${date} (${dte}d)`, dte };
+        });
+      },
+      /** @param {string} sym @param {string} date */
+      async chain(sym, date) {
+        const data = await request("options/chains", { symbol: sym.trim().toUpperCase(), expiration: date, greeks: "true" });
+        const strikes = /* @__PURE__ */ new Map();
+        for (const option of rows(data?.options?.option)) {
+          const strike = numeric(option?.strike), type = option?.option_type;
+          if (strike === null || strike <= 0 || type !== "call" && type !== "put") continue;
+          const row = strikes.get(strike) || { strike, call: null, put: null };
+          row[type] = optionQuote(option);
+          strikes.set(strike, row);
+        }
+        return [...strikes.values()].sort((a, b) => a.strike - b.strike);
+      },
+      /** Returns the latest `days` valid daily closes, oldest first.
+       * @param {string} sym @param {number} [days]
+       */
+      async history(sym, days = 60) {
+        const count = Math.max(0, Math.floor(num(days)));
+        if (!count) return [];
+        const data = await request("history", { symbol: sym.trim().toUpperCase(), interval: "daily" });
+        return rows(data?.history?.day).filter((row) => typeof row?.date === "string" && Number.isFinite(Date.parse(row.date)) && numeric(row.close) !== null).map((row) => ({ day: row.date, p: num(row.close) })).sort((a, b) => a.day.localeCompare(b.day)).slice(-count);
+      }
+    };
+  }
+
+  // src/ui/real-watch.js
+  var KEY4 = "oa.realwatch";
+  var DEFAULTS = ["SPY", "QQQ", "AAPL", "MSFT", "IWM"];
+  function loadRealWatch() {
+    try {
+      const raw = JSON.parse(localStorage.getItem(KEY4));
+      if (Array.isArray(raw) && raw.length) {
+        return raw.map((s2) => String(s2 || "").trim().toUpperCase()).filter(Boolean).slice(0, 24);
+      }
+    } catch {
+    }
+    return DEFAULTS.slice();
+  }
+  function saveRealWatch(syms) {
+    const clean = [...new Set(syms.map((s2) => String(s2 || "").trim().toUpperCase()).filter(Boolean))].slice(0, 24);
+    try {
+      localStorage.setItem(KEY4, JSON.stringify(clean.length ? clean : DEFAULTS));
+    } catch {
+    }
+    return clean.length ? clean : DEFAULTS.slice();
+  }
+
+  // src/ui/real-market.js
+  var isMobile2 = () => !!(window.matchMedia && matchMedia("(max-width: 640px)").matches);
+  function errBanner(err) {
+    const kind = err instanceof TradierError ? err.kind : "network";
+    const map = {
+      auth: { title: "API key rejected", body: "Fix or re-paste your Tradier sandbox key in Settings.", href: "#/settings" },
+      cors: { title: "Connection blocked", body: "Browser or network blocked Tradier (corporate proxies often do). Try another network." },
+      network: { title: "Network error", body: "Could not reach Tradier. Check your connection and try again." },
+      symbol: { title: "Unknown symbol", body: "That ticker returned no quotes. Check the symbol and try again." },
+      rate: { title: "Rate limited", body: "Tradier sandbox asked us to slow down. Wait a moment and refresh." }
+    };
+    const m = map[kind] || map.network;
+    const box = el(
+      "div",
+      { class: "oa-banner warn", role: "alert" },
+      el("div", { style: "font-weight:700" }, m.title),
+      el("p", { class: "sub", style: "margin:4px 0 0" }, m.body)
+    );
+    if (m.href) {
+      box.appendChild(el("a", { class: "btn sm mt1", href: m.href }, "Open Settings"));
+    }
+    return box;
+  }
+  function atmStrike(strikes, S2) {
+    return strikes.reduce((a, b) => Math.abs(b - S2) < Math.abs(a - S2) ? b : a, strikes[0]);
+  }
+  function midOf(o) {
+    if (!o) return 0;
+    if (o.mid != null && isFinite(o.mid)) return o.mid;
+    if (o.bid != null && o.ask != null) return (o.bid + o.ask) / 2;
+    return o.ask ?? o.bid ?? 0;
+  }
+  function renderRealMarket(root, params) {
+    const client = createTradier({ key: tradierKey() });
+    let watch = loadRealWatch();
+    let sym = (params[0] || watch[0] || "SPY").toUpperCase();
+    if (!watch.includes(sym)) watch = saveRealWatch([sym, ...watch]);
+    let expIdx = 0;
+    let quote = null;
+    let exps = [];
+    let chain = [];
+    let hist = [];
+    let ivRankVal = (
+      /** @type {number|null} */
+      null
+    );
+    let sideEmphasis = "both";
+    let priceChart = null;
+    let range = "3mo";
+    let loadGen = 0;
+    let bannerHost = null;
+    root.appendChild(el("div", { class: "eyebrow" }, "Live Market \u2014 Real (delayed)"));
+    const head = el("div", { class: "flex-between", style: "flex-wrap:wrap;gap:8px" });
+    head.appendChild(el("h1", {}, "Watch & analyze"));
+    head.appendChild(el("span", { class: "pill real-delayed-badge" }, "REAL \xB7 DELAYED 15 MIN"));
+    root.appendChild(head);
+    root.appendChild(el(
+      "p",
+      { class: "sub", style: "max-width:72ch" },
+      "Delayed sandbox quotes for study \u2014 no paper fills in Real mode. Tap Analyze on a strike to open it in the Strategy Lab with live mids."
+    ));
+    root.appendChild(simDisclaimer());
+    root.appendChild(el(
+      "div",
+      { class: "btn-row mt1" },
+      el("a", { class: "btn sm", href: "#/settings" }, "Feed settings"),
+      el("button", { class: "btn sm", type: "button", onclick: () => {
+        setFeedMode("sim");
+        location.hash = "#/market/" + (sym || "");
+        location.reload();
+      } }, "Switch to Sim")
+    ));
+    bannerHost = el("div", { class: "mt1" });
+    root.appendChild(bannerHost);
+    const topRow = el("div", { class: "row mt2" });
+    const watchCard = el("div", { class: "card w33" });
+    const detailCard = el("div", { class: "card w66" });
+    topRow.appendChild(watchCard);
+    topRow.appendChild(detailCard);
+    root.appendChild(topRow);
+    const chainCard = el("div", { class: "card mt2" });
+    root.appendChild(chainCard);
+    chainCard.appendChild(el(
+      "div",
+      { class: "flex-between" },
+      el("h3", {}, "Option chain"),
+      el("span", { class: "small muted" }, "analyze only \xB7 no ticket")
+    ));
+    const expRow = el("div", { class: "btn-row mb1" });
+    chainCard.appendChild(expRow);
+    const chainBox = el("div", { class: "tbl-wrap" });
+    chainCard.appendChild(chainBox);
+    const analyzeNote = el(
+      "p",
+      { class: "small muted mt1", style: "margin-bottom:0" },
+      "Paper trading stays on Sim feed. Analyze sends legs to Strategy Lab with real entry mids."
+    );
+    chainCard.appendChild(analyzeNote);
+    watchCard.appendChild(el("h3", {}, "Watchlist"));
+    const chipBox = el("div", { class: "watch-chips" });
+    watchCard.appendChild(chipBox);
+    const addIn = el("input", {
+      type: "text",
+      class: "chip-input",
+      placeholder: "Add SYM",
+      "aria-label": "Add symbol",
+      maxlength: "8"
+    });
+    addIn.addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      const s2 = addIn.value.trim().toUpperCase();
+      addIn.value = "";
+      if (!s2) return;
+      watch = saveRealWatch([...watch, s2]);
+      sym = s2;
+      renderWatch();
+      refreshSymbol();
+    });
+    watchCard.appendChild(el("div", { class: "field mt1" }, addIn));
+    watchCard.appendChild(el(
+      "p",
+      { class: "small muted", style: "margin-bottom:0" },
+      "Saved on this device (oa.realwatch)."
+    ));
+    function renderWatch() {
+      chipBox.innerHTML = "";
+      for (const s2 of watch) {
+        const chip = el("button", {
+          type: "button",
+          class: "watch-chip" + (s2 === sym ? " on" : ""),
+          onclick: () => {
+            sym = s2;
+            renderWatch();
+            refreshSymbol();
+          }
+        }, s2);
+        const rm = el("button", {
+          type: "button",
+          class: "watch-chip-x",
+          "aria-label": "Remove " + s2,
+          onclick: (e) => {
+            e.stopPropagation();
+            watch = saveRealWatch(watch.filter((x) => x !== s2));
+            if (sym === s2) sym = watch[0] || "SPY";
+            renderWatch();
+            refreshSymbol();
+          }
+        }, "\xD7");
+        chip.appendChild(rm);
+        chipBox.appendChild(chip);
+      }
+    }
+    const detailHead = el("div", { class: "flex-between", style: "flex-wrap:wrap;gap:8px" });
+    const detailTitle = el("h2", {});
+    const ivChip = el("span", { class: "pill brass num", style: "display:none" });
+    detailHead.appendChild(el("div", { class: "btn-row", style: "align-items:center" }, detailTitle, ivChip));
+    const rangeSeg = el("div", { class: "seg" });
+    const b3m = el("button", { class: "on", type: "button", onclick: () => {
+      range = "3mo";
+      b3m.classList.add("on");
+      drawPrice();
+    } }, "History");
+    rangeSeg.appendChild(b3m);
+    detailHead.appendChild(rangeSeg);
+    detailCard.appendChild(detailHead);
+    const detailStats = el("div", { class: "pos-greeks mb1" });
+    detailCard.appendChild(detailStats);
+    const priceBox = el("div", {});
+    detailCard.appendChild(priceBox);
+    const loadingEl = el("p", { class: "small muted" }, "Loading\u2026");
+    detailCard.appendChild(loadingEl);
+    function setBanner(node) {
+      bannerHost.innerHTML = "";
+      if (node) bannerHost.appendChild(node);
+    }
+    function drawPrice() {
+      if (!quote) return;
+      const up = (quote.chg || 0) >= 0;
+      detailTitle.textContent = `${quote.sym} \u2014 ${F.usd(quote.S)}`;
+      detailStats.innerHTML = "";
+      detailStats.appendChild(el(
+        "span",
+        { class: up ? "up" : "down" },
+        `${up ? "\u25B2" : "\u25BC"} ${F.usdSigned(quote.chg || 0)} (${F.pctSigned(quote.chgPct || 0)})`
+      ));
+      if (quote.name) detailStats.appendChild(el("span", { class: "muted" }, quote.name));
+      detailStats.appendChild(el("span", { class: "muted" }, "Delayed ~15 min"));
+      if (ivRankVal != null) {
+        ivChip.style.display = "";
+        ivChip.textContent = `IV rank ${Math.round(ivRankVal * 100)}`;
+        ivChip.title = "IV vs 60-day realized range (HV proxy) \u2014 model context, not a forecast";
+      } else {
+        ivChip.style.display = "none";
+      }
+      const pts = (hist || []).map((c, i) => ({ x: i, y: c.p }));
+      if (quote.S != null && pts.length) pts.push({ x: pts.length, y: quote.S });
+      if (!pts.length) {
+        priceBox.innerHTML = "";
+        priceBox.appendChild(el("p", { class: "small muted" }, "No history yet."));
+        priceChart = null;
+        return;
+      }
+      const opts = {
+        height: isMobile2() ? 180 : 230,
+        series: [{ name: quote.sym, color: up ? "--gain-mark" : "--loss", points: pts, width: 2, area: true }],
+        fmtX: (i) => {
+          const row = hist[Math.round(i)];
+          return row ? String(row.day).slice(5) : "";
+        },
+        fmtY: (y) => F.usd(y, 2),
+        tipLabel: "",
+        yPad: 0.15
+      };
+      if (!priceChart || !priceBox.querySelector("canvas")) {
+        priceBox.innerHTML = "";
+        priceChart = line(priceBox, opts);
+      } else priceChart.update(opts);
+    }
+    function sendAnalyze(kind, strike, exp, row) {
+      const opt = kind === "call" ? row.call : row.put;
+      const entry = midOf(opt);
+      const dte = exp.dte != null ? exp.dte : 21;
+      const atmIv = row.call?.iv ?? row.put?.iv ?? 0.2;
+      const iv = opt && opt.iv != null ? opt.iv : atmIv;
+      writeAnalyzeStash({
+        sym,
+        S: quote?.S ?? strike,
+        iv: iv || 0.2,
+        dte,
+        expDate: exp.date,
+        label: `Long ${kind} ${F.usd(strike, 0)}`,
+        source: "tradier",
+        legs: [{
+          kind,
+          side: 1,
+          qty: 1,
+          strike,
+          expDay: dte,
+          // Strategy Lab treats as relative DTE marker in realCtx
+          entry
+        }]
+      });
+      toast(`Analyze \u2192 ${sym} ${F.usd(strike, 0)} ${kind} @ ${F.usd(entry)}`, "gain");
+      location.hash = "#/strategy";
+    }
+    function renderChain() {
+      expRow.innerHTML = "";
+      if (!exps.length) {
+        chainBox.innerHTML = "";
+        chainBox.appendChild(el("p", { class: "small muted" }, "No expirations loaded."));
+        return;
+      }
+      if (expIdx >= exps.length) expIdx = 0;
+      exps.forEach((e, i) => {
+        expRow.appendChild(el("button", {
+          class: "btn sm" + (i === expIdx ? " primary" : ""),
+          type: "button",
+          onclick: () => {
+            expIdx = i;
+            loadChain();
+          }
+        }, e.label || e.date));
+      });
+      const exp = exps[expIdx];
+      const S2 = quote?.S || 0;
+      const strikes = chain.map((r) => r.strike).filter((k) => k != null);
+      const atm = strikes.length ? atmStrike(strikes, S2) : null;
+      if (isMobile2()) {
+        const wrap = el("div", { class: "mobile-only" });
+        const toolbar = el("div", { class: "ladder-toolbar" });
+        toolbar.appendChild(el("button", {
+          class: "btn sm" + (sideEmphasis === "both" ? " primary" : ""),
+          type: "button",
+          onclick: () => {
+            sideEmphasis = "both";
+            renderChain();
+          }
+        }, "Both"));
+        toolbar.appendChild(el("button", {
+          class: "btn sm" + (sideEmphasis === "calls" ? " primary" : ""),
+          type: "button",
+          onclick: () => {
+            sideEmphasis = "calls";
+            renderChain();
+          }
+        }, "Calls"));
+        toolbar.appendChild(el("button", {
+          class: "btn sm" + (sideEmphasis === "puts" ? " primary" : ""),
+          type: "button",
+          onclick: () => {
+            sideEmphasis = "puts";
+            renderChain();
+          }
+        }, "Puts"));
+        wrap.appendChild(toolbar);
+        const ladder2 = el("div", {
+          class: "chain-ladder" + (sideEmphasis === "calls" ? " ladder-emphasize-calls" : "") + (sideEmphasis === "puts" ? " ladder-emphasize-puts" : "")
+        });
+        let atmRow = null;
+        for (const row of chain) {
+          const k = row.strike;
+          const c = row.call || {};
+          const p = row.put || {};
+          const isAtm = k === atm;
+          const rEl = el(
+            "div",
+            { class: "ladder-row" + (isAtm ? " atm" : "") },
+            el(
+              "div",
+              { class: "ladder-side calls" },
+              el("div", { class: "num small" }, F.usd(midOf(c))),
+              el("button", {
+                type: "button",
+                class: "btn sm analyze-btn",
+                onclick: () => sendAnalyze("call", k, exp, row)
+              }, "Analyze \u2192")
+            ),
+            el(
+              "div",
+              { class: "ladder-mid" },
+              el("div", { class: "k num" }, F.usd(k, 2)),
+              el("div", { class: "iv" }, "IV " + F.pct(((c.iv || 0) + (p.iv || 0)) / 2 || 0, 0))
+            ),
+            el(
+              "div",
+              { class: "ladder-side puts" },
+              el("div", { class: "num small" }, F.usd(midOf(p))),
+              el("button", {
+                type: "button",
+                class: "btn sm analyze-btn",
+                onclick: () => sendAnalyze("put", k, exp, row)
+              }, "Analyze \u2192")
+            )
+          );
+          if (isAtm) atmRow = rEl;
+          ladder2.appendChild(rEl);
+        }
+        wrap.appendChild(ladder2);
+        chainBox.innerHTML = "";
+        chainBox.appendChild(wrap);
+        if (atmRow) {
+          requestAnimationFrame(() => {
+            try {
+              atmRow.scrollIntoView({ block: "center", behavior: "smooth" });
+            } catch {
+              atmRow.scrollIntoView();
+            }
+          });
+        }
+      } else {
+        const tbl = el("table", { class: "oa desktop-chain" });
+        tbl.appendChild(el("thead", {}, el(
+          "tr",
+          {},
+          el("th", {}, "\u0394"),
+          el("th", {}, "IV"),
+          el("th", {}, "Mid"),
+          el("th", {}, ""),
+          el("th", { class: "center", style: "text-align:center" }, "Strike"),
+          el("th", {}, ""),
+          el("th", {}, "Mid"),
+          el("th", {}, "IV"),
+          el("th", {}, "\u0394")
+        )));
+        const tb = el("tbody", {});
+        for (const row of chain) {
+          const k = row.strike;
+          const c = row.call || {};
+          const p = row.put || {};
+          const tr = el("tr", {});
+          const cell = (txt, cls) => el("td", { class: cls || "" }, txt);
+          tr.appendChild(cell(c.delta != null ? Number(c.delta).toFixed(2) : "\u2014"));
+          tr.appendChild(cell(c.iv != null ? F.pct(c.iv, 0) : "\u2014"));
+          tr.appendChild(cell(F.usd(midOf(c)), k < S2 ? "chain-itm" : ""));
+          tr.appendChild(el(
+            "td",
+            {},
+            el("button", {
+              type: "button",
+              class: "btn sm analyze-btn",
+              onclick: () => sendAnalyze("call", k, exp, row)
+            }, "Analyze \u2192")
+          ));
+          tr.appendChild(cell(F.usd(k, 2), "chain-strike"));
+          tr.appendChild(el(
+            "td",
+            {},
+            el("button", {
+              type: "button",
+              class: "btn sm analyze-btn",
+              onclick: () => sendAnalyze("put", k, exp, row)
+            }, "Analyze \u2192")
+          ));
+          tr.appendChild(cell(F.usd(midOf(p)), k > S2 ? "chain-itm" : ""));
+          tr.appendChild(cell(p.iv != null ? F.pct(p.iv, 0) : "\u2014"));
+          tr.appendChild(cell(p.delta != null ? Number(p.delta).toFixed(2) : "\u2014"));
+          tb.appendChild(tr);
+        }
+        tbl.appendChild(tb);
+        chainBox.innerHTML = "";
+        chainBox.appendChild(tbl);
+      }
+    }
+    async function loadChain() {
+      const exp = exps[expIdx];
+      if (!exp) return;
+      const gen = loadGen;
+      try {
+        chain = await client.chain(sym, exp.date);
+        if (gen !== loadGen) return;
+        renderChain();
+        try {
+          const S2 = quote?.S;
+          const strikes = chain.map((r) => r.strike);
+          if (S2 && strikes.length && hist.length >= 2) {
+            const atm = atmStrike(strikes, S2);
+            const row = chain.find((r) => r.strike === atm) || chain[Math.floor(chain.length / 2)];
+            const atmIv = ((row?.call?.iv || 0) + (row?.put?.iv || 0)) / 2 || row?.call?.iv || row?.put?.iv;
+            const series = hvSeries(hist, 20);
+            const ivHist = series.map((r) => r.hv).filter((v) => v != null && isFinite(v));
+            ivRankVal = atmIv != null ? ivRank(atmIv, ivHist) : null;
+            drawPrice();
+          }
+        } catch {
+        }
+      } catch (err) {
+        if (gen !== loadGen) return;
+        setBanner(errBanner(err));
+        chain = [];
+        renderChain();
+      }
+    }
+    async function refreshSymbol() {
+      const gen = ++loadGen;
+      loadingEl.style.display = "";
+      loadingEl.textContent = `Loading ${sym}\u2026`;
+      setBanner(null);
+      quote = null;
+      exps = [];
+      chain = [];
+      hist = [];
+      ivRankVal = null;
+      try {
+        const [q, e, h] = await Promise.all([
+          client.quote(sym),
+          client.expirations(sym),
+          client.history(sym, 60).catch(() => [])
+        ]);
+        if (gen !== loadGen) return;
+        quote = q;
+        exps = e || [];
+        hist = h || [];
+        expIdx = 0;
+        loadingEl.style.display = "none";
+        drawPrice();
+        await loadChain();
+      } catch (err) {
+        if (gen !== loadGen) return;
+        loadingEl.style.display = "none";
+        setBanner(errBanner(err));
+        detailTitle.textContent = sym;
+        detailStats.innerHTML = "";
+        chainBox.innerHTML = "";
+      }
+    }
+    renderWatch();
+    refreshSymbol();
+    const onResize = () => {
+      if (chain.length) renderChain();
+    };
+    window.addEventListener("resize", onResize);
+    return () => {
+      loadGen++;
+      window.removeEventListener("resize", onResize);
+      priceChart && priceChart.destroy();
+    };
+  }
+
   // src/ui/views/market.js
   var viewState2 = {};
   var THESIS_DIRS = [
@@ -8036,7 +9381,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     ["vol-down", "Vol \u2193"],
     ["income", "Income"]
   ];
-  var isMobile2 = () => !!(window.matchMedia && matchMedia("(max-width: 640px)").matches);
+  var isMobile3 = () => !!(window.matchMedia && matchMedia("(max-width: 640px)").matches);
   var showFreemium = () => !isFamilyBuild() && tier() === "free";
   var freeSym = (sym) => FREE_LIMITS.symbols.includes(sym);
   function riskCard(checks) {
@@ -8228,8 +9573,11 @@ This is why the simulator matters more than the formula sheet. Run the same path
     const m = modal(wrap, { onClose: false });
     lessonIn.focus();
   }
-  var view9 = {
+  var view10 = {
     render(root, params) {
+      if (feedMode() === "tradier") {
+        return renderRealMarket(root, params);
+      }
       let sym = params[0] && market.tickers[params[0]] ? params[0] : viewState2.sym || "LMND";
       viewState2.sym = sym;
       let expIdx = 0;
@@ -8394,7 +9742,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         if (range === "day") pts = t.intraday.map((p) => ({ x: p.m, y: p.p }));
         else pts = t.closes.slice(-63).map((c) => ({ x: c.day, y: c.p })).concat([{ x: market.day, y: t.S }]);
         const opts = {
-          height: isMobile2() ? 180 : 230,
+          height: isMobile3() ? 180 : 230,
           series: [{ name: sym, color: up ? "--gain-mark" : "--loss", points: pts, width: 2, area: true }],
           fmtX: range === "day" ? (m) => {
             const mm = 9 * 60 + 30 + m;
@@ -8423,7 +9771,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         stockBtns.appendChild(el(
           "span",
           { class: "small muted" },
-          isMobile2() ? "Tap bid/ask in the ladder to add legs." : "Options trade from the chain below \u2014 click a bid (sell) or ask (buy)."
+          isMobile3() ? "Tap bid/ask in the ladder to add legs." : "Options trade from the chain below \u2014 click a bid (sell) or ask (buy)."
         ));
       }
       chainCard.appendChild(el(
@@ -8438,7 +9786,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       chainCard.appendChild(chainBox);
       const ticketCard = el("div", { class: "card mt2 desktop-ticket", style: "border-color:var(--brass-ring)" });
       chainCard.appendChild(ticketCard);
-      function atmStrike(strikes, S2) {
+      function atmStrike2(strikes, S2) {
         return strikes.reduce((a, b) => Math.abs(b - S2) < Math.abs(a - S2) ? b : a);
       }
       function renderChain() {
@@ -8454,8 +9802,8 @@ This is why the simulator matters more than the formula sheet. Run the same path
         const exp = exps[expIdx];
         const S2 = market.quote(sym).S;
         const strikes = market.strikes(sym);
-        const atm = atmStrike(strikes, S2);
-        if (isMobile2()) {
+        const atm = atmStrike2(strikes, S2);
+        if (isMobile3()) {
           const wrap = el("div", { class: "mobile-only" });
           const toolbar = el("div", { class: "ladder-toolbar" });
           const bothBtn = el("button", { class: "btn sm" + (sideEmphasis === "both" ? " primary" : ""), onclick: () => {
@@ -8588,7 +9936,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         renderTicket();
       }
       function ensureMobileTicketUi() {
-        if (chipEl || !isMobile2()) return;
+        if (chipEl || !isMobile3()) return;
         chipEl = el("button", {
           type: "button",
           class: "oa-ticket-chip",
@@ -8622,7 +9970,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         const existing = ticket.find((L) => L.kind === kind && L.strike === strike && L.expDay === expDay && L.side === side);
         if (existing) existing.qty++;
         else ticket.push({ kind, side, qty: 1, strike, expDay });
-        if (isMobile2()) sheetOpen = true;
+        if (isMobile3()) sheetOpen = true;
         renderTicket();
       }
       function ticketBody(into, { compact } = {}) {
@@ -8635,7 +9983,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           into.appendChild(el(
             "p",
             { class: "small muted", style: "margin-bottom:0" },
-            isMobile2() ? "Tap bids/asks in the ladder to build an order." : "Click bids/asks in the chain to build an order \u2014 combine legs for spreads."
+            isMobile3() ? "Tap bids/asks in the ladder to build an order." : "Click bids/asks in the chain to build an order \u2014 combine legs for spreads."
           ));
           return;
         }
@@ -8676,7 +10024,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           "div",
           { class: "pos-greeks mt1" },
           el("span", { class: "num", style: "font-weight:700" }, (cost >= 0 ? "Debit " : "Credit ") + F.usd(Math.abs(cost))),
-          el("span", { class: "small muted" }, `+ ${F.usd(0.65 * ticket.reduce((s, L) => s + L.qty, 0))} fees`),
+          el("span", { class: "small muted" }, `+ ${F.usd(0.65 * ticket.reduce((s2, L) => s2 + L.qty, 0))} fees`),
           el(
             "span",
             { class: "num" },
@@ -8736,7 +10084,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           "div",
           { class: "btn-row mt1" },
           el("span", { class: "num", style: "font-weight:700" }, (cost >= 0 ? "Debit " : "Credit ") + F.usd(Math.abs(cost))),
-          el("span", { class: "small muted" }, `+ ${F.usd(0.65 * ticket.reduce((s, L) => s + L.qty, 0))} fees`),
+          el("span", { class: "small muted" }, `+ ${F.usd(0.65 * ticket.reduce((s2, L) => s2 + L.qty, 0))} fees`),
           el(
             "span",
             { class: "num small" },
@@ -8750,7 +10098,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         ));
       }
       function renderTicket() {
-        if (isMobile2()) {
+        if (isMobile3()) {
           ensureMobileTicketUi();
           ticketCard.style.display = "none";
           if (!ticket.length) {
@@ -8831,7 +10179,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         }
         const liveIds = new Set(p.positions.map((x) => x.id));
         for (const id of [...explainOpen]) if (!liveIds.has(id)) explainOpen.delete(id);
-        if (isMobile2()) {
+        if (isMobile3()) {
           const cards = el("div", { class: "pos-cards mobile-only" });
           for (const pos of p.positions) {
             const val = posValue(pos), cost = posCost(pos), pnl = val - cost;
@@ -9398,7 +10746,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       grid.appendChild(card);
     });
   }
-  var view10 = {
+  var view11 = {
     render(root, params) {
       if (params[0] === "lemonade") return lemonade(root);
       if (params[0] === "spinner") return spinner(root);
@@ -9455,7 +10803,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
   };
 
   // src/ui/views/progress.js
-  var view11 = {
+  var view12 = {
     render(root) {
       const p = active();
       if (!p) {
@@ -9535,6 +10883,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       root.appendChild(el(
         "div",
         { class: "btn-row mt2" },
+        el("a", { class: "btn", href: "#/settings" }, "\u2699\uFE0F Settings"),
         el("button", { class: "btn", onclick: () => bus.emit("profile-picker") }, "\u{1F46A} Switch / add family member")
       ));
       return () => {
@@ -9574,7 +10923,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
     return wrap;
   }
-  var view12 = {
+  var view13 = {
     render(root) {
       root.appendChild(el("div", { class: "eyebrow" }, "Trade Journal"));
       root.appendChild(el("h1", {}, "Process Score"));
@@ -9599,6 +10948,8 @@ This is why the simulator matters more than the formula sheet. Run the same path
         ));
       }
       const avg = avgScore(10);
+      const scoreSeries = entries().filter((e) => e.status === "closed" && e.score != null).slice(0, 10).map((e) => e.score).reverse();
+      const sparkCv = el("canvas", { class: "score-spark", style: "width:120px;max-width:40vw", "aria-hidden": "true" });
       const hero = el(
         "div",
         { class: "card mt2 process-hero" },
@@ -9606,7 +10957,13 @@ This is why the simulator matters more than the formula sheet. Run the same path
           "div",
           { class: "process-hero-score" },
           el("div", { class: "k" }, "Avg (last 10)"),
-          el("div", { class: "v num" }, avg == null ? "\u2014" : String(avg))
+          el("div", { class: "v num" }, avg == null ? "\u2014" : String(avg)),
+          scoreSeries.length >= 2 ? el(
+            "div",
+            { class: "score-spark-wrap mt1" },
+            el("div", { class: "small muted" }, "Score trend"),
+            sparkCv
+          ) : null
         ),
         el(
           "p",
@@ -9615,6 +10972,11 @@ This is why the simulator matters more than the formula sheet. Run the same path
         )
       );
       root.appendChild(hero);
+      if (scoreSeries.length >= 2) {
+        requestAnimationFrame(() => {
+          spark(sparkCv, scoreSeries, { color: "--brass", height: 36, baseline: 50 });
+        });
+      }
       const list2 = entries();
       if (!list2.length) {
         root.appendChild(el(
@@ -9740,11 +11102,14 @@ This is why the simulator matters more than the formula sheet. Run the same path
     ));
     root.appendChild(simDisclaimer());
     const free = !isFamilyBuild() && tier() === "free";
-    const grid = el("div", { class: "grid2 mt2" });
-    for (const m of list()) {
+    const all = list();
+    const week1 = all.filter((m) => !String(m.id).startsWith("w2-")).slice(0, 10);
+    const week2 = all.filter((m) => String(m.id).startsWith("w2-"));
+    const rest = all.filter((m) => !week1.includes(m) && !week2.includes(m));
+    function missionCard(m) {
       const locked = free && !FREE_LIMITS.missions.includes(m.id);
       const statusPill = m.done ? el("span", { class: "pill gain" }, "\u2713 Done") : locked ? el("a", { class: "pill brass lock-chip", href: "#/upgrade", style: "text-decoration:none" }, "\u{1F512} Upgrade") : el("span", { class: "pill brass" }, m.skill || "mission");
-      const card = el(
+      return el(
         "div",
         { class: "card mission-card" },
         el(
@@ -9768,9 +11133,17 @@ This is why the simulator matters more than the formula sheet. Run the same path
           } }, m.done ? "Replay \u2192" : locked ? "Preview \u2192" : "Start \u2192")
         )
       );
-      grid.appendChild(card);
     }
-    root.appendChild(grid);
+    function section(title, list2) {
+      if (!list2.length) return;
+      root.appendChild(el("h3", { class: "mission-week-head mt2" }, title));
+      const grid = el("div", { class: "grid2 mt1" });
+      for (const m of list2) grid.appendChild(missionCard(m));
+      root.appendChild(grid);
+    }
+    section("Week 1", week1);
+    section("Week 2", week2);
+    section("More missions", rest);
   }
   function confirmLeave(onYes) {
     const wrap = el(
@@ -9822,14 +11195,14 @@ This is why the simulator matters more than the formula sheet. Run the same path
         location.hash = "#/missions";
       });
     }
-    function atmStrike(mkt, s) {
-      const q = mkt.quote(s);
-      const strikes = mkt.strikes(s);
+    function atmStrike2(mkt, s2) {
+      const q = mkt.quote(s2);
+      const strikes = mkt.strikes(s2);
       return strikes.reduce((a, b) => Math.abs(b - q.S) < Math.abs(a - q.S) ? b : a);
     }
-    function strikeAt(mkt, s, off) {
-      const strikes = mkt.strikes(s);
-      const atm = atmStrike(mkt, s);
+    function strikeAt(mkt, s2, off) {
+      const strikes = mkt.strikes(s2);
+      const atm = atmStrike2(mkt, s2);
       const i = strikes.indexOf(atm);
       return strikes[Math.max(0, Math.min(strikes.length - 1, i + off))];
     }
@@ -9851,11 +11224,11 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
     function previewCost() {
       if (!legsSpec.length) return 0;
-      return legsSpec.reduce((s, L) => {
-        if (L.kind === "stock") return s + L.side * L.qty * S2.market.quote(sym).S;
+      return legsSpec.reduce((s2, L) => {
+        if (L.kind === "stock") return s2 + L.side * L.qty * S2.market.quote(sym).S;
         const q = S2.market.optQuote(sym, L.strike, L.expDay, L.kind);
         const px = L.side > 0 ? q.ask : q.bid;
-        return s + L.side * L.qty * 100 * px;
+        return s2 + L.side * L.qty * 100 * px;
       }, 0);
     }
     function paint() {
@@ -10112,7 +11485,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       }
     };
   }
-  var view13 = {
+  var view14 = {
     render(root, params) {
       if (params[0]) return renderRunner(root, params[0]);
       renderHub(root);
@@ -10121,7 +11494,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
 
   // src/main.js
   function start4() {
-    boot({ home: view4, learn: view5, strategy: view6, greeks: view7, vol: view8, market: view9, kids: view10, progress: view11, journal: view12, missions: view13, legal: view3 });
+    boot({ home: view5, learn: view6, strategy: view7, greeks: view8, vol: view9, market: view10, kids: view11, progress: view12, journal: view13, missions: view14, legal: view4 });
     start3();
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       navigator.serviceWorker.register("./sw.js").catch(() => {
