@@ -1278,6 +1278,14 @@
     }
     return n;
   }
+  function viewHeader(eyebrow, title) {
+    return el(
+      "header",
+      { class: "view-header" },
+      el("div", { class: "eyebrow" }, eyebrow),
+      el("h1", {}, title)
+    );
+  }
   var esc = (s2) => String(s2).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   function mdInline(s2) {
     return esc(s2).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>").replace(/\*(.+?)\*/g, "<em>$1</em>").replace(/`(.+?)`/g, "<code>$1</code>");
@@ -1347,14 +1355,23 @@
     const box = el("div", { class: "oa-modal", role: "dialog", "aria-modal": "true" });
     box.appendChild(contentEl2);
     bg.appendChild(box);
+    const onKey = (e) => {
+      if (e.key === "Escape" && onClose !== false) dismiss();
+    };
+    const dismiss = () => {
+      document.removeEventListener("keydown", onKey);
+      bg.remove();
+      onClose && onClose();
+    };
     bg.addEventListener("click", (e) => {
-      if (e.target === bg && onClose !== false) {
-        bg.remove();
-        onClose && onClose();
-      }
+      if (e.target === bg && onClose !== false) dismiss();
     });
+    document.addEventListener("keydown", onKey);
     document.body.appendChild(bg);
-    return { close: () => bg.remove() };
+    return { close: () => {
+      document.removeEventListener("keydown", onKey);
+      bg.remove();
+    } };
   }
   function quiz(container, items, { onDone } = {}) {
     let score = 0, answered = 0;
@@ -4314,6 +4331,37 @@
     }
   };
 
+  // src/ui/icons.js
+  var P = {
+    home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.5"/><path d="M10 21v-6h4v6"/>',
+    book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    balloon: '<circle cx="12" cy="8" r="5.25"/><path d="M12 13.5c-1.2 1.8-1.2 3 0 4.5s1.2 2.2 0 3"/>',
+    monitor: '<rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
+    layers: '<path d="m12 2.5 9.5 5L12 12.5l-9.5-5z"/><path d="m2.5 12.5 9.5 5 9.5-5"/><path d="m2.5 17 9.5 5 9.5-5"/>',
+    temple: '<path d="M3 21h18"/><path d="M5 18h14"/><path d="M6.5 18V10"/><path d="M10.2 18V10"/><path d="M13.8 18V10"/><path d="M17.5 18V10"/><path d="M3 9.5 12 3l9 6.5z"/>',
+    wave: '<path d="M2 12c2.5 0 2.5-5.5 5-5.5S9.5 17 12 17s2.5-10.5 5-10.5S19.5 12 22 12"/>',
+    notebook: '<rect x="4.5" y="2.5" width="15" height="19" rx="2"/><path d="M8.5 2.5v19"/><path d="M12 7.5h4"/><path d="M12 11.5h4"/><path d="M12 15.5h2.5"/>',
+    compass: '<circle cx="12" cy="12" r="9.25"/><path d="m15.8 8.2-2 5.6-5.6 2 2-5.6z" fill="currentColor" stroke="none"/>',
+    trophy: '<path d="M8 21h8"/><path d="M12 17.5V21"/><path d="M7 4h10v5.5a5 5 0 0 1-10 0z"/><path d="M7 6H4.25C4.25 9 5.5 10.75 7 11"/><path d="M17 6h2.75c0 3-1.25 4.75-2.75 5"/>',
+    gear: '<circle cx="12" cy="12" r="3.25"/><path d="M12 2.5v2.75"/><path d="M12 18.75v2.75"/><path d="M2.5 12h2.75"/><path d="M18.75 12h2.75"/><path d="m5.3 5.3 1.95 1.95"/><path d="m16.75 16.75 1.95 1.95"/><path d="m18.7 5.3-1.95 1.95"/><path d="m7.25 16.75-1.95 1.95"/>',
+    scale: '<path d="M12 3v18"/><path d="M8.5 21h7"/><path d="M12 5.5 5 7.5m7-2 7 2"/><path d="M5 7.5 2.75 13a2.6 2.6 0 0 0 4.5 0z"/><path d="M19 7.5 16.75 13a2.6 2.6 0 0 0 4.5 0z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2"/><path d="M12 19.5v2"/><path d="M2.5 12h2"/><path d="M19.5 12h2"/><path d="m5 5 1.4 1.4"/><path d="m17.6 17.6 1.4 1.4"/><path d="m19 5-1.4 1.4"/><path d="m6.4 17.6-1.4 1.4"/>',
+    moon: '<path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.75 6.75 0 0 0 9.7 9.7z"/>',
+    contrast: '<circle cx="12" cy="12" r="9.25"/><path d="M12 2.75a9.25 9.25 0 0 1 0 18.5z" fill="currentColor" stroke="none"/>',
+    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>',
+    cloud: '<path d="M17.5 19H6.75A4.25 4.25 0 0 1 6 10.55 6.5 6.5 0 0 1 18.7 11.9 3.75 3.75 0 0 1 17.5 19z"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>',
+    sparkle: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/>',
+    grad: '<path d="m12 4 10 5-10 5L2 9z"/><path d="M6.5 11.5V16c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4.5"/><path d="M22 9v5"/>'
+  };
+  function icon(name, o = {}) {
+    const s2 = document.createElement("span");
+    s2.className = "oi" + (o.cls ? " " + o.cls : "");
+    s2.setAttribute("aria-hidden", "true");
+    s2.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"${o.size ? ` style="width:${o.size}px;height:${o.size}px"` : ""}>${P[name] || P.sparkle}</svg>`;
+    return s2;
+  }
+
   // src/ui/legal.js
   var CFTC_441 = "HYPOTHETICAL OR SIMULATED PERFORMANCE RESULTS HAVE CERTAIN LIMITATIONS. UNLIKE AN ACTUAL PERFORMANCE RECORD, SIMULATED RESULTS DO NOT REPRESENT ACTUAL TRADING. ALSO, SINCE THE TRADES HAVE NOT BEEN EXECUTED, THE RESULTS MAY HAVE UNDER-OR-OVER COMPENSATED FOR THE IMPACT, IF ANY, OF CERTAIN MARKET FACTORS, SUCH AS LACK OF LIQUIDITY. SIMULATED TRADING PROGRAMS IN GENERAL ARE ALSO SUBJECT TO THE FACT THAT THEY ARE DESIGNED WITH THE BENEFIT OF HINDSIGHT. NO REPRESENTATION IS BEING MADE THAT ANY ACCOUNT WILL OR IS LIKELY TO ACHIEVE PROFIT OR LOSSES SIMILAR TO THOSE SHOWN.";
   var ACK_TEXT = "I understand Options Academy is for education only \u2014 it is not investment, financial, or trading advice; it is not a broker or advisor; all markets here are simulated; and options trading involves substantial risk of loss.";
@@ -4364,36 +4412,330 @@
     }
   };
 
-  // src/ui/icons.js
-  var P = {
-    home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.5"/><path d="M10 21v-6h4v6"/>',
-    book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
-    balloon: '<circle cx="12" cy="8" r="5.25"/><path d="M12 13.5c-1.2 1.8-1.2 3 0 4.5s1.2 2.2 0 3"/>',
-    monitor: '<rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
-    layers: '<path d="m12 2.5 9.5 5L12 12.5l-9.5-5z"/><path d="m2.5 12.5 9.5 5 9.5-5"/><path d="m2.5 17 9.5 5 9.5-5"/>',
-    temple: '<path d="M3 21h18"/><path d="M5 18h14"/><path d="M6.5 18V10"/><path d="M10.2 18V10"/><path d="M13.8 18V10"/><path d="M17.5 18V10"/><path d="M3 9.5 12 3l9 6.5z"/>',
-    wave: '<path d="M2 12c2.5 0 2.5-5.5 5-5.5S9.5 17 12 17s2.5-10.5 5-10.5S19.5 12 22 12"/>',
-    notebook: '<rect x="4.5" y="2.5" width="15" height="19" rx="2"/><path d="M8.5 2.5v19"/><path d="M12 7.5h4"/><path d="M12 11.5h4"/><path d="M12 15.5h2.5"/>',
-    compass: '<circle cx="12" cy="12" r="9.25"/><path d="m15.8 8.2-2 5.6-5.6 2 2-5.6z" fill="currentColor" stroke="none"/>',
-    trophy: '<path d="M8 21h8"/><path d="M12 17.5V21"/><path d="M7 4h10v5.5a5 5 0 0 1-10 0z"/><path d="M7 6H4.25C4.25 9 5.5 10.75 7 11"/><path d="M17 6h2.75c0 3-1.25 4.75-2.75 5"/>',
-    gear: '<circle cx="12" cy="12" r="3.25"/><path d="M12 2.5v2.75"/><path d="M12 18.75v2.75"/><path d="M2.5 12h2.75"/><path d="M18.75 12h2.75"/><path d="m5.3 5.3 1.95 1.95"/><path d="m16.75 16.75 1.95 1.95"/><path d="m18.7 5.3-1.95 1.95"/><path d="m7.25 16.75-1.95 1.95"/>',
-    scale: '<path d="M12 3v18"/><path d="M8.5 21h7"/><path d="M12 5.5 5 7.5m7-2 7 2"/><path d="M5 7.5 2.75 13a2.6 2.6 0 0 0 4.5 0z"/><path d="M19 7.5 16.75 13a2.6 2.6 0 0 0 4.5 0z"/>',
-    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2"/><path d="M12 19.5v2"/><path d="M2.5 12h2"/><path d="M19.5 12h2"/><path d="m5 5 1.4 1.4"/><path d="m17.6 17.6 1.4 1.4"/><path d="m19 5-1.4 1.4"/><path d="m6.4 17.6-1.4 1.4"/>',
-    moon: '<path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.75 6.75 0 0 0 9.7 9.7z"/>',
-    contrast: '<circle cx="12" cy="12" r="9.25"/><path d="M12 2.75a9.25 9.25 0 0 1 0 18.5z" fill="currentColor" stroke="none"/>',
-    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>',
-    cloud: '<path d="M17.5 19H6.75A4.25 4.25 0 0 1 6 10.55 6.5 6.5 0 0 1 18.7 11.9 3.75 3.75 0 0 1 17.5 19z"/>',
-    user: '<circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>',
-    sparkle: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/>',
-    grad: '<path d="m12 4 10 5-10 5L2 9z"/><path d="M6.5 11.5V16c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4.5"/><path d="M22 9v5"/>'
-  };
-  function icon(name, o = {}) {
-    const s2 = document.createElement("span");
-    s2.className = "oi" + (o.cls ? " " + o.cls : "");
-    s2.setAttribute("aria-hidden", "true");
-    s2.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"${o.size ? ` style="width:${o.size}px;height:${o.size}px"` : ""}>${P[name] || P.sparkle}</svg>`;
-    return s2;
+  // src/ui/views/start.js
+  var CHAIN_ROWS = [
+    { k: 98, call: "3.40", put: "1.12", atm: false },
+    { k: 100, call: "2.15", put: "1.98", atm: true },
+    { k: 102, call: "1.22", put: "3.05", atm: false },
+    { k: 104, call: "0.68", put: "4.40", atm: false }
+  ];
+  function openStartLearning() {
+    bus.emit("add-profile");
   }
+  function exploreCurriculum() {
+    if (!profiles().length) {
+      bus.emit("add-profile", { then: "#/learn" });
+      return;
+    }
+    location.hash = "#/learn";
+  }
+  function buildMiniTape(host) {
+    const inner = el("div", { class: "fd-mini-tape-inner" });
+    host.appendChild(inner);
+    function paint() {
+      inner.innerHTML = "";
+      const list2 = market.list().slice(0, 8);
+      for (const t of list2) {
+        const q = market.quote(t.sym);
+        const up = (q?.chg ?? 0) >= 0;
+        inner.appendChild(el(
+          "span",
+          { class: "fd-tq" },
+          el("span", { class: "sym" }, t.sym),
+          el("span", { class: "px num" }, F.usd(q?.S)),
+          el(
+            "span",
+            { class: "chg num " + (up ? "up" : "down") },
+            (up ? "\u25B2" : "\u25BC") + F.pctSigned(q?.chgPct ?? 0)
+          )
+        ));
+      }
+    }
+    paint();
+    return paint;
+  }
+  function buildSpark(canvas) {
+    const pts = [];
+    let v = 100;
+    for (let i = 0; i < 48; i++) {
+      v += Math.sin(i / 5) * 0.4 + (i % 7 - 3) * 0.08;
+      pts.push(v);
+    }
+    spark(canvas, pts, { color: "--brass", height: 56 });
+    return pts;
+  }
+  function tickSpark(canvas, pts, reduced) {
+    if (reduced) return;
+    const last = pts[pts.length - 1] || 100;
+    const next = last + Math.sin(Date.now() / 900) * 0.35 + (Date.now() % 11 - 5) * 0.02;
+    pts.push(next);
+    if (pts.length > 48) pts.shift();
+    spark(canvas, pts, { color: "--brass", height: 56 });
+  }
+  function productShot() {
+    const tape = el("div", { class: "fd-mini-tape", "aria-hidden": "true" });
+    const sparkWrap = el(
+      "div",
+      { class: "fd-spark-wrap" },
+      el(
+        "div",
+        { class: "fd-spark-label" },
+        el("span", { class: "eyebrow" }, "LMND"),
+        el("span", { class: "num muted" }, "sim tape")
+      ),
+      el("canvas", { class: "fd-spark", width: "280", height: "56" })
+    );
+    const canvas = (
+      /** @type {HTMLCanvasElement} */
+      sparkWrap.querySelector("canvas")
+    );
+    const chain = el(
+      "div",
+      { class: "fd-mini-chain" },
+      el(
+        "div",
+        { class: "fd-chain-head" },
+        el("span", {}, "Call"),
+        el("span", {}, "Strike"),
+        el("span", {}, "Put")
+      )
+    );
+    for (const row of CHAIN_ROWS) {
+      chain.appendChild(el(
+        "div",
+        { class: "fd-chain-row" + (row.atm ? " atm" : "") },
+        el("span", { class: "num" }, row.call),
+        el("span", { class: "num strike" }, String(row.k)),
+        el("span", { class: "num" }, row.put)
+      ));
+    }
+    const card = el(
+      "div",
+      { class: "fd-product-card" },
+      tape,
+      sparkWrap,
+      chain
+    );
+    return { el: el("div", { class: "fd-product-stage" }, card), tape, canvas };
+  }
+  function processRing() {
+    const r = 42;
+    const c = 2 * Math.PI * r;
+    const score = 82;
+    const dash = score / 100 * c;
+    const svg = el("div", { class: "fd-score-ring", "aria-label": "Process Score 82 of 100" });
+    svg.innerHTML = `<svg viewBox="0 0 100 100" width="100" height="100" aria-hidden="true">
+    <circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--inset)" stroke-width="8"/>
+    <circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--brass)" stroke-width="8"
+      stroke-linecap="round" stroke-dasharray="${dash.toFixed(1)} ${c.toFixed(1)}"
+      transform="rotate(-90 50 50)"/>
+    <text x="50" y="48" text-anchor="middle" class="num" fill="var(--ink)"
+      font-family="var(--mono)" font-size="22" font-weight="700">82</text>
+    <text x="50" y="64" text-anchor="middle" fill="var(--ink-3)"
+      font-family="var(--sans)" font-size="9" letter-spacing="0.08em">/ 100</text>
+  </svg>`;
+    return svg;
+  }
+  function regimeBadges() {
+    const regimes = [
+      { label: "Calm", cls: "" },
+      { label: "Earnings", cls: "hot" },
+      { label: "Crash week", cls: "risk" },
+      { label: "IV crush", cls: "hot" }
+    ];
+    const row = el("div", { class: "fd-regime-row" });
+    for (const r of regimes) {
+      row.appendChild(el("span", { class: "fd-regime-badge" + (r.cls ? " " + r.cls : "") }, r.label));
+    }
+    return row;
+  }
+  function missionMocks() {
+    return el(
+      "div",
+      { class: "fd-mission-mocks" },
+      el(
+        "div",
+        { class: "card pad-s fd-mission-mock" },
+        el(
+          "div",
+          { class: "flex-between" },
+          icon("compass", { cls: "mi" }),
+          el("span", { class: "pill brass" }, "income")
+        ),
+        el("h3", {}, "First Covered Call"),
+        el("p", { class: "sub" }, "Sell a call against shares you hold.")
+      ),
+      el(
+        "div",
+        { class: "card pad-s fd-mission-mock" },
+        el(
+          "div",
+          { class: "flex-between" },
+          icon("wave", { cls: "mi" }),
+          el("span", { class: "pill brass" }, "vol")
+        ),
+        el("h3", {}, "Straddle the print"),
+        el("p", { class: "sub" }, "Trade movement through an earnings gap.")
+      )
+    );
+  }
+  function storyBand(opts) {
+    const { eyebrow, title, body, linkHref, linkLabel, graphic, alt } = opts;
+    return el(
+      "section",
+      { class: "fd-band" + (alt ? " alt" : "") },
+      el(
+        "div",
+        { class: "fd-band-inner" },
+        el(
+          "div",
+          { class: "fd-band-copy" },
+          el("div", { class: "eyebrow" }, eyebrow),
+          el("h2", { class: "fd-band-title" }, title),
+          el("p", { class: "sub" }, body),
+          el("a", { class: "fd-inline-link", href: linkHref }, linkLabel + " \u2192")
+        ),
+        el("div", { class: "fd-band-graphic" }, graphic)
+      )
+    );
+  }
+  function pricingStrip() {
+    if (isFamilyBuild()) {
+      return el(
+        "section",
+        { class: "fd-pricing fd-family-note" },
+        el(
+          "div",
+          { class: "fd-pricing-inner" },
+          el("div", { class: "eyebrow" }, "Family build"),
+          el("h2", { class: "fd-band-title" }, "Built for the Lopez trading floor"),
+          el(
+            "p",
+            { class: "sub" },
+            "Kids mode on, freemium gates off \u2014 the home build for the family bookshelf. The commercial PWA is where Free vs Academy lives."
+          )
+        )
+      );
+    }
+    return el(
+      "section",
+      { class: "fd-pricing" },
+      el(
+        "div",
+        { class: "fd-pricing-inner" },
+        el("div", { class: "eyebrow" }, "Plans"),
+        el("h2", { class: "fd-band-title" }, "Start free. Go Academy when you are ready."),
+        el(
+          "div",
+          { class: "fd-price-row" },
+          el(
+            "div",
+            { class: "card fd-price-card" },
+            el("div", { class: "eyebrow" }, "Free"),
+            el("div", { class: "fd-price num" }, "$0"),
+            el("p", { class: "sub" }, "Paper trading with practice limits \u2014 enough to learn the craft."),
+            el("button", { type: "button", class: "btn primary", onclick: openStartLearning }, "Start free")
+          ),
+          el(
+            "div",
+            { class: "card fd-price-card featured" },
+            el("div", { class: "eyebrow" }, "Academy"),
+            el("div", { class: "fd-price num" }, "$" + BILLING.priceMonthlyUsd, el("span", { class: "per" }, "/mo")),
+            el("p", { class: "sub" }, "Full missions, unlimited journal, every ticker."),
+            el("button", { type: "button", class: "btn", onclick: openStartLearning }, "Start free \u2014 upgrade later")
+          )
+        )
+      )
+    );
+  }
+  var view5 = {
+    render(root) {
+      const reduced = !!(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches);
+      const shot = productShot();
+      const hero = el(
+        "section",
+        { class: "fd-hero" },
+        el(
+          "div",
+          { class: "fd-hero-copy" },
+          el("div", { class: "eyebrow fd-brand" }, "Options Academy"),
+          el("h1", { class: "fd-display" }, "Learn options the way pilots learn to fly."),
+          el(
+            "p",
+            { class: "fd-subhead" },
+            "A live simulated market, guided missions, and a journal that grades your decisions \u2014 not your luck."
+          ),
+          el(
+            "div",
+            { class: "fd-cta-row" },
+            el(
+              "button",
+              { type: "button", class: "btn primary lg", onclick: openStartLearning },
+              "Start learning \u2014 free"
+            ),
+            el(
+              "button",
+              { type: "button", class: "btn ghost lg", onclick: exploreCurriculum },
+              "Explore the curriculum"
+            )
+          ),
+          !isFamilyBuild() ? el("p", { class: "fd-trust small muted" }, "No card required \xB7 Education only \xB7 Cancel anytime") : null
+        ),
+        shot.el
+      );
+      const page = el(
+        "div",
+        { class: "fd-page" },
+        hero,
+        storyBand({
+          eyebrow: "The market",
+          title: "A market that teaches",
+          body: "Regimes, earnings gaps, IV crush, and replayable crash weeks \u2014 the sim is a flight school, not a slot machine.",
+          linkHref: "#/market",
+          linkLabel: "Open the Live Market",
+          graphic: regimeBadges(),
+          alt: false
+        }),
+        storyBand({
+          eyebrow: "The journal",
+          title: "Graded on process, not luck",
+          body: "Process Score grades thesis, defined risk, sizing, and exit discipline \u2014 the decision, not the P&L.",
+          linkHref: "#/journal",
+          linkLabel: "See Process Score",
+          graphic: processRing(),
+          alt: true
+        }),
+        storyBand({
+          eyebrow: "The drills",
+          title: "Missions, not videos",
+          body: "Sandboxed markets with clear objectives. Defined-risk drills before you freestyle on the tape.",
+          linkHref: "#/missions",
+          linkLabel: "Browse missions",
+          graphic: missionMocks(),
+          alt: false
+        }),
+        pricingStrip(),
+        el("footer", { class: "fd-footer" }, simDisclaimer())
+      );
+      page.querySelectorAll('a[href="#/market"], a[href="#/journal"], a[href="#/missions"]').forEach((a) => {
+        a.addEventListener("click", (e) => {
+          if (!profiles().length) {
+            e.preventDefault();
+            bus.emit("add-profile", { then: a.getAttribute("href") });
+          }
+        });
+      });
+      root.appendChild(page);
+      const paintTape = buildMiniTape(shot.tape);
+      const sparkPts = buildSpark(shot.canvas);
+      const tapeId = setInterval(paintTape, 1e3);
+      const sparkId = reduced ? null : setInterval(() => tickSpark(shot.canvas, sparkPts, reduced), 1e3);
+      return () => {
+        clearInterval(tapeId);
+        if (sparkId) clearInterval(sparkId);
+      };
+    }
+  };
 
   // src/ui/shell.js
   var contentEl;
@@ -4432,7 +4774,7 @@
     { id: "journal", icon: "\u{1F4D3}", ic: "notebook", label: "Journal" }
   ];
   var LAB_IDS = new Set(LABS.map((l) => l.id));
-  var YOU_IDS = /* @__PURE__ */ new Set(["progress", "settings", "upgrade", "welcome", "legal"]);
+  var YOU_IDS = /* @__PURE__ */ new Set(["progress", "settings", "upgrade", "welcome", "legal", "start"]);
   function navItems() {
     return NAV.filter((n) => !n.kidsOnly || kidsEnabled());
   }
@@ -4694,7 +5036,7 @@
     const m = modal(wrap, { onClose: firstRun === true ? false : void 0 });
     return m;
   }
-  function addProfileModal() {
+  function addProfileModal(opts = {}) {
     let emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)], mode = "adult";
     const nameIn = el("input", { type: "text", placeholder: "Name", "aria-label": "Profile name", style: "padding:8px 10px;border:1px solid var(--hairline);border-radius:6px;width:100%;background:var(--card);" });
     const emojiRow = el("div", { class: "btn-row", style: "margin:10px 0" });
@@ -4754,25 +5096,29 @@
           m.close();
           refreshProfile();
           toast(`Welcome, ${name}! You start with ${F.usd(1e5, 0)} of paper money.`, "gain");
-          if (useMode === "kid") {
-            location.hash = "#/kids";
-          } else {
-            start(p?.id || active()?.id);
-            location.hash = "#/welcome";
-          }
+          const dest = useMode === "kid" ? "#/kids" : opts.then || "#/welcome";
+          if (useMode !== "kid") start(p?.id || active()?.id);
+          if ((location.hash || "") === "#/start") location.replace(dest);
+          else location.hash = dest;
           route();
         } }, "Start learning")
       )
     );
-    const m = modal(wrap, { onClose: profiles().length ? void 0 : false });
+    const m = modal(wrap);
     nameIn.focus();
   }
   function route() {
     closeSheet();
     const hash = location.hash || "#/home";
     const parts = hash.replace(/^#\//, "").split("/");
-    const name = (parts[0] || "home").split("?")[0] || "home";
-    const view15 = VIEWS[name] || VIEWS.home;
+    let name = (parts[0] || "home").split("?")[0] || "home";
+    if (!profiles().length && name !== "start" && name !== "legal") {
+      location.replace("#/start");
+      return;
+    }
+    const landing = name === "start";
+    document.body.classList.toggle("oa-landing", landing);
+    const view16 = VIEWS[name] || VIEWS.home;
     if (currentCleanup) {
       try {
         currentCleanup();
@@ -4784,10 +5130,10 @@
     refreshTabActive(name);
     contentEl.innerHTML = "";
     window.scrollTo(0, 0);
-    currentCleanup = view15.render(contentEl, parts.slice(1)) || null;
+    currentCleanup = view16.render(contentEl, parts.slice(1)) || null;
   }
   function boot(views) {
-    VIEWS = { welcome: view, upgrade: view2, settings: view3, ...views };
+    VIEWS = { welcome: view, upgrade: view2, settings: view3, start: view5, ...views };
     try {
       const th = localStorage.getItem("oa.theme");
       if (th) document.documentElement.setAttribute("data-theme", th);
@@ -4798,6 +5144,7 @@
     market.on("state", renderTape);
     bus.on("profile", refreshProfile);
     bus.on("profile-picker", () => profilePicker());
+    bus.on("add-profile", (opts) => addProfileModal(opts && typeof opts === "object" ? opts : {}));
     bus.on("tape", renderTape);
     setInterval(() => saveMarketSnapshot(market.snapshot()), 15e3);
     document.addEventListener("visibilitychange", () => {
@@ -4814,7 +5161,6 @@
     market.start();
     window.addEventListener("hashchange", route);
     route();
-    if (!profiles().length) addProfileModal();
   }
 
   // src/content/curriculum.js
@@ -7006,13 +7352,12 @@ This is why the simulator matters more than the formula sheet. Run the same path
     "Buy the straddle when you expect realized > implied. The Volatility Lab lets you test that bet 60 paths at a time.",
     "A covered call trades your upside above the strike for cash today. Great on stock you'd happily sell there anyway."
   ];
-  var view5 = {
+  var view6 = {
     render(root) {
       const p = active();
       const hour = (/* @__PURE__ */ new Date()).getHours();
       const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-      root.appendChild(el("div", { class: "eyebrow" }, "Family Exchange"));
-      root.appendChild(el("h1", {}, p ? `${greet}, ${p.name}` : "Welcome to Options Academy"));
+      root.appendChild(viewHeader("Family Exchange", p ? `${greet}, ${p.name}` : "Welcome to Options Academy"));
       root.appendChild(el(
         "p",
         { class: "sub", style: "max-width:70ch" },
@@ -7554,8 +7899,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     });
   }
   function renderIndex(root) {
-    root.appendChild(el("div", { class: "eyebrow" }, "Curriculum"));
-    root.appendChild(el("h1", {}, "Learn the craft, then trade it"));
+    root.appendChild(viewHeader("Curriculum", "Learn the craft, then trade it"));
     root.appendChild(el(
       "p",
       { class: "sub", style: "max-width:68ch" },
@@ -7804,7 +8148,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     refreshDoneBtn(already || !(l.quiz || []).length);
     root.appendChild(footer);
   }
-  var view6 = {
+  var view7 = {
     render(root, params) {
       if (!curriculum || !curriculum.tracks?.length) {
         root.appendChild(el("p", { class: "sub" }, "Curriculum loading\u2026"));
@@ -8008,15 +8352,14 @@ This is why the simulator matters more than the formula sheet. Run the same path
       return null;
     }
   }
-  var view7 = {
+  var view8 = {
     render(root) {
       let sym = viewState.sym || "LMND";
       let expIdx = 1;
       let legs = [];
       let chart = null;
       let realCtx = null;
-      root.appendChild(el("div", { class: "eyebrow" }, "Strategy Lab"));
-      root.appendChild(el("h1", {}, "Build it, see it, trade it"));
+      root.appendChild(viewHeader("Strategy Lab", "Build it, see it, trade it"));
       root.appendChild(el(
         "p",
         { class: "sub", style: "max-width:70ch" },
@@ -8505,7 +8848,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       tryIt: "Note how the 60-day curve towers over the 5-day curve: if you want to trade a volatility opinion, you trade time. If you want pure gamma, you trade the short end."
     }
   ];
-  var view8 = {
+  var view9 = {
     render(root) {
       let tab = "delta";
       const P2 = { K: 100, dte: 30, iv: 0.3 };
@@ -8679,7 +9022,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       cost: straddle0 * 100
     };
   }
-  var view9 = {
+  var view10 = {
     render(root) {
       root.appendChild(el("div", { class: "eyebrow" }, "Volatility Lab"));
       root.appendChild(el("h1", {}, "Trade movement itself"));
@@ -9645,7 +9988,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     const m = modal(wrap, { onClose: false });
     lessonIn.focus();
   }
-  var view10 = {
+  var view11 = {
     render(root, params) {
       if (feedMode() === "tradier") {
         return renderRealMarket(root, params);
@@ -9662,9 +10005,8 @@ This is why the simulator matters more than the formula sheet. Run the same path
       let sheetEl = null;
       let sheetBg = null;
       let coachEl = null;
-      root.appendChild(el("div", { class: "eyebrow" }, "Live Market \u2014 Family Exchange"));
+      const hdr = viewHeader("Live Market \u2014 Family Exchange", "Paper-trade the tape");
       const head = el("div", { class: "flex-between" });
-      head.appendChild(el("h1", {}, "Paper-trade the tape"));
       const clockBig = el("span", { class: "num muted" });
       const speedSeg = el("div", { class: "seg", role: "group", "aria-label": "Simulation speed" });
       const speeds = [["\u23F8", 0], ["1\xD7", 1], ["6\xD7", 6], ["30\xD7", 30]];
@@ -9680,6 +10022,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         speedSeg.appendChild(b);
         return { b, sp };
       });
+      head.appendChild(hdr);
       function refreshSpeed() {
         speedBtns.forEach(({ b, sp }) => b.classList.toggle(
           "on",
@@ -10818,7 +11161,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       grid.appendChild(card);
     });
   }
-  var view11 = {
+  var view12 = {
     render(root, params) {
       if (params[0] === "lemonade") return lemonade(root);
       if (params[0] === "spinner") return spinner(root);
@@ -10875,7 +11218,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
   };
 
   // src/ui/views/progress.js
-  var view12 = {
+  var view13 = {
     render(root) {
       const p = active();
       if (!p) {
@@ -10995,10 +11338,9 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
     return wrap;
   }
-  var view13 = {
+  var view14 = {
     render(root) {
-      root.appendChild(el("div", { class: "eyebrow" }, "Trade Journal"));
-      root.appendChild(el("h1", {}, "Process Score"));
+      root.appendChild(viewHeader("Trade Journal", "Process Score"));
       if (!isFamilyBuild() && tier() === "free") {
         const used = entries().length;
         const cap = FREE_LIMITS.journalEntries;
@@ -11165,8 +11507,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     return line2.replace(/\*\*/g, "").slice(0, 140);
   }
   function renderHub(root) {
-    root.appendChild(el("div", { class: "eyebrow" }, "Missions"));
-    root.appendChild(el("h1", {}, "Guided trading drills"));
+    root.appendChild(viewHeader("Missions", "Guided trading drills"));
     root.appendChild(el(
       "p",
       { class: "sub", style: "max-width:68ch" },
@@ -11557,7 +11898,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       }
     };
   }
-  var view14 = {
+  var view15 = {
     render(root, params) {
       if (params[0]) return renderRunner(root, params[0]);
       renderHub(root);
@@ -11566,7 +11907,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
 
   // src/main.js
   function start4() {
-    boot({ home: view5, learn: view6, strategy: view7, greeks: view8, vol: view9, market: view10, kids: view11, progress: view12, journal: view13, missions: view14, legal: view4 });
+    boot({ home: view6, learn: view7, strategy: view8, greeks: view9, vol: view10, market: view11, kids: view12, progress: view13, journal: view14, missions: view15, legal: view4 });
     start3();
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       navigator.serviceWorker.register("./sw.js").catch(() => {
