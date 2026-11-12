@@ -971,3 +971,11 @@ input[type="range"] { accent-color: var(--brass); width: 100%; }
 @media (prefers-reduced-motion: reduce) {
   .watch-chip, .real-data-card { transition: none; }
 }
+
+/* svg icons */
+.oi { display: inline-flex; align-items: center; justify-content: center; }
+.oi svg { width: 1.1em; height: 1.1em; display: block; }
+.oa-nav .ni svg { width: 17px; height: 17px; }
+.oa-tabbar .ti svg { width: 22px; height: 22px; }
+.oa-sheet-item .si svg { width: 19px; height: 19px; }
+.theme-btn .oi svg { width: 15px; height: 15px; }

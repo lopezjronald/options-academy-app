@@ -293,8 +293,8 @@
         }
       });
     }
-    function pushEvent(icon, text) {
-      st.events.unshift({ icon, text, day: st.day, minute: st.minute });
+    function pushEvent(icon2, text) {
+      st.events.unshift({ icon: icon2, text, day: st.day, minute: st.minute });
       if (st.events.length > 80) st.events.pop();
     }
     function setRegime(nextRegime, cfg = {}) {
@@ -303,8 +303,8 @@
       const prev = st.regime;
       st.regime = nextRegime;
       if (!cfg.silent && prev !== nextRegime) {
-        const [icon, text] = REGIME_HEADLINES[nextRegime];
-        pushEvent(icon, text);
+        const [icon2, text] = REGIME_HEADLINES[nextRegime];
+        pushEvent(icon2, text);
         emit("regime", st.regime);
       }
     }
@@ -345,8 +345,8 @@
         }
       }
     }
-    function headline(icon, text) {
-      pushEvent(icon || "\u{1F4F0}", text || "");
+    function headline(icon2, text) {
+      pushEvent(icon2 || "\u{1F4F0}", text || "");
       emit("news", null);
     }
     function applyScenarioTimeline(day, minute, phase) {
@@ -1578,7 +1578,7 @@
     let lastDrawAt = 0;
     let pendingOpts = null;
     let throttleTimer = null;
-    const P = { l: 52, r: 14, t: 10, b: 26 };
+    const P2 = { l: 52, r: 14, t: 10, b: 26 };
     const PIN_HIT_PX = 18;
     function bounds() {
       let xlo = Infinity, xhi = -Infinity, ylo = Infinity, yhi = -Infinity;
@@ -1605,8 +1605,8 @@
       }
       const { ctx, w, h } = setupCanvas(canvas, o.height || 260);
       const b = bounds();
-      const X = (x) => P.l + (x - b.xlo) / (b.xhi - b.xlo) * (w - P.l - P.r);
-      const Y = (y) => h - P.b - (y - b.ylo) / (b.yhi - b.ylo) * (h - P.t - P.b);
+      const X = (x) => P2.l + (x - b.xlo) / (b.xhi - b.xlo) * (w - P2.l - P2.r);
+      const Y = (y) => h - P2.b - (y - b.ylo) / (b.yhi - b.ylo) * (h - P2.t - P2.b);
       chart.X = X;
       chart.Y = Y;
       chart.b = b;
@@ -1622,29 +1622,29 @@
       for (const t of niceTicks(b.ylo, b.yhi, 5)) {
         const y = Y(t);
         ctx.beginPath();
-        ctx.moveTo(P.l, y);
-        ctx.lineTo(w - P.r, y);
+        ctx.moveTo(P2.l, y);
+        ctx.lineTo(w - P2.r, y);
         ctx.stroke();
         ctx.textAlign = "right";
         ctx.textBaseline = "middle";
-        ctx.fillText(o.fmtY ? o.fmtY(t) : String(t), P.l - 7, y);
+        ctx.fillText(o.fmtY ? o.fmtY(t) : String(t), P2.l - 7, y);
       }
       ctx.textAlign = "center";
       ctx.textBaseline = "top";
       for (const t of niceTicks(b.xlo, b.xhi, 6)) {
-        ctx.fillText(o.fmtX ? o.fmtX(t) : String(t), X(t), h - P.b + 7);
+        ctx.fillText(o.fmtX ? o.fmtX(t) : String(t), X(t), h - P2.b + 7);
       }
       ctx.strokeStyle = resolve("--baseline");
       ctx.beginPath();
-      ctx.moveTo(P.l, h - P.b);
-      ctx.lineTo(w - P.r, h - P.b);
+      ctx.moveTo(P2.l, h - P2.b);
+      ctx.lineTo(w - P2.r, h - P2.b);
       ctx.stroke();
       if (o.zeroLine && b.ylo < 0 && b.yhi > 0) {
         ctx.strokeStyle = resolve("--baseline");
         ctx.lineWidth = 1.5;
         ctx.beginPath();
-        ctx.moveTo(P.l, Y(0));
-        ctx.lineTo(w - P.r, Y(0));
+        ctx.moveTo(P2.l, Y(0));
+        ctx.lineTo(w - P2.r, Y(0));
         ctx.stroke();
       }
       for (const vb of o.vbands || []) {
@@ -1655,7 +1655,7 @@
         ctx.save();
         ctx.globalAlpha = vb.opacity != null ? vb.opacity : 0.35;
         ctx.fillStyle = resolve(vb.color || "--brass-soft");
-        ctx.fillRect(x0, P.t, x1 - x0, h - P.t - P.b);
+        ctx.fillRect(x0, P2.t, x1 - x0, h - P2.t - P2.b);
         ctx.restore();
       }
       for (const hl of o.hlines || []) {
@@ -1663,15 +1663,15 @@
         ctx.lineWidth = 1;
         ctx.setLineDash([4, 4]);
         ctx.beginPath();
-        ctx.moveTo(P.l, Y(hl.y));
-        ctx.lineTo(w - P.r, Y(hl.y));
+        ctx.moveTo(P2.l, Y(hl.y));
+        ctx.lineTo(w - P2.r, Y(hl.y));
         ctx.stroke();
         ctx.setLineDash([]);
         if (hl.label) {
           ctx.fillStyle = resolve(hl.color || "--ink-3");
           ctx.textAlign = "left";
           ctx.textBaseline = "bottom";
-          ctx.fillText(hl.label, P.l + 4, Y(hl.y) - 3);
+          ctx.fillText(hl.label, P2.l + 4, Y(hl.y) - 3);
         }
       }
       for (const vl of o.vlines || []) {
@@ -1680,15 +1680,15 @@
         ctx.lineWidth = 1.2;
         ctx.setLineDash(vl.dash === false ? [] : [4, 4]);
         ctx.beginPath();
-        ctx.moveTo(X(vl.x), P.t);
-        ctx.lineTo(X(vl.x), h - P.b);
+        ctx.moveTo(X(vl.x), P2.t);
+        ctx.lineTo(X(vl.x), h - P2.b);
         ctx.stroke();
         ctx.setLineDash([]);
         if (vl.label) {
           ctx.fillStyle = resolve(vl.color || "--ink-3");
           ctx.textAlign = "center";
           ctx.textBaseline = "bottom";
-          ctx.fillText(vl.label, X(vl.x), P.t + 10);
+          ctx.fillText(vl.label, X(vl.x), P2.t + 10);
         }
       }
       for (const s2 of o.series) {
@@ -1745,8 +1745,8 @@
           ctx.lineWidth = pinX != null ? 1.4 : 1;
           ctx.setLineDash(pinX != null ? [] : [3, 3]);
           ctx.beginPath();
-          ctx.moveTo(hx, P.t);
-          ctx.lineTo(hx, h - P.b);
+          ctx.moveTo(hx, P2.t);
+          ctx.lineTo(hx, h - P2.b);
           ctx.stroke();
           ctx.setLineDash([]);
           for (const n of nearest) {
@@ -1763,15 +1763,15 @@
           tip.style.display = "block";
           const tw = tip.offsetWidth;
           tip.style.left = Math.min(w - tw - 6, Math.max(2, hx + 12)) + "px";
-          tip.style.top = P.t + 6 + "px";
+          tip.style.top = P2.t + 6 + "px";
         }
       } else tip.style.display = "none";
     }
     function xFromClient(clientX) {
       const r = canvas.getBoundingClientRect();
       const px = clientX - r.left;
-      if (px < P.l || px > chart.w - P.r) return null;
-      return chart.b.xlo + (px - P.l) / (chart.w - P.l - P.r) * (chart.b.xhi - chart.b.xlo);
+      if (px < P2.l || px > chart.w - P2.r) return null;
+      return chart.b.xlo + (px - P2.l) / (chart.w - P2.l - P2.r) * (chart.b.xhi - chart.b.xlo);
     }
     let downPt = null;
     function onMove(e) {
@@ -2366,8 +2366,8 @@
     bus.emit("mission", S);
     return { ok: true, session: S };
   }
-  function log(icon, text) {
-    S.log.unshift({ icon, text, day: S.market.day });
+  function log(icon2, text) {
+    S.log.unshift({ icon: icon2, text, day: S.market.day });
   }
   var mult3 = (l) => l.kind === "stock" ? 1 : 100;
   function positionValue(pos) {
@@ -4251,6 +4251,46 @@
         fileIn
       ));
       root.appendChild(dataCard);
+      const appearance = el("div", { class: "card mt2 settings-section" });
+      appearance.appendChild(el("h3", {}, "Appearance"));
+      appearance.appendChild(el("p", { class: "sub" }, "Follow your device, or pick a side. Both themes are contrast-checked."));
+      const current = (() => {
+        try {
+          return localStorage.getItem("oa.theme") || "system";
+        } catch {
+          return "system";
+        }
+      })();
+      const applyTheme = (mode) => {
+        const rootEl = document.documentElement;
+        if (mode === "system") {
+          rootEl.removeAttribute("data-theme");
+          try {
+            localStorage.removeItem("oa.theme");
+          } catch {
+          }
+        } else {
+          rootEl.setAttribute("data-theme", mode);
+          try {
+            localStorage.setItem("oa.theme", mode);
+          } catch {
+          }
+        }
+      };
+      const seg = el("div", { class: "seg", role: "group", "aria-label": "Theme" });
+      const mkBtn = (mode, label) => {
+        const b = el("button", { class: current === mode ? "on" : "", onclick: () => {
+          applyTheme(mode);
+          seg.querySelectorAll("button").forEach((x) => x.classList.remove("on"));
+          b.classList.add("on");
+        } }, label);
+        return b;
+      };
+      seg.appendChild(mkBtn("system", "System"));
+      seg.appendChild(mkBtn("light", "Light"));
+      seg.appendChild(mkBtn("dark", "Dark"));
+      appearance.appendChild(seg);
+      root.appendChild(appearance);
       const about = el("div", { class: "card mt2 settings-section" });
       about.appendChild(el("h3", {}, "About"));
       about.appendChild(el(
@@ -4324,6 +4364,37 @@
     }
   };
 
+  // src/ui/icons.js
+  var P = {
+    home: '<path d="M3 10.5 12 3l9 7.5"/><path d="M5.5 9.5V20a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1V9.5"/><path d="M10 21v-6h4v6"/>',
+    book: '<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>',
+    balloon: '<circle cx="12" cy="8" r="5.25"/><path d="M12 13.5c-1.2 1.8-1.2 3 0 4.5s1.2 2.2 0 3"/>',
+    monitor: '<rect x="2.5" y="4" width="19" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 17v4"/>',
+    layers: '<path d="m12 2.5 9.5 5L12 12.5l-9.5-5z"/><path d="m2.5 12.5 9.5 5 9.5-5"/><path d="m2.5 17 9.5 5 9.5-5"/>',
+    temple: '<path d="M3 21h18"/><path d="M5 18h14"/><path d="M6.5 18V10"/><path d="M10.2 18V10"/><path d="M13.8 18V10"/><path d="M17.5 18V10"/><path d="M3 9.5 12 3l9 6.5z"/>',
+    wave: '<path d="M2 12c2.5 0 2.5-5.5 5-5.5S9.5 17 12 17s2.5-10.5 5-10.5S19.5 12 22 12"/>',
+    notebook: '<rect x="4.5" y="2.5" width="15" height="19" rx="2"/><path d="M8.5 2.5v19"/><path d="M12 7.5h4"/><path d="M12 11.5h4"/><path d="M12 15.5h2.5"/>',
+    compass: '<circle cx="12" cy="12" r="9.25"/><path d="m15.8 8.2-2 5.6-5.6 2 2-5.6z" fill="currentColor" stroke="none"/>',
+    trophy: '<path d="M8 21h8"/><path d="M12 17.5V21"/><path d="M7 4h10v5.5a5 5 0 0 1-10 0z"/><path d="M7 6H4.25C4.25 9 5.5 10.75 7 11"/><path d="M17 6h2.75c0 3-1.25 4.75-2.75 5"/>',
+    gear: '<circle cx="12" cy="12" r="3.25"/><path d="M12 2.5v2.75"/><path d="M12 18.75v2.75"/><path d="M2.5 12h2.75"/><path d="M18.75 12h2.75"/><path d="m5.3 5.3 1.95 1.95"/><path d="m16.75 16.75 1.95 1.95"/><path d="m18.7 5.3-1.95 1.95"/><path d="m7.25 16.75-1.95 1.95"/>',
+    scale: '<path d="M12 3v18"/><path d="M8.5 21h7"/><path d="M12 5.5 5 7.5m7-2 7 2"/><path d="M5 7.5 2.75 13a2.6 2.6 0 0 0 4.5 0z"/><path d="M19 7.5 16.75 13a2.6 2.6 0 0 0 4.5 0z"/>',
+    sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2"/><path d="M12 19.5v2"/><path d="M2.5 12h2"/><path d="M19.5 12h2"/><path d="m5 5 1.4 1.4"/><path d="m17.6 17.6 1.4 1.4"/><path d="m19 5-1.4 1.4"/><path d="m6.4 17.6-1.4 1.4"/>',
+    moon: '<path d="M20.5 13.2A8.5 8.5 0 1 1 10.8 3.5a6.75 6.75 0 0 0 9.7 9.7z"/>',
+    contrast: '<circle cx="12" cy="12" r="9.25"/><path d="M12 2.75a9.25 9.25 0 0 1 0 18.5z" fill="currentColor" stroke="none"/>',
+    lock: '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/>',
+    cloud: '<path d="M17.5 19H6.75A4.25 4.25 0 0 1 6 10.55 6.5 6.5 0 0 1 18.7 11.9 3.75 3.75 0 0 1 17.5 19z"/>',
+    user: '<circle cx="12" cy="8" r="4"/><path d="M4.5 21a7.5 7.5 0 0 1 15 0"/>',
+    sparkle: '<path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/>',
+    grad: '<path d="m12 4 10 5-10 5L2 9z"/><path d="M6.5 11.5V16c0 1.5 2.5 3 5.5 3s5.5-1.5 5.5-3v-4.5"/><path d="M22 9v5"/>'
+  };
+  function icon(name, o = {}) {
+    const s2 = document.createElement("span");
+    s2.className = "oi" + (o.cls ? " " + o.cls : "");
+    s2.setAttribute("aria-hidden", "true");
+    s2.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"${o.size ? ` style="width:${o.size}px;height:${o.size}px"` : ""}>${P[name] || P.sparkle}</svg>`;
+    return s2;
+  }
+
   // src/ui/shell.js
   var contentEl;
   var tapeInner;
@@ -4338,27 +4409,27 @@
   var sheetHost = null;
   var NAV = [
     { sect: "Learn" },
-    { id: "home", icon: "\u{1F3E0}", label: "Home" },
-    { id: "learn", icon: "\u{1F4DA}", label: "Curriculum" },
-    { id: "kids", icon: "\u{1F388}", label: "Kids Corner", kidsOnly: true },
+    { id: "home", icon: "\u{1F3E0}", ic: "home", label: "Home" },
+    { id: "learn", icon: "\u{1F4DA}", ic: "book", label: "Curriculum" },
+    { id: "kids", icon: "\u{1F388}", ic: "balloon", label: "Kids Corner", kidsOnly: true },
     { sect: "Apply" },
-    { id: "market", icon: "\u{1F4FA}", label: "Live Market" },
-    { id: "strategy", icon: "\u{1F9E9}", label: "Strategy Lab" },
-    { id: "greeks", icon: "\u{1F3DB}\uFE0F", label: "Greeks Lab" },
-    { id: "vol", icon: "\u{1F30A}", label: "Volatility Lab" },
-    { id: "journal", icon: "\u{1F4D3}", label: "Journal" },
-    { id: "missions", icon: "\u{1F9ED}", label: "Missions" },
+    { id: "market", icon: "\u{1F4FA}", ic: "monitor", label: "Live Market" },
+    { id: "strategy", icon: "\u{1F9E9}", ic: "layers", label: "Strategy Lab" },
+    { id: "greeks", icon: "\u{1F3DB}\uFE0F", ic: "temple", label: "Greeks Lab" },
+    { id: "vol", icon: "\u{1F30A}", ic: "wave", label: "Volatility Lab" },
+    { id: "journal", icon: "\u{1F4D3}", ic: "notebook", label: "Journal" },
+    { id: "missions", icon: "\u{1F9ED}", ic: "compass", label: "Missions" },
     { sect: "You" },
-    { id: "progress", icon: "\u{1F3C6}", label: "Progress" },
-    { id: "settings", icon: "\u2699\uFE0F", label: "Settings" },
-    { id: "legal", icon: "\u2696\uFE0F", label: "Disclosures" }
+    { id: "progress", icon: "\u{1F3C6}", ic: "trophy", label: "Progress" },
+    { id: "settings", icon: "\u2699\uFE0F", ic: "gear", label: "Settings" },
+    { id: "legal", icon: "\u2696\uFE0F", ic: "scale", label: "Disclosures" }
   ];
   var LABS = [
-    { id: "strategy", icon: "\u{1F9E9}", label: "Strategy Lab" },
-    { id: "greeks", icon: "\u{1F3DB}\uFE0F", label: "Greeks Lab" },
-    { id: "vol", icon: "\u{1F30A}", label: "Volatility Lab" },
-    { id: "missions", icon: "\u{1F9ED}", label: "Missions" },
-    { id: "journal", icon: "\u{1F4D3}", label: "Journal" }
+    { id: "strategy", icon: "\u{1F9E9}", ic: "layers", label: "Strategy Lab" },
+    { id: "greeks", icon: "\u{1F3DB}\uFE0F", ic: "temple", label: "Greeks Lab" },
+    { id: "vol", icon: "\u{1F30A}", ic: "wave", label: "Volatility Lab" },
+    { id: "missions", icon: "\u{1F9ED}", ic: "compass", label: "Missions" },
+    { id: "journal", icon: "\u{1F4D3}", ic: "notebook", label: "Journal" }
   ];
   var LAB_IDS = new Set(LABS.map((l) => l.id));
   var YOU_IDS = /* @__PURE__ */ new Set(["progress", "settings", "upgrade", "welcome", "legal"]);
@@ -4390,7 +4461,7 @@
             it.onClick();
           }
         },
-        el("span", { class: "si" }, it.icon),
+        it.ic ? icon(it.ic, { cls: "si" }) : el("span", { class: "si" }, it.icon),
         el("span", {}, it.label)
       ));
     }
@@ -4401,6 +4472,7 @@
   }
   function openLabsSheet() {
     openSheet("Labs", LABS.map((l) => ({
+      ic: l.ic,
       icon: l.icon,
       label: l.label,
       onClick: () => {
@@ -4410,17 +4482,17 @@
   }
   function openYouSheet() {
     const items = [
-      { icon: "\u{1F3C6}", label: "Progress", onClick: () => {
+      { ic: "trophy", icon: "\u{1F3C6}", label: "Progress", onClick: () => {
         location.hash = "#/progress";
       } },
-      { icon: "\u2699\uFE0F", label: "Settings", onClick: () => {
+      { ic: "gear", icon: "\u2699\uFE0F", label: "Settings", onClick: () => {
         location.hash = "#/settings";
       } },
-      { icon: "\u{1F464}", label: "Switch profile", onClick: () => profilePicker() },
-      { icon: "\u25D0", label: "Toggle theme", onClick: () => toggleTheme() }
+      { ic: "user", icon: "\u{1F464}", label: "Switch profile", onClick: () => profilePicker() },
+      { ic: "contrast", icon: "\u25D0", label: "Toggle theme", onClick: () => toggleTheme() }
     ];
     if (!isFamilyBuild() && tier() === "free") {
-      items.push({ icon: "\u2728", label: "Upgrade to Academy", onClick: () => {
+      items.push({ ic: "sparkle", icon: "\u2728", label: "Upgrade to Academy", onClick: () => {
         location.hash = "#/upgrade";
       } });
     }
@@ -4429,28 +4501,28 @@
   }
   function buildTabbar() {
     const tabs = [
-      { id: "learn", icon: "\u{1F4DA}", label: "Learn", href: "#/learn" },
-      { id: "market", icon: "\u{1F4FA}", label: "Market", href: "#/market" },
-      { id: "labs", icon: "\u{1F9E9}", label: "Labs", onClick: openLabsSheet }
+      { id: "learn", ic: "book", label: "Learn", href: "#/learn" },
+      { id: "market", ic: "monitor", label: "Market", href: "#/market" },
+      { id: "labs", ic: "layers", label: "Labs", onClick: openLabsSheet }
     ];
     if (kidsEnabled()) {
-      tabs.push({ id: "kids", icon: "\u{1F388}", label: "Kids", href: "#/kids" });
+      tabs.push({ id: "kids", ic: "balloon", label: "Kids", href: "#/kids" });
     }
-    tabs.push({ id: "you", icon: "\u{1F3C6}", label: "You", onClick: openYouSheet });
+    tabs.push({ id: "you", ic: "user", label: "You", onClick: openYouSheet });
     tabbarEl = el("nav", { class: "oa-tabbar", "aria-label": "Primary" });
     for (const t of tabs) {
       if (t.href) {
         tabbarEl.appendChild(el(
           "a",
           { href: t.href, "data-tab": t.id },
-          el("span", { class: "ti" }, t.icon),
+          icon(t.ic, { cls: "ti" }),
           el("span", {}, t.label)
         ));
       } else {
         tabbarEl.appendChild(el(
           "button",
           { type: "button", "data-tab": t.id, onclick: t.onClick },
-          el("span", { class: "ti" }, t.icon),
+          icon(t.ic, { cls: "ti" }),
           el("span", {}, t.label)
         ));
       }
@@ -4483,7 +4555,7 @@
       navEl.appendChild(el(
         "a",
         { href: "#/" + n.id, "data-nav": n.id },
-        el("span", { class: "ni" }, n.icon),
+        n.ic ? icon(n.ic, { cls: "ni" }) : el("span", { class: "ni" }, n.icon),
         el("span", { class: "lbl" }, n.label)
       ));
     }
@@ -4517,7 +4589,7 @@
     tapeInner = el("div", { class: "oa-tape-inner" });
     liveDot = el("span", { class: "oa-live-dot" });
     clockEl = el("span", {}, "");
-    const themeBtn = el("button", { class: "theme-btn", title: "Toggle light/dark", "aria-label": "Toggle theme", onclick: toggleTheme }, "\u25D0");
+    const themeBtn = el("button", { class: "theme-btn", title: "Toggle light/dark", "aria-label": "Toggle theme", onclick: toggleTheme }, icon("contrast"));
     const tape = el(
       "div",
       { class: "oa-tape" },
@@ -7086,10 +7158,10 @@ This is why the simulator matters more than the formula sheet. Run the same path
       const unTick = market.on("tick", renderSnap);
       const labs = el("div", { class: "grid3 mt2" });
       root.appendChild(labs);
-      const lab = (href, icon, name, desc) => el(
+      const lab = (href, icon2, name, desc) => el(
         "a",
         { class: "card", href, style: "text-decoration:none;color:inherit" },
-        el("div", { style: "font-size:24px" }, icon),
+        el("div", { style: "font-size:24px" }, icon2),
         el("h3", { class: "mt1" }, name),
         el("p", { class: "sub", style: "margin:0" }, desc)
       );
@@ -8436,7 +8508,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
   var view8 = {
     render(root) {
       let tab = "delta";
-      const P = { K: 100, dte: 30, iv: 0.3 };
+      const P2 = { K: 100, dte: 30, iv: 0.3 };
       let chart = null;
       root.appendChild(el("div", { class: "eyebrow" }, "Greeks Lab"));
       root.appendChild(el("h1", {}, "The dashboard dials of every option"));
@@ -8479,18 +8551,18 @@ This is why the simulator matters more than the formula sheet. Run the same path
         });
         return el("div", { class: "slider-row" }, el("label", {}, label), input, val);
       }
-      sliders.appendChild(slider("Strike K", 70, 130, 1, () => P.K, (v) => P.K = v, (v) => F.usd(v, 0)));
-      sliders.appendChild(slider("Days to expiry", 1, 90, 1, () => P.dte, (v) => P.dte = v, (v) => v + "d"));
-      sliders.appendChild(slider("Implied vol", 0.08, 0.8, 0.01, () => P.iv, (v) => P.iv = v, (v) => F.pct(v, 0)));
+      sliders.appendChild(slider("Strike K", 70, 130, 1, () => P2.K, (v) => P2.K = v, (v) => F.usd(v, 0)));
+      sliders.appendChild(slider("Days to expiry", 1, 90, 1, () => P2.dte, (v) => P2.dte = v, (v) => v + "d"));
+      sliders.appendChild(slider("Implied vol", 0.08, 0.8, 0.01, () => P2.iv, (v) => P2.iv = v, (v) => F.pct(v, 0)));
       const xs = [];
       for (let s2 = 60; s2 <= 140; s2 += 1) xs.push(s2);
       const T = (d) => d / 365;
       function seriesFor() {
-        const base = { S: 100, K: P.K, r: 0.04 };
+        const base = { S: 100, K: P2.K, r: 0.04 };
         if (tab === "delta") return {
           series: [
-            { name: "Call delta", color: "--s1", points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T(P.dte), v: P.iv, type: "call" }).delta })) },
-            { name: "Put delta", color: "--s2", points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T(P.dte), v: P.iv, type: "put" }).delta })) }
+            { name: "Call delta", color: "--s1", points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T(P2.dte), v: P2.iv, type: "call" }).delta })) },
+            { name: "Put delta", color: "--s2", points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T(P2.dte), v: P2.iv, type: "put" }).delta })) }
           ],
           fmtY: (y) => y.toFixed(2),
           zeroLine: true,
@@ -8500,18 +8572,18 @@ This is why the simulator matters more than the formula sheet. Run the same path
           series: [30, 10, 2].map((d, i) => ({
             name: `${d}-day gamma`,
             color: ["--s1", "--s2", "--s3"][i],
-            points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T(d), v: P.iv, type: "call" }).gamma }))
+            points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T(d), v: P2.iv, type: "call" }).gamma }))
           })),
           fmtY: (y) => y.toFixed(3),
           zeroLine: false
         };
         if (tab === "theta") {
           const days = [];
-          for (let d = Math.max(60, P.dte); d >= 1; d--) days.push(d);
+          for (let d = Math.max(60, P2.dte); d >= 1; d--) days.push(d);
           return {
             series: [
-              { name: "At-the-money ($100 strike)", color: "--s1", points: days.map((d) => ({ x: -d, y: price({ S: 100, K: 100, T: T(d), v: P.iv, r: 0.04, type: "call" }) })) },
-              { name: `Out-of-the-money ($${Math.round(110)} strike)`, color: "--s2", points: days.map((d) => ({ x: -d, y: price({ S: 100, K: 110, T: T(d), v: P.iv, r: 0.04, type: "call" }) })) }
+              { name: "At-the-money ($100 strike)", color: "--s1", points: days.map((d) => ({ x: -d, y: price({ S: 100, K: 100, T: T(d), v: P2.iv, r: 0.04, type: "call" }) })) },
+              { name: `Out-of-the-money ($${Math.round(110)} strike)`, color: "--s2", points: days.map((d) => ({ x: -d, y: price({ S: 100, K: 110, T: T(d), v: P2.iv, r: 0.04, type: "call" }) })) }
             ],
             fmtX: (x) => Math.round(-x) + "d",
             fmtY: (y) => F.usd(y),
@@ -8523,7 +8595,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           series: [60, 20, 5].map((d, i) => ({
             name: `${d}-day vega`,
             color: ["--s1", "--s2", "--s3"][i],
-            points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T(d), v: P.iv, type: "call" }).vega }))
+            points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T(d), v: P2.iv, type: "call" }).vega }))
           })),
           fmtY: (y) => F.usd(y),
           zeroLine: false
@@ -8543,16 +8615,16 @@ This is why the simulator matters more than the formula sheet. Run the same path
           zeroLine: cfg.zeroLine,
           fmtX: cfg.fmtX || ((x) => F.usd(x, 0)),
           fmtY: cfg.fmtY,
-          vlines: tab === "theta" ? [] : [{ x: P.K, label: "strike", color: "--s4" }, { x: 100, label: "spot $100", color: "--ink-3" }],
+          vlines: tab === "theta" ? [] : [{ x: P2.K, label: "strike", color: "--s4" }, { x: 100, label: "spot $100", color: "--ink-3" }],
           tipLabel: tab === "theta" ? "T\u2212" : "XYZ @ "
         };
         if (!chart) chart = line(chartBox, opts);
         else chart.update(opts);
         legend(legendBox, cfg.series.map((s2) => ({ name: s2.name, color: s2.color })));
-        const g = greeks({ S: 100, K: P.K, T: T(P.dte), v: P.iv, r: 0.04, type: "call" });
+        const g = greeks({ S: 100, K: P2.K, T: T(P2.dte), v: P2.iv, r: 0.04, type: "call" });
         tiles.innerHTML = "";
         const tile = (k, v, d) => el("div", { class: "stat" }, el("div", { class: "k" }, k), el("div", { class: "v" }, v), el("div", { class: "d muted" }, d));
-        tiles.appendChild(tile("Call price", F.usd(g.price), `K=${F.usd(P.K, 0)}, ${P.dte}d, ${F.pct(P.iv, 0)} IV`));
+        tiles.appendChild(tile("Call price", F.usd(g.price), `K=${F.usd(P2.K, 0)}, ${P2.dte}d, ${F.pct(P2.iv, 0)} IV`));
         tiles.appendChild(tile("Delta", g.delta.toFixed(2), "per $1 stock move"));
         tiles.appendChild(tile("Gamma", g.gamma.toFixed(4), "delta gained per $1"));
         tiles.appendChild(tile("Theta", F.usd(g.theta), "per day (\xD7100/contract)"));
@@ -8625,7 +8697,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         { class: "sub", style: "max-width:70ch" },
         "You buy a 30-day at-the-money straddle on a $100 stock and keep it delta-neutral. The solid line is your running P&L. Set realized vol above the implied vol you paid and watch hedging grind out profits; set it below and watch theta eat you."
       ));
-      const P = { iv: 0.25, rv: 0.4, hedge: 1 };
+      const P2 = { iv: 0.25, rv: 0.4, hedge: 1 };
       const sliderBox = el("div", { style: "max-width:560px" });
       card.appendChild(sliderBox);
       function slider(label, min, max, step, get2, set, fmt) {
@@ -8638,9 +8710,9 @@ This is why the simulator matters more than the formula sheet. Run the same path
         });
         return el("div", { class: "slider-row" }, el("label", {}, label), input, val);
       }
-      sliderBox.appendChild(slider("IV you pay", 0.1, 0.6, 0.01, () => P.iv, (v) => P.iv = v, (v) => F.pct(v, 0)));
-      sliderBox.appendChild(slider("Realized vol", 0.05, 0.8, 0.01, () => P.rv, (v) => P.rv = v, (v) => F.pct(v, 0)));
-      sliderBox.appendChild(slider("Hedge every", 1, 5, 1, () => P.hedge, (v) => P.hedge = v, (v) => v + (v === 1 ? " day" : " days")));
+      sliderBox.appendChild(slider("IV you pay", 0.1, 0.6, 0.01, () => P2.iv, (v) => P2.iv = v, (v) => F.pct(v, 0)));
+      sliderBox.appendChild(slider("Realized vol", 0.05, 0.8, 0.01, () => P2.rv, (v) => P2.rv = v, (v) => F.pct(v, 0)));
+      sliderBox.appendChild(slider("Hedge every", 1, 5, 1, () => P2.hedge, (v) => P2.hedge = v, (v) => v + (v === 1 ? " day" : " days")));
       const edge = el("div", { class: "pill mt1" });
       card.appendChild(edge);
       const chartBox = el("div", { class: "mt2" });
@@ -8653,7 +8725,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       card.appendChild(btnRow);
       let chart = null;
       function rerun() {
-        const r = runScalp(P.iv, P.rv, 30, P.hedge);
+        const r = runScalp(P2.iv, P2.rv, 30, P2.hedge);
         const spotNorm = r.spot.map((p) => ({ x: p.x, y: (p.y - 100) * 10 }));
         const opts = {
           height: 280,
@@ -8674,8 +8746,8 @@ This is why the simulator matters more than the formula sheet. Run the same path
         tiles.appendChild(tile("Option P&L (mostly \u2212theta)", F.usdSigned(r.optionPnl, 0), r.optionPnl >= 0 ? "up" : "down"));
         tiles.appendChild(tile("Hedging P&L (gamma scalps)", F.usdSigned(r.hedgePnl, 0), r.hedgePnl >= 0 ? "up" : "down"));
         tiles.appendChild(tile("Total", F.usdSigned(r.total, 0), r.total >= 0 ? "up" : "down"));
-        const diff = P.rv - P.iv;
-        edge.textContent = diff > 0.02 ? `Edge: realized ${F.pct(P.rv, 0)} > implied ${F.pct(P.iv, 0)} \u2014 long gamma should win on average` : diff < -0.02 ? `Edge: realized ${F.pct(P.rv, 0)} < implied ${F.pct(P.iv, 0)} \u2014 you overpaid; theta should win` : "Fair fight: realized \u2248 implied \u2014 expect P&L near zero on average";
+        const diff = P2.rv - P2.iv;
+        edge.textContent = diff > 0.02 ? `Edge: realized ${F.pct(P2.rv, 0)} > implied ${F.pct(P2.iv, 0)} \u2014 long gamma should win on average` : diff < -0.02 ? `Edge: realized ${F.pct(P2.rv, 0)} < implied ${F.pct(P2.iv, 0)} \u2014 you overpaid; theta should win` : "Fair fight: realized \u2248 implied \u2014 expect P&L near zero on average";
         edge.className = "pill mt1 " + (diff > 0.02 ? "gain" : diff < -0.02 ? "loss" : "");
       }
       btnRow.appendChild(el("button", { class: "btn primary", onclick: rerun }, "\u{1F3B2} Run another path"));
@@ -8687,7 +8759,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         let sum = 0, wins = 0;
         const N = 60;
         for (let i = 0; i < N; i++) {
-          const r = runScalp(P.iv, P.rv, 30, P.hedge);
+          const r = runScalp(P2.iv, P2.rv, 30, P2.hedge);
           sum += r.total;
           if (r.total > 0) wins++;
         }
@@ -10771,12 +10843,12 @@ This is why the simulator matters more than the formula sheet. Run the same path
         ["cards", "\u{1F0CF}", "Flash Cards", "Ten big ideas, kid-sized. Flip and learn."]
       ];
       const grid = el("div", { class: "grid2 mt2" });
-      for (const [id, icon, name, desc] of games) {
+      for (const [id, icon2, name, desc] of games) {
         const played = p && p.games && p.games[id];
         grid.appendChild(el(
           "a",
           { class: "game-card", href: "#/kids/" + id, style: "text-decoration:none;color:inherit" },
-          el("div", { class: "gi" }, icon),
+          el("div", { class: "gi" }, icon2),
           el("div", { style: "font-weight:700;font-size:17px" }, name, played ? el("span", { class: "star" }, " \u2605") : ""),
           el("div", { class: "sub" }, desc)
         ));
