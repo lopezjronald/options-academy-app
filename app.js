@@ -1661,7 +1661,8 @@
     clock: '<circle cx="12" cy="12" r="9.25"/><path d="M12 6.5V12l3.5 2"/>',
     bell: '<path d="M18 9.5a6 6 0 0 0-12 0c0 5-2 6-2 6h16s-2-1-2-6z"/><path d="M10.25 19.5a2 2 0 0 0 3.5 0"/>',
     bars: '<path d="M4.5 20V10"/><path d="M10.5 20V4.5"/><path d="M16.5 20v-7.5"/><path d="M21 20H3"/>',
-    flag: '<path d="M5 21V4"/><path d="M5 4.5c4-2 7 2 11.5.5V13c-4.5 1.5-7.5-2.5-11.5-.5"/>'
+    flag: '<path d="M5 21V4"/><path d="M5 4.5c4-2 7 2 11.5.5V13c-4.5 1.5-7.5-2.5-11.5-.5"/>',
+    grid: '<rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><rect x="13.5" y="13.5" width="7" height="7" rx="1"/>'
   };
   var MAP = {
     "\u{1F6E1}\uFE0F": "shield",
@@ -1851,7 +1852,7 @@
       chart.h = h;
       lastDrawAt = Date.now();
       ctx.clearRect(0, 0, w, h);
-      ctx.font = '10.5px "Cascadia Mono", Consolas, ui-monospace, monospace';
+      ctx.font = `${parseFloat(cssVar("--chart-axis")) || 10.5}px "Cascadia Mono", Consolas, ui-monospace, monospace`;
       const grid = resolve("--grid"), muted = resolve("--ink-3");
       ctx.strokeStyle = grid;
       ctx.lineWidth = 1;
@@ -4269,7 +4270,7 @@
     const build2 = isFamilyBuild() ? "founder" : "commercial";
     const hash = (
       /** @type {any} */
-      "2026-11-12"
+      "2026-11-13"
     );
     return `${hash} \xB7 ${build2}`;
   }
@@ -4951,6 +4952,7 @@
     { id: "strategy", icon: "\u{1F9E9}", ic: "layers", label: "Strategy Lab" },
     { id: "greeks", icon: "\u{1F3DB}\uFE0F", ic: "temple", label: "Greeks Lab" },
     { id: "vol", icon: "\u{1F30A}", ic: "wave", label: "Volatility Lab" },
+    { id: "risk", icon: "\u{1F4CA}", ic: "grid", label: "Risk Desk" },
     { id: "journal", icon: "\u{1F4D3}", ic: "notebook", label: "Journal" },
     { id: "missions", icon: "\u{1F9ED}", ic: "compass", label: "Missions" },
     { sect: "You" },
@@ -4962,6 +4964,7 @@
     { id: "strategy", icon: "\u{1F9E9}", ic: "layers", label: "Strategy Lab" },
     { id: "greeks", icon: "\u{1F3DB}\uFE0F", ic: "temple", label: "Greeks Lab" },
     { id: "vol", icon: "\u{1F30A}", ic: "wave", label: "Volatility Lab" },
+    { id: "risk", icon: "\u{1F4CA}", ic: "grid", label: "Risk Desk" },
     { id: "missions", icon: "\u{1F9ED}", ic: "compass", label: "Missions" },
     { id: "journal", icon: "\u{1F4D3}", ic: "notebook", label: "Journal" }
   ];
@@ -5295,7 +5298,7 @@
     }
     const landing = name === "start";
     document.body.classList.toggle("oa-landing", landing);
-    const view15 = VIEWS[name] || VIEWS.home;
+    const view16 = VIEWS[name] || VIEWS.home;
     if (currentCleanup) {
       try {
         currentCleanup();
@@ -5307,7 +5310,7 @@
     refreshTabActive(name);
     contentEl.innerHTML = "";
     window.scrollTo(0, 0);
-    currentCleanup = view15.render(contentEl, parts.slice(1)) || null;
+    currentCleanup = view16.render(contentEl, parts.slice(1)) || null;
   }
   function boot(views) {
     VIEWS = { welcome: view, upgrade: view2, settings: view3, start: view5, ...views };
@@ -10991,8 +10994,235 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
   };
 
-  // src/ui/views/progress.js
+  // src/ui/views/risk.js
+  var SPOT_SHOCKS = [-0.15, -0.1, -0.05, 0, 0.05, 0.1, 0.15];
+  var IV_SHOCKS = [0.2, 0.1, 0, -0.1];
+  var DAY_OPTS = [0, 1, 3, 5];
+  function buildBook(positions) {
+    const book = [];
+    for (const pos of positions) {
+      const S0 = market.quote(pos.sym).S;
+      for (const l of pos.legs) {
+        if (l.kind === "stock") {
+          book.push({ pos, kind: "stock", side: l.side, qty: l.qty, S0 });
+          continue;
+        }
+        const q = market.optQuote(pos.sym, l.strike, l.expDay, l.kind);
+        book.push({
+          pos,
+          kind: l.kind,
+          side: l.side,
+          qty: l.qty,
+          S0,
+          strike: l.strike,
+          iv: q.iv,
+          dte: q.dte,
+          basePx: price({ S: S0, K: l.strike, T: q.dte / TRADING_YEAR, v: q.iv, type: l.kind })
+        });
+      }
+    }
+    return book;
+  }
+  function legStress(leg, dS, dIv, dDays) {
+    if (leg.kind === "stock") return leg.side * leg.qty * leg.S0 * dS;
+    const newPx = price({
+      S: leg.S0 * (1 + dS),
+      K: leg.strike,
+      T: Math.max(0, leg.dte - dDays) / TRADING_YEAR,
+      v: Math.max(0.01, leg.iv + dIv),
+      type: leg.kind
+    });
+    return leg.side * leg.qty * 100 * (newPx - leg.basePx);
+  }
+  function cellStyle(v, maxAbs) {
+    if (Math.abs(v) < 1) return "";
+    const a = Math.min(1, Math.abs(v) / Math.max(1, maxAbs));
+    const tint = 0.06 + a * 0.22;
+    return v > 0 ? `background:color-mix(in srgb, var(--gain-mark) ${Math.round(tint * 100)}%, transparent)` : `background:color-mix(in srgb, var(--loss) ${Math.round(tint * 100)}%, transparent)`;
+  }
   var view12 = {
+    render(root) {
+      root.appendChild(el("div", { class: "eyebrow" }, "Risk Desk"));
+      root.appendChild(el("h1", {}, "Portfolio stress test"));
+      root.appendChild(el(
+        "p",
+        { class: "sub", style: "max-width:70ch" },
+        "Every open position repriced across simultaneous spot and implied-volatility shocks \u2014 the question a desk asks before the move happens, not after."
+      ));
+      let dDays = 0;
+      const dayBtns = DAY_OPTS.map((d) => el("button", {
+        type: "button",
+        class: d === dDays ? "on" : "",
+        onclick: () => {
+          dDays = d;
+          dayBtns.forEach((b, i) => b.classList.toggle("on", DAY_OPTS[i] === d));
+          paint();
+        }
+      }, d === 0 ? "Today" : `+${d}d`));
+      const daySeg = el("div", { class: "seg", role: "group", "aria-label": "Days forward" });
+      dayBtns.forEach((b) => daySeg.appendChild(b));
+      const controls = el("div", { class: "field mt2" }, el("label", {}, "Time decay"), daySeg);
+      const body = el("div", {});
+      root.appendChild(controls);
+      root.appendChild(body);
+      function paintEmpty() {
+        controls.style.display = "none";
+        body.innerHTML = "";
+        body.appendChild(el(
+          "div",
+          { class: "card mt1" },
+          el("h3", {}, "No open positions to stress"),
+          el(
+            "p",
+            { class: "sub" },
+            "Open a position on the Live Market or build a spread in the Strategy Lab, then come back to see how it holds up when spot gaps and vol spikes at the same time."
+          ),
+          el(
+            "div",
+            { class: "btn-row mt1" },
+            el("a", { class: "btn primary", href: "#/market" }, "Open the Live Market"),
+            el("a", { class: "btn", href: "#/strategy" }, "Strategy Lab")
+          )
+        ));
+      }
+      function paint() {
+        const p = active();
+        const positions = p?.positions || [];
+        if (!positions.length) {
+          paintEmpty();
+          return;
+        }
+        controls.style.display = "";
+        body.innerHTML = "";
+        const book = buildBook(positions);
+        const grid = IV_SHOCKS.map((dIv) => SPOT_SHOCKS.map((dS) => book.reduce((s2, leg) => s2 + legStress(leg, dS, dIv, dDays), 0)));
+        const flat = grid.flat();
+        const maxAbs = Math.max(...flat.map(Math.abs), 1);
+        let worst = { v: Infinity, dS: 0, dIv: 0 };
+        IV_SHOCKS.forEach((dIv, r) => SPOT_SHOCKS.forEach((dS, c) => {
+          if (grid[r][c] < worst.v) worst = { v: grid[r][c], dS, dIv };
+        }));
+        const card = el("div", { class: "card mt1" });
+        card.appendChild(el(
+          "div",
+          { class: "flex-between" },
+          el("h3", {}, `Spot \xD7 IV shock matrix${dDays ? ` \xB7 ${dDays} trading day${dDays > 1 ? "s" : ""} forward` : ""}`),
+          el("span", { class: "small muted num" }, `${positions.length} position${positions.length === 1 ? "" : "s"}`)
+        ));
+        const tbl = el("table", { class: "oa risk-matrix" });
+        const head = el("tr", {}, el("th", { class: "rm-corner" }, "IV \\ Spot"));
+        for (const dS of SPOT_SHOCKS) {
+          head.appendChild(el(
+            "th",
+            { class: "num" + (dS === 0 ? " rm-base" : "") },
+            (dS > 0 ? "+" : "") + Math.round(dS * 100) + "%"
+          ));
+        }
+        tbl.appendChild(head);
+        IV_SHOCKS.forEach((dIv, r) => {
+          const tr = el(
+            "tr",
+            {},
+            el(
+              "th",
+              { class: "num" + (dIv === 0 ? " rm-base" : "") },
+              (dIv > 0 ? "+" : "") + Math.round(dIv * 100) + " pts"
+            )
+          );
+          SPOT_SHOCKS.forEach((dS, c) => {
+            const v = grid[r][c];
+            const isWorst = v === worst.v && worst.v < 0;
+            tr.appendChild(el("td", {
+              class: "num" + (isWorst ? " rm-worst" : ""),
+              style: cellStyle(v, maxAbs),
+              title: `Spot ${(dS > 0 ? "+" : "") + Math.round(dS * 100)}% \xB7 IV ${(dIv > 0 ? "+" : "") + Math.round(dIv * 100)} pts`
+            }, F.usdSigned(v, 0)));
+          });
+          tbl.appendChild(tr);
+        });
+        card.appendChild(el("div", { class: "risk-matrix-scroll" }, tbl));
+        card.appendChild(el(
+          "p",
+          { class: "small muted mt1", style: "margin-bottom:0" },
+          "Cells are P&L change from today's theoretical mark if spot and implied vol move together. Forward cells hold today's vol surface flat apart from your shock. Deep red corner = the scenario that hurts most."
+        ));
+        body.appendChild(card);
+        const eq = equity(p);
+        const bp = buyingPower(p);
+        const worstLoss = Math.min(0, worst.v);
+        const worstPct = eq > 0 ? worstLoss / eq : 0;
+        const stats = el(
+          "div",
+          { class: "stats mt2" },
+          el(
+            "div",
+            { class: "stat" },
+            el("div", { class: "k" }, "Worst scenario"),
+            el("div", { class: "v num down" }, F.usdSigned(worstLoss, 0))
+          ),
+          el(
+            "div",
+            { class: "stat" },
+            el("div", { class: "k" }, "Where it hits"),
+            el("div", { class: "v num" }, worstLoss < 0 ? `${worst.dS > 0 ? "+" : ""}${Math.round(worst.dS * 100)}% / ${worst.dIv > 0 ? "+" : ""}${Math.round(worst.dIv * 100)}pts` : "\u2014")
+          ),
+          el(
+            "div",
+            { class: "stat" },
+            el("div", { class: "k" }, "Of equity"),
+            el("div", { class: "v num" }, F.pct(Math.abs(worstPct), 1))
+          ),
+          el(
+            "div",
+            { class: "stat" },
+            el("div", { class: "k" }, "Buying power after"),
+            el("div", { class: "v num" }, F.usd(Math.max(0, bp + worstLoss), 0))
+          )
+        );
+        body.appendChild(stats);
+        if (worstPct <= -0.1) {
+          body.appendChild(el(
+            "p",
+            { class: "small mt1", style: "color:var(--loss)" },
+            "\u26A0 The worst cell costs more than 10% of equity \u2014 the sizing discipline the journal grades starts right here."
+          ));
+        }
+        if (worstLoss < 0) {
+          const byPos = /* @__PURE__ */ new Map();
+          for (const leg of book) {
+            const v = legStress(leg, worst.dS, worst.dIv, dDays);
+            byPos.set(leg.pos, (byPos.get(leg.pos) || 0) + v);
+          }
+          const contribs = [...byPos.entries()].sort((a, b) => a[1] - b[1]);
+          const cCard = el("div", { class: "card mt2" });
+          cCard.appendChild(el("h3", {}, "Who hurts in the worst scenario"));
+          for (const [pos, v] of contribs.slice(0, 5)) {
+            cCard.appendChild(el(
+              "div",
+              { class: "pos-greeks mt1" },
+              el("span", {}, `${pos.sym} \xB7 ${pos.label}`),
+              el("span", { class: "num " + (v >= 0 ? "up" : "down") }, F.usdSigned(v, 0))
+            ));
+          }
+          body.appendChild(cCard);
+        }
+      }
+      paint();
+      let tickN = 0;
+      const unTick = market.on("tick", () => {
+        if (++tickN % 3 === 0) paint();
+      });
+      const unDay = market.on("day", paint);
+      root.appendChild(simDisclaimer());
+      return () => {
+        unTick();
+        unDay();
+      };
+    }
+  };
+
+  // src/ui/views/progress.js
+  var view13 = {
     render(root) {
       const p = active();
       if (!p) {
@@ -11117,7 +11347,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
     return wrap;
   }
-  var view13 = {
+  var view14 = {
     render(root) {
       root.appendChild(viewHeader("Trade Journal", "Process Score"));
       if (!isFamilyBuild() && tier() === "free") {
@@ -11677,7 +11907,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       }
     };
   }
-  var view14 = {
+  var view15 = {
     render(root, params) {
       if (params[0]) return renderRunner(root, params[0]);
       renderHub(root);
@@ -11686,7 +11916,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
 
   // src/main.js
   function start4() {
-    boot({ home: view6, learn: view7, strategy: view8, greeks: view9, vol: view10, market: view11, progress: view12, journal: view13, missions: view14, legal: view4 });
+    boot({ home: view6, learn: view7, strategy: view8, greeks: view9, vol: view10, market: view11, risk: view12, progress: view13, journal: view14, missions: view15, legal: view4 });
     start3();
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       navigator.serviceWorker.register("./sw.js").catch(() => {

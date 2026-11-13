@@ -7,25 +7,25 @@
 :root {
   color-scheme: light;
   /* surfaces */
-  --page: #f9f9f7;
-  --card: #fcfcfb;
-  --card-2: #f3f2ee;
-  --inset: #eeede8;
+  --page: #faf6ee;
+  --card: #fdfaf3;
+  --card-2: #f6f2e8;
+  --inset: #f3efe4;
   /* ink */
   --ink: #0b0b0b;
   --ink-2: #52514e;
   --ink-3: #6e6c66; /* 4.98:1 on page (AA) */
-  --hairline: #e1e0d9;
+  --hairline: #e5dfd0;
   --border: rgba(11, 11, 11, 0.10);
-  --baseline: #c3c2b7;
+  --baseline: #c8c2b0;
   /* brand accent: ticker brass */
-  --brass: #96690a;
+  --brass: #8d6209;
   --brass-strong: #7a5500;
-  --brass-soft: rgba(150, 105, 10, 0.10);
-  --brass-ring: rgba(150, 105, 10, 0.35);
+  --brass-soft: rgba(141, 98, 9, 0.10);
+  --brass-ring: rgba(141, 98, 9, 0.35);
   --amber: #c8870a;
-  --brass-grad: linear-gradient(135deg, #7a540a 0%, var(--brass) 100%); /* white text 4.86:1+ on both stops (AA) */
-  --brass-glow: 0 0 12px rgba(150, 105, 10, 0.28);
+  --brass-grad: linear-gradient(135deg, #7a540a 0%, var(--brass) 100%); /* white text 5.4:1+ on both stops (AA) */
+  --brass-glow: 0 0 12px rgba(141, 98, 9, 0.28);
   /* semantics: P&L only */
   --gain: #006300;
   --gain-mark: #0ca30c;
@@ -36,7 +36,7 @@
   /* chart series (validated categorical order) */
   --s1: #2a78d6; --s2: #0b7285; --s3: #e87ba4; --s4: #eda100;
   --s5: #1baf7a; --s6: #eb6834; --s7: #4a3aa7; --s8: #5f6b7a;
-  --grid: #e1e0d9;
+  --grid: #e5dfd0; --chart-axis: 10.5;
   /* type */
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
   --sans: "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -72,7 +72,7 @@
     --loss-soft: rgba(230, 103, 103, 0.14);
     --s1: #3987e5; --s2: #35b5c9; --s3: #d55181; --s4: #c98500;
     --s5: #199e70; --s6: #d95926; --s7: #9085e9; --s8: #9aa7b8;
-    --grid: #2c2c2a;
+    --grid: #2c2c2a; --chart-axis: 11;
     --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);
   }
 }
@@ -102,28 +102,28 @@
   --loss-soft: rgba(230, 103, 103, 0.14);
   --s1: #3987e5; --s2: #35b5c9; --s3: #d55181; --s4: #c98500;
   --s5: #199e70; --s6: #d95926; --s7: #9085e9; --s8: #9aa7b8;
-  --grid: #2c2c2a;
+  --grid: #2c2c2a; --chart-axis: 11;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 6px 20px rgba(0, 0, 0, 0.35);
 }
 :root[data-theme="light"] {
   color-scheme: light;
-  --page: #f9f9f7;
-  --card: #fcfcfb;
-  --card-2: #f3f2ee;
-  --inset: #eeede8;
+  --page: #faf6ee;
+  --card: #fdfaf3;
+  --card-2: #f6f2e8;
+  --inset: #f3efe4;
   --ink: #0b0b0b;
   --ink-2: #52514e;
   --ink-3: #6e6c66; /* 4.98:1 on page (AA) */
-  --hairline: #e1e0d9;
+  --hairline: #e5dfd0;
   --border: rgba(11, 11, 11, 0.10);
-  --baseline: #c3c2b7;
-  --brass: #96690a;
+  --baseline: #c8c2b0;
+  --brass: #8d6209;
   --brass-strong: #7a5500;
-  --brass-soft: rgba(150, 105, 10, 0.10);
-  --brass-ring: rgba(150, 105, 10, 0.35);
+  --brass-soft: rgba(141, 98, 9, 0.10);
+  --brass-ring: rgba(141, 98, 9, 0.35);
   --amber: #c8870a;
-  --brass-grad: linear-gradient(135deg, #7a540a 0%, var(--brass) 100%); /* white text 4.86:1+ on both stops (AA) */
-  --brass-glow: 0 0 12px rgba(150, 105, 10, 0.28);
+  --brass-grad: linear-gradient(135deg, #7a540a 0%, var(--brass) 100%); /* white text 5.4:1+ on both stops (AA) */
+  --brass-glow: 0 0 12px rgba(141, 98, 9, 0.28);
   --gain: #006300;
   --gain-mark: #0ca30c;
   --gain-soft: rgba(12, 163, 12, 0.10);
@@ -131,7 +131,7 @@
   --loss-soft: rgba(208, 59, 59, 0.10);
   --s1: #2a78d6; --s2: #0b7285; --s3: #e87ba4; --s4: #eda100;
   --s5: #1baf7a; --s6: #eb6834; --s7: #4a3aa7; --s8: #5f6b7a;
-  --grid: #e1e0d9;
+  --grid: #e5dfd0; --chart-axis: 10.5;
   --shadow: 0 1px 2px rgba(11, 11, 11, 0.05), 0 4px 16px rgba(11, 11, 11, 0.05);
 }
 
@@ -444,7 +444,7 @@ input[type="range"] { accent-color: var(--brass); width: 100%; }
 .lesson-item:hover { background: var(--card-2); }
 .lesson-item .lcheck {
   width: 22px; height: 22px; flex: 0 0 22px; border-radius: 50%;
-  border: 2px solid var(--baseline);
+  border: 2px solid var(--ink-3); /* >=3:1 non-text contrast (was --baseline, 1.75:1) */
   display: grid; place-items: center; font-size: 12px; color: #fff;
 }
 .lesson-item.done .lcheck { background: var(--gain-mark); border-color: var(--gain-mark); }
@@ -1280,3 +1280,14 @@ body.oa-landing .oa-content {
 }
 :root[data-theme="dark"] table.oa td { font-size: 13px; }
 :root[data-theme="dark"] .oa-tq { font-size: 13px; }
+
+/* ---------- Risk Desk ---------- */
+.risk-matrix-scroll { overflow-x: auto; }
+table.oa.risk-matrix { margin-top: 10px; min-width: 580px; border-collapse: collapse; width: 100%; }
+table.oa.risk-matrix th, table.oa.risk-matrix td { padding: 7px 9px; text-align: right; }
+table.oa.risk-matrix th { font-size: 10.5px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink-3); }
+table.oa.risk-matrix th.rm-corner { font-size: 9.5px; text-align: left; }
+table.oa.risk-matrix .rm-base { color: var(--brass-strong); }
+table.oa.risk-matrix tr th:first-child { text-align: left; }
+table.oa.risk-matrix td { border-top: 1px solid var(--hairline); font-size: 12.5px; }
+table.oa.risk-matrix td.rm-worst { outline: 2px solid var(--loss); outline-offset: -2px; border-radius: 3px; font-weight: 700; }
