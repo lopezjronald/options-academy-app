@@ -4717,7 +4717,7 @@
     const c = 2 * Math.PI * r;
     const score = 82;
     const dash = score / 100 * c;
-    const svg = el("div", { class: "fd-score-ring", "aria-label": "Process Score 82 of 100" });
+    const svg = el("div", { class: "fd-score-ring", role: "img", "aria-label": "Process Score 82 of 100" });
     svg.innerHTML = `<svg viewBox="0 0 100 100" width="100" height="100" aria-hidden="true">
     <circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--inset)" stroke-width="8"/>
     <circle cx="50" cy="50" r="${r}" fill="none" stroke="var(--brass)" stroke-width="8"
