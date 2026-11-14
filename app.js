@@ -5890,6 +5890,35 @@
       "Sandboxed markets with clear objectives. Defined-risk only \u2014 practice the playbook before you freestyle on the Live Market."
     ));
     root.appendChild(simDisclaimer());
+    const demosDone = readDemos();
+    root.appendChild(el("h3", { class: "mission-week-head mt2" }, "Strategy demos"));
+    root.appendChild(el(
+      "p",
+      { class: "sub", style: "max-width:68ch;margin-top:4px" },
+      "Watch the app place each strategy step by step with plain-English captions \u2014 then do it yourself with a guide. Free for everyone."
+    ));
+    const dgrid = el("div", { class: "grid2 mt1" });
+    for (const d of DEMOS) {
+      const watched = typeof demosDone[d.id] === "number";
+      const did = typeof demosDone[d.id + ":do"] === "number";
+      dgrid.appendChild(el(
+        "div",
+        { class: "card pad-s" },
+        el(
+          "div",
+          { class: "flex-between" },
+          el("h3", { style: "margin:0;font-size:15px" }, d.title.replace(/, step by step$/, "")),
+          watched || did ? el("span", { class: "pill gain" }, did ? "\u2713 Done" : "\u2713 Watched") : el("span", { class: "pill brass" }, "Free")
+        ),
+        el(
+          "div",
+          { class: "btn-row mt1" },
+          el("a", { class: "btn sm" + (watched ? "" : " primary"), href: "#/demo/" + d.id + "/watch" }, "Watch"),
+          el("a", { class: "btn sm" + (watched && !did ? " primary" : ""), href: "#/demo/" + d.id + "/do" }, "Do it guided")
+        )
+      ));
+    }
+    root.appendChild(dgrid);
     const free = !isFamilyBuild() && tier() === "free";
     const all = list();
     const week1 = all.filter((m) => !String(m.id).startsWith("w2-")).slice(0, 10);
