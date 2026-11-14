@@ -4954,12 +4954,20 @@
 
   // src/ui/legal.js
   var CFTC_441 = "HYPOTHETICAL OR SIMULATED PERFORMANCE RESULTS HAVE CERTAIN LIMITATIONS. UNLIKE AN ACTUAL PERFORMANCE RECORD, SIMULATED RESULTS DO NOT REPRESENT ACTUAL TRADING. ALSO, SINCE THE TRADES HAVE NOT BEEN EXECUTED, THE RESULTS MAY HAVE UNDER-OR-OVER COMPENSATED FOR THE IMPACT, IF ANY, OF CERTAIN MARKET FACTORS, SUCH AS LACK OF LIQUIDITY. SIMULATED TRADING PROGRAMS IN GENERAL ARE ALSO SUBJECT TO THE FACT THAT THEY ARE DESIGNED WITH THE BENEFIT OF HINDSIGHT. NO REPRESENTATION IS BEING MADE THAT ANY ACCOUNT WILL OR IS LIKELY TO ACHIEVE PROFIT OR LOSSES SIMILAR TO THOSE SHOWN.";
-  var ACK_TEXT = "I understand Options Academy is for education only \u2014 it is not investment, financial, or trading advice; it is not a broker or advisor; all markets here are simulated; and options trading involves substantial risk of loss.";
+  var ACK_TEXT = "I understand Options Academy is for education only \u2014 it is not investment, financial, or trading advice; it is not a broker or advisor; all trading and every account here are simulated and no real orders are ever placed; market quotes are simulated unless I connect my own market-data account; and options trading involves substantial risk of loss.";
   function simDisclaimer() {
     return el(
       "p",
       { class: "sim-disclaimer small muted", role: "note" },
       "Simulated market for education only \u2014 not investment advice; hypothetical results have inherent limitations. ",
+      el("a", { href: "#/legal" }, "Full disclosures")
+    );
+  }
+  function dataDisclaimer() {
+    return el(
+      "p",
+      { class: "sim-disclaimer small muted", role: "note" },
+      "Delayed market data for education only \u2014 not investment advice; all trading here is simulated and hypothetical results have inherent limitations. ",
       el("a", { href: "#/legal" }, "Full disclosures")
     );
   }
@@ -4970,7 +4978,7 @@
       const S2 = (title, ...kids) => root.appendChild(el("div", { class: "card mt2", style: "max-width:76ch" }, el("h3", {}, title), ...kids));
       S2(
         "Education only \u2014 not advice",
-        el("p", { class: "sub" }, "Options Academy (operated by Steadfast Labs LLC) is an educational product. Nothing here is investment, financial, legal, or tax advice, and nothing is a recommendation to buy or sell any security or derivative. We are not a registered investment adviser or broker-dealer. Every market, price, and account on this platform is simulated.")
+        el("p", { class: "sub" }, "Options Academy (operated by Steadfast Labs LLC) is an educational product. Nothing here is investment, financial, legal, or tax advice, and nothing is a recommendation to buy or sell any security or derivative. We are not a registered investment adviser or broker-dealer. Every account, order, and fill on this platform is simulated \u2014 the platform never places real orders and never connects to a brokerage account for trading. Market prices are simulated by default; if you connect your own market-data account, the delayed or real quotes shown are for context only, and all trading remains simulated.")
       );
       S2(
         "Hypothetical performance (CFTC Rule 4.41)",
@@ -6855,7 +6863,7 @@
                 "id": "f-risk-vs-reward",
                 "title": "Surviving the Worst Case Comes First",
                 "objective": "Ask what the worst-case dollar loss is before chasing a profit, and see why a 90% win rate can still lose money.",
-                "body": "You would never drive a 15-ton truck across a wooden bridge rated for 10 tons just because it holds up 9 times out of 10. In trading, the drop from your account peak to its bottom during a losing stretch is called a **drawdown**, such as a $10,000 account dropping $2,000 to $8,000. Before Maria looks at what she might make on Rocket Robotics ($182), she asks whether her account can survive the worst-case dollar loss. The bridge analogy stops there: a collapsed bridge ends the trip forever, while a small cash loss can be recovered if you protect your core savings.\n\nBeginners often brag about their **win rate**, which is the share of trades that make money, such as winning 90 out of 100 tries (90%, or 9 in 10). Suppose Sam collects $100 on 90 trades (+$9,000 total) by making promises on PowerSun Energy ($95), but loses $2,000 on the other 10 trades (\u2212$20,000 total). Despite winning 9 times out of 10, Sam finishes down $11,000 across those 100 trades ($9,000 minus $20,000 is \u2212$11,000). In plain words: winning often means nothing if one bad day wipes out two years of small wins.\n\nEven a good average payout is not the whole story if you need cash on a deadline. Suppose Maria has $10,000 and needs $500 for tuition next month: a safe government bill pays a sure $500, while shares of Lumend Brands ($42) have a 50% chance, or 1 in 2, of gaining $1,250 and a 50% chance of gaining $0. The shares average $625 ($1,250 \xD7 50% is $625), but Maria picks the sure $500 because a $0 month means missing tuition.\n\nHigher potential returns exist in markets because someone has to stomach the bumpy ride. When a stranger online promises Maria an 8% monthly return ($800 a month on $10,000) with zero chance of losing money, she walks away. That pitch is either lying or hiding a rare $5,000 crash that has not hit yet. In plain words: always check the worst-case dollar loss first, and make sure you can afford it on your worst day.",
+                "body": "You would never drive a 15-ton truck across a wooden bridge rated for 10 tons just because it holds up 9 times out of 10. In trading, the drop from your account peak to its bottom during a losing stretch is called a **drawdown**, such as a $10,000 account dropping $2,000 to $8,000. Before Maria looks at what she might make on Rocket Robotics ($182), she asks whether her account can survive the worst-case dollar loss. The bridge analogy stops there: a collapsed bridge ends the trip forever, while a small cash loss can be recovered if you protect your core savings.\n\nBeginners often brag about their **win rate**, which is the share of trades that make money, such as winning 90 out of 100 tries (90%, or 9 in 10). Suppose Sam collects $100 on 90 trades (+$9,000 total) by making promises on PowerSun Energy ($95), but loses $2,000 on the other 10 trades (\u2212$20,000 total). Despite winning 9 times out of 10, Sam finishes down $11,000 across those 100 trades ($9,000 minus $20,000 is \u2212$11,000). In plain words: winning often means nothing if one bad day wipes out two years of small wins.\n\nEven a good average payout is not the whole story if you need cash on a deadline. Suppose Maria has $10,000 and needs $500 for tuition next month, and a safe government bill pays a sure $500. Shares of Lumend Brands ($42) instead have a 50% chance, or 1 in 2, of gaining $1,250 and a 50% chance of gaining $0. The shares average $625 ($1,250 \xD7 50% is $625), but Maria picks the sure $500 because a $0 month means missing tuition.\n\nHigher potential returns exist in markets because someone has to stomach the bumpy ride. When a stranger online promises Maria an 8% monthly return ($800 a month on $10,000) with zero chance of losing money, she walks away. That pitch is either lying or hiding a rare $5,000 crash that has not hit yet. In plain words: always check the worst-case dollar loss first, and make sure you can afford it on your worst day.",
                 "key_takeaways": [
                   "Higher potential returns always come with real downside swings.",
                   "Ask two questions before every trade: what is the worst-case dollar loss, and can my account survive it?",
@@ -6910,7 +6918,7 @@
                 "id": "f-what-is-a-stock",
                 "title": "What Owning a Share of Stock Really Means",
                 "objective": "See how a share of stock gives you a slice of a real business, and how buyers and sellers set its price every second.",
-                "body": "You have split the cost of a yard-sale table with friends so everyone gets a share of the cash. When Burgess Restaurant Group ($67) wants $670,000 for new kitchens, it sells 10,000 ownership slices called **common stock** at $67 each. Buying 10 shares for $670 ($67 \xD7 10 shares is $670) gives Maria a real slice of future profits. The yard-sale analogy stops there: Maria can sell her shares in seconds without asking the other owners.\n\nWhen Maria sells her 10 shares, she does not ask Burgess Restaurant Group for her $670 back. On the exchange, buyers post a top offer of $66.95 and sellers ask $67.05, leaving a $0.10 gap called the **bid-ask spread**. Sam pays $67.05 per share ($670.50 for 10 shares) to buy now, or gets $66.95 ($669.50 total) when selling. In plain words: a share is worth what a buyer will pay today, and crossing the gap between buyers and sellers costs a small fee.\n\nWhy does Lumend Brands trade at $42 in the morning and $40 by lunch? All day long, people update what they think the company will earn next year. If a surprise report says shipping costs jumped, buyers lower their offers from $42 to $40, cutting the value of Maria's 100 shares from $4,200 to $4,000 ($2 \xD7 100 shares is $200). Nobody at the exchange sets an official price\u2014the last trade between a buyer and a seller is the price.\n\nBefore buying 100 shares of Lumend Brands at $42 for $4,200, Sam checks his worst-case dollar loss. Unlike a bank loan, a company makes no promise to pay Sam back his $4,200 if sales collapse. If Lumend Brands goes out of business and the share price hits $0, Sam loses the entire $4,200 he paid, though he can never lose more than that $4,200. In plain words: buying shares gives you open-ended upside if the business grows, and your worst case in dollars is the full amount you paid.",
+                "body": "You have split the cost of a yard-sale table with friends so everyone gets a share of the cash. When Burgess Restaurant Group ($67) wants $670,000 for new kitchens, it sells 10,000 ownership slices called **common stock** at $67 each. Buying 10 shares for $670 ($67 \xD7 10 shares is $670) gives Maria a real slice of future profits. The yard-sale analogy stops there: Maria can sell her shares in seconds without asking the other owners.\n\nWhen Maria sells her 10 shares, she does not ask Burgess Restaurant Group for her $670 back. On the exchange, buyers post a top offer of $66.95 and sellers ask $67.05, leaving a $0.10 gap called the **bid-ask spread**. Sam pays $67.05 per share ($670.50 for 10 shares) to buy now, or gets $66.95 ($669.50 total) when selling. In plain words: a share is worth what a buyer will pay today, and crossing the gap between buyers and sellers costs a small fee.\n\nWhy does Lumend Brands trade at $42 in the morning and $40 by lunch? All day long, people update what they think the company will earn next year. If a surprise report says shipping costs jumped, buyers lower their offers from $42 to $40, cutting Maria's 100 shares from $4,200 to $4,000 ($2 \xD7 100 shares is $200). Nobody at the exchange sets an official price\u2014the last trade between a buyer and a seller is the price.\n\nBefore buying 100 shares of Lumend Brands at $42 for $4,200, Sam checks his worst-case dollar loss. Unlike a bank loan, a company makes no promise to pay Sam back his $4,200 if sales collapse. If Lumend Brands goes out of business and the share price hits $0, Sam loses the entire $4,200 he paid, though he can never lose more than that $4,200. In plain words: buying shares gives you open-ended upside if the business grows, and your worst case in dollars is the full amount you paid.",
                 "key_takeaways": [
                   "A share of common stock is a real slice of a business, its assets, and its future profits.",
                   "You sell shares to other people on the exchange, where the gap between buyer and seller prices is the bid-ask spread.",
@@ -6959,7 +6967,7 @@
                 "id": "f-diversification",
                 "title": "Why Owning Different Businesses Smooths the Ride",
                 "objective": "Spread your cash across businesses that react differently to the same news, and see when that protection can fail.",
-                "body": "You have packed both an umbrella and sunglasses for a trip so neither forecast ruins your day. Splitting $9,500 across businesses that react differently to the same news\u2014like $4,750 in PowerSun Energy ($95) and $4,750 in Burgess Restaurant Group ($67)\u2014is called **diversification**. When fuel prices jump, a $400 gain on PowerSun can offset a $300 dip on Burgess. The trip analogy stops there: weather gear never fails at once, while all stocks can drop together in a panic.\n\nHow closely two stocks move together on the same day is called **correlation**, measured on a scale from \u22121 to +1 where +1 means they move in lockstep. Suppose Sam puts $9,100 across five fast-growing robotics companies, including 10 shares of Rocket Robotics ($182) for $1,820. Because all five share a correlation near +1, a single jump in interest rates can knock 10% off every one of them, costing Sam $910 in one afternoon. In plain words: owning five stocks in the same industry is just one big bet wearing five different shirts.\n\nNow compare Maria's mix of Lumend Brands ($42), PowerSun Energy ($95), and Burgess Restaurant Group ($67). Suppose each stock has a 60% chance, or 3 in 5, of gaining $300 this year and a 40% chance, or 2 in 5, of losing $150, for an average gain of $120 per stock. By holding $3,000 in each instead of $9,000 in just one, Maria keeps the same $360 combined average gain while cutting her daily dollar swings nearly in half. One company's rough quarter gets cushioned by a steady quarter at the other two.\n\nThere is one catch every stock owner must respect. During a sudden market-wide scare, nervous traders sell everything at once to raise cash, pushing correlations across almost all stocks toward +1. In a 20% market drop, even Maria's $9,000 three-stock mix can lose $1,800 in a single week. In plain words: spreading cash across different industries protects you from one company blowing up, but only true insurance\u2014like the option contracts you will meet next\u2014puts a hard floor under a market-wide crash.",
+                "body": "You have packed both an umbrella and sunglasses for a trip so neither forecast ruins your day. Splitting $9,500 across businesses that react differently to the same news\u2014like $4,750 in PowerSun Energy ($95) and $4,750 in Burgess Restaurant Group ($67)\u2014is called **diversification**. When fuel prices jump, a $400 gain on PowerSun can offset a $300 dip on Burgess. The trip analogy stops there: weather gear never fails at once, while all stocks can drop together in a panic.\n\nHow closely two stocks move together on the same day is called **correlation**, measured on a scale from \u22121 to +1 where +1 means they move in lockstep. Suppose Sam puts $9,100 across five fast-growing robotics companies, including 10 shares of Rocket Robotics ($182) for $1,820. Because all five share a correlation near +1, a single jump in interest rates can knock 10% off every one of them, costing Sam $910 in one afternoon. In plain words: owning five stocks in the same industry is just one big bet wearing five different shirts.\n\nNow compare Maria's mix of Lumend Brands ($42), PowerSun Energy ($95), and Burgess Restaurant Group ($67). Suppose each stock has a 60% chance, or 3 in 5, of gaining $300 this year and a 40% chance, or 2 in 5, of losing $150. That works out to an average gain of $120 per stock. By holding $3,000 in each instead of $9,000 in just one, Maria keeps the same $360 combined average gain while cutting her daily dollar swings nearly in half. One company's rough quarter gets cushioned by a steady quarter at the other two.\n\nThere is one catch every stock owner must respect. During a sudden market-wide scare, nervous traders sell everything at once to raise cash, pushing correlations across almost all stocks toward +1. In a 20% market drop, even Maria's $9,000 three-stock mix can lose $1,800 in a single week. Only true insurance\u2014like the option contracts you will meet next\u2014puts a hard floor under a market-wide crash. In plain words: spreading cash across different industries protects you from one company blowing up, not from everything falling at once.",
                 "key_takeaways": [
                   "Diversification spreads your cash across businesses that react differently to the same news.",
                   "Owning five companies in the same tech sector is one big bet in disguise because their correlation sits near +1.",
@@ -7420,10 +7428,10 @@
               {
                 "id": "c-vertical-spreads",
                 "title": "Vertical Spreads: Cutting Your Cost by Capping Your Gain",
-                "objective": "Pair an option you buy with an option you sell at a different strike price, calculate your max profit, max loss, and breakeven, and see why capping your upside can lower your risk.",
-                "body": "You have bought a $300 festival pass and sold the Sunday wristband you cannot use for $100 to cut your cost. Pairing an option you buy with one you sell at a different strike is a **vertical spread**, like buying a $42 call and selling a $47 call. On Lumend Brands ($42), Maria pays $300 for the $42 call and collects $100 for the $47 call, capping her net loss at $200. The wristband analogy stops there: paper tickets have fixed prices, while both option legs trade up and down until expiration.\n\nWhy does Maria gladly cap her profit at the $47 strike on Lumend ($42)? She expects Lumend to grind toward $46 over 60 days, with only a 10% chance, or 1 in 10, of passing $47. Selling the $47 call lowers her breakeven to $44 ($42 plus $2 net cost) and caps her max profit at $300 ($500 gap minus $200). In plain words: selling a higher call gives up long-shot upside you do not expect so you pay less up front.\n\nSam flips that math around when he expects Burgess Restaurant Group ($67) to slide toward $62. Buying a $67 put for $320 and selling a $62 put for $120 builds a **bear put spread** for a $200 net cost. Sam caps his worst-case loss at $200, lowers his breakeven to $65 ($67 minus $2), and caps his profit at $300 ($500 minus $200). Whether you build a spread with calls or puts, the option you sell helps pay for the one you buy.\n\nOne timing quirk surprises almost every first-time spread trader. If Lumend hits $49 with 10 days left, Maria's $42/$47 call spread trades near $460 instead of $500 because the $47 call holds $40 of time value. Her spread is not broken\u2014that final $40 of profit arrives only when the $47 call's time value melts at expiration. In plain words: a winning spread reaches its full cap slowly, so closing early to bank $260 of a $300 max gain is smart.",
+                "objective": "Pair an option you buy with an option you sell at a different strike price. Calculate your max profit, max loss, and breakeven, and see why capping your upside can lower your risk.",
+                "body": "You have bought a $300 festival pass and sold the Sunday wristband you cannot use for $100 to cut your cost. Pairing an option you buy with one you sell at a different strike is a **vertical spread**, like buying a $42 call and selling a $47 call. On Lumend Brands ($42), Maria pays $300 for the $42 call and collects $100 for the $47 call, capping her net loss at $200. The wristband analogy stops there: paper tickets have fixed prices, while both option legs trade up and down until expiration.\n\nWhy does Maria gladly cap her profit at the $47 strike on Lumend ($42)? She expects Lumend to grind toward $46 over 60 days, with only a 10% chance, or 1 in 10, of passing $47. Selling the $47 call lowers her breakeven to $44 ($42 plus $2 net cost) and caps her max profit at $300 ($500 gap minus $200). In plain words: selling a higher call gives up long-shot upside you do not expect so you pay less up front.\n\nSam flips that math around when he expects Burgess Restaurant Group ($67) to slide toward $62. Buying a $67 put for $320 and selling a $62 put for $120 builds a **bear put spread** for a $200 net cost. Sam caps his worst-case loss at $200, lowers his breakeven to $65 ($67 minus $2), and caps his profit at $300 ($500 minus $200). In plain words: whether you build a spread with calls or puts, the option you sell helps pay for the one you buy.\n\nOne timing quirk surprises almost every first-time spread trader. If Lumend hits $49 with 10 days left, Maria's $42/$47 call spread trades near $460 instead of $500 because the $47 call holds $40 of time value. Her spread is not broken\u2014that final $40 of profit arrives only when the $47 call's time value melts at expiration. In plain words: a winning spread reaches its full cap slowly, so closing early to bank $260 of a $300 max gain is smart.",
                 "key_takeaways": [
-                  "In a bull call spread, your worst-case loss is the net cash paid ($200), your breakeven is the lower strike plus net cost ($42 + $2 = $44), and your max profit is the strike gap minus net cost ($500 \u2212 $200 = $300).",
+                  "In a bull call spread, your worst-case loss is the net cash paid ($200) and your breakeven is the lower strike plus net cost ($42 + $2 = $44). Your max profit is the strike gap minus net cost ($500 \u2212 $200 = $300).",
                   "Selling the further-away strike helps pay for the option you bought by giving up long-shot gains you do not expect.",
                   "A bear put spread works the same way for a drop: buy a higher-strike put and sell a lower-strike put in the same expiration.",
                   "Spreads reach their maximum dollar value only at the deadline because the option you sold holds onto a little time value until the end."
@@ -7586,7 +7594,7 @@
                 ],
                 "source": "OASI 5e volatility chapters (Part VI, The Basics of Volatility Trading); Volcube Trading Implied Volatility",
                 "sim": "vol",
-                "sim_task": "Open Volatility Lab and look at the Gamma scalping simulator card. Drag the IV you pay slider to 32% and the Realized vol slider to 18%, then click Run another path and Run 60 trials to see what happens when actual daily swings stay smaller than the IV forecast you paid for.",
+                "sim_task": "Open Volatility Lab and look at the Gamma scalping simulator card. Drag the IV you pay slider to 32% and the Realized vol slider to 18%. Then click Run another path and Run 60 trials to see what happens when actual daily swings stay smaller than the IV forecast you paid for.",
                 "quiz": [
                   {
                     "q": "Lumend Brands trades at $50 with an annual implied volatility (IV) of 32%. Using the divide-by-16 rule, roughly what typical 1-day dollar move are its options pricing in?",
@@ -11098,16 +11106,18 @@
   function optionQuote(option) {
     const bid = numeric(option.bid), ask = numeric(option.ask);
     const g = option.greeks || {};
+    const theta = numeric(g.theta);
     return {
       bid: bid ?? 0,
       ask: ask ?? 0,
       mid: num(bid !== null && ask !== null ? bid / 2 + ask / 2 : num(option.last)),
-      iv: num(g.mid_iv),
-      delta: num(g.delta),
-      gamma: num(g.gamma),
-      // Tradier theta is per calendar day; the sim uses per trading day (252/year).
-      theta: num(g.theta),
-      vega: num(g.vega),
+      // Absent greeks stay null — zero is a real greek value consumers must be able to trust.
+      iv: numeric(g.mid_iv),
+      delta: numeric(g.delta),
+      gamma: numeric(g.gamma),
+      // Tradier theta is per calendar day; the app quotes decay per trading day (252/year).
+      theta: theta === null ? null : theta * (365 / 252),
+      vega: numeric(g.vega),
       oi: num(option.open_interest),
       volume: num(option.volume)
     };
@@ -11272,7 +11282,7 @@
       { class: "sub", style: "max-width:72ch" },
       "Delayed sandbox quotes for study \u2014 no paper fills in Real mode. Tap Analyze on a strike to open it in the Strategy Lab with live mids."
     ));
-    root.appendChild(simDisclaimer());
+    root.appendChild(dataDisclaimer());
     root.appendChild(el(
       "div",
       { class: "btn-row mt1" },
@@ -11401,8 +11411,8 @@
       detailStats.appendChild(el("span", { class: "muted" }, "Delayed ~15 min"));
       if (ivRankVal != null) {
         ivChip.style.display = "";
-        ivChip.textContent = `IV rank ${Math.round(ivRankVal * 100)}`;
-        ivChip.title = "IV vs 60-day realized range (HV proxy) \u2014 model context, not a forecast";
+        ivChip.textContent = `IV vs HV ${Math.round(ivRankVal * 100)}`;
+        ivChip.title = "Where today's at-the-money implied volatility sits inside the recent realized-volatility range \u2014 an HV-based stand-in, not true IV rank (which needs a year of IV history)";
       } else {
         ivChip.style.display = "none";
       }
@@ -11516,6 +11526,7 @@
           const c = row.call || {};
           const p = row.put || {};
           const isAtm = k === atm;
+          const rowIvs = [c.iv, p.iv].filter((v) => v != null);
           const rEl = el(
             "div",
             { class: "ladder-row" + (isAtm ? " atm" : "") },
@@ -11533,7 +11544,7 @@
               "div",
               { class: "ladder-mid" },
               el("div", { class: "k num" }, F.usd(k, 2)),
-              el("div", { class: "iv" }, "IV " + F.pct(((c.iv || 0) + (p.iv || 0)) / 2 || 0, 0))
+              el("div", { class: "iv" }, rowIvs.length ? "IV " + F.pct(rowIvs.reduce((a, b) => a + b, 0) / rowIvs.length, 0) : "IV \u2014")
             ),
             el(
               "div",
@@ -11629,7 +11640,8 @@
           if (S2 && strikes.length && hist.length >= 2) {
             const atm = atmStrike(strikes, S2);
             const row = chain.find((r) => r.strike === atm) || chain[Math.floor(chain.length / 2)];
-            const atmIv = ((row?.call?.iv || 0) + (row?.put?.iv || 0)) / 2 || row?.call?.iv || row?.put?.iv;
+            const atmIvs = [row?.call?.iv, row?.put?.iv].filter((v) => v != null && isFinite(v));
+            const atmIv = atmIvs.length ? atmIvs.reduce((a, b) => a + b, 0) / atmIvs.length : null;
             const series = hvSeries(hist, 20);
             const ivHist = series.map((r) => r.hv).filter((v) => v != null && isFinite(v));
             ivRankVal = atmIv != null ? ivRank(atmIv, ivHist) : null;
