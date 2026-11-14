@@ -198,16 +198,18 @@ input, select { font: inherit; color: var(--ink); }
   font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
   color: var(--ink-3); padding: 14px 8px 4px;
 }
-.oa-nav a {
+.oa-nav a, .oa-nav button.oa-nav-link {
   display: flex; align-items: center; gap: 10px;
+  width: 100%; text-align: left;
   padding: 7px 10px; margin: 1px 0;
   border-radius: var(--r);
   color: var(--ink-2); text-decoration: none;
-  font-weight: 500; font-size: 14px;
+  font: inherit; font-weight: 500; font-size: 14px;
   border: 1px solid transparent;
+  background: transparent; cursor: pointer;
 }
-.oa-nav a:hover { background: var(--card-2); color: var(--ink); }
-.oa-nav a.active {
+.oa-nav a:hover, .oa-nav button.oa-nav-link:hover { background: var(--card-2); color: var(--ink); }
+.oa-nav a.active, .oa-nav button.oa-nav-link.active {
   background: var(--brass-soft);
   color: var(--brass-strong);
   border-color: var(--brass-ring);
@@ -291,6 +293,7 @@ a.card:hover, .card.interactive:hover, a.card.track-card:hover {
   .grid2, .grid3 { grid-template-columns: 1fr; }
   .oa-rail { width: 64px; flex-basis: 64px; }
   .oa-rail .oa-logo-name, .oa-rail .oa-logo-sub, .oa-rail .oa-nav a span.lbl,
+  .oa-rail .oa-nav button.oa-nav-link span.lbl,
   .oa-rail .oa-nav-sect, .oa-rail .oa-profile .pt { display: none; }
   .oa-content { padding: 18px 14px 50px; }
 }
@@ -654,17 +657,43 @@ input[type="range"] { accent-color: var(--brass); width: 100%; }
 
 /* ---------- mobile shell (<640px) ---------- */
 .oa-tabbar { display: none; }
-.oa-sheet-bg { display: none; }
 .oa-ticket-chip { display: none; }
 .oa-ticket-sheet { display: none; }
 .oa-coach { display: none; }
+
+/* Sheets work on the desktop rail (Labs) and on the phone tab bar. */
+.oa-sheet-bg {
+  display: block; position: fixed; inset: 0; z-index: 70;
+  background: rgba(11, 11, 11, 0.45);
+}
+.oa-sheet {
+  position: absolute; left: 50%; top: 10vh; transform: translateX(-50%);
+  width: min(420px, calc(100vw - 32px));
+  background: var(--card); border-radius: 14px;
+  border: 1px solid var(--hairline);
+  padding: 8px 14px 18px;
+  box-shadow: var(--shadow); max-height: 70vh; overflow-y: auto;
+}
+.oa-sheet-handle {
+  width: 36px; height: 4px; border-radius: 99px;
+  background: var(--baseline); margin: 4px auto 12px;
+}
+.oa-sheet-item {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; text-align: left; min-height: 48px;
+  padding: 10px 8px; border: 0; border-radius: var(--r);
+  background: transparent; color: var(--ink); font: inherit; font-weight: 600;
+  text-decoration: none; cursor: pointer;
+}
+.oa-sheet-item:hover, .oa-sheet-item:focus-visible { background: var(--card-2); }
+.oa-sheet-item .si { width: 28px; text-align: center; font-size: 20px; }
 
 @media (max-width: 640px) {
   #oa-app { flex-direction: column; min-height: 100dvh; }
   .oa-rail { display: none; }
   .oa-main { flex: 1; min-height: 0; padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
   .oa-content {
-    padding: 14px 12px calc(72px + env(safe-area-inset-bottom, 0px));
+    padding: 14px 12px calc(132px + env(safe-area-inset-bottom, 0px));
     max-width: 100%;
   }
   .oa-tape { height: 34px; }
@@ -1291,3 +1320,60 @@ table.oa.risk-matrix .rm-base { color: var(--brass-strong); }
 table.oa.risk-matrix tr th:first-child { text-align: left; }
 table.oa.risk-matrix td { border-top: 1px solid var(--hairline); font-size: 12.5px; }
 table.oa.risk-matrix td.rm-worst { outline: 2px solid var(--loss); outline-offset: -2px; border-radius: 3px; font-weight: 700; }
+
+/* ---------- coach spotlight (demos + tour) ---------- */
+.oa-coach-ring {
+  position: fixed;
+  z-index: 80;
+  pointer-events: none;
+  border: 2px solid var(--brass);
+  border-radius: 12px;
+  box-shadow: 0 0 0 9999px rgba(11, 11, 11, 0.45);
+}
+:root[data-theme="dark"] .oa-coach-ring { box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.62); }
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) .oa-coach-ring { box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.62); }
+}
+.oa-coach-bar {
+  position: fixed;
+  z-index: 81;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  max-width: 720px;
+  margin: 0 auto;
+  background: var(--card);
+  color: var(--ink);
+  border: 1px solid var(--brass-ring);
+  border-radius: var(--r);
+  box-shadow: var(--shadow);
+  padding: 12px 14px;
+}
+.oa-coach-say { margin: 4px 0 8px; max-width: 68ch; }
+.oa-coach-err { margin: 0 0 8px; }
+.oa-coach-bar .btn { min-height: 44px; }
+.oa-next {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  padding: 8px 16px;
+  background: var(--brass-soft);
+  border-bottom: 1px solid var(--brass-ring);
+}
+.oa-next[hidden] { display: none !important; }
+.oa-next-text { margin: 0; font-size: 14px; max-width: 72ch; }
+.home-next { border-color: var(--brass-ring); }
+.home-next h2 { max-width: 36ch; }
+body.oa-landing .oa-next { display: none !important; }
+@media (max-width: 640px) {
+  .oa-next {
+    position: fixed; left: 0; right: 0; z-index: 45;
+    bottom: calc(56px + env(safe-area-inset-bottom, 0px));
+    border-bottom: 0;
+    border-top: 1px solid var(--brass-ring);
+  }
+  .oa-next .btn { min-height: 44px; }
+  .btn.sm.buy, .oa-ticket-sheet .btn.primary, .desktop-ticket .btn.primary { min-height: 44px; }
+  .oa-coach-bar { bottom: calc(120px + env(safe-area-inset-bottom, 0px)); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .oa-coach-ring { transition: none; }
+}

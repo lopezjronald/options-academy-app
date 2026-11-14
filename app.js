@@ -2167,19 +2167,19 @@
       seed: 20101,
       startCash: 25e3,
       endDay: 11,
-      brief: "The tape is quiet and drifting sideways \u2014 the exact regime where equity holders get paid for patience instead of praying for a breakout.\n\n**Buy 100 shares of BRGR and sell 1 out-of-the-money call against them**, then hold the covered call through Day 10 while keeping your drawdown under 15%.",
+      brief: "Burgess Restaurant Group (BRGR, ~$67) is drifting sideways in a quiet week. Maria can get paid cash today by selling a call option against 100 shares she owns\u2014remembering that the upfront cash only softens a stock drop and caps her gains above the strike.\n\n**Buy 100 shares of BRGR and sell 1 call above today's price on the same ticket**, then hold your covered call through Day 10 while keeping your account drop under 15%.",
       hints: [
-        "A covered call pairs +100 shares of BRGR with \u22121 call on the same ticket.",
-        "Select a call strike above the current spot price so you collect extrinsic rent while leaving modest upside room.",
-        "Stay patient through Day 10 \u2014 time decay accelerates as expiration approaches."
+        "A covered call pairs +100 shares of BRGR with \u22121 call on the same order ticket.",
+        "Pick a call strike price a step or two above today's ~$67 share price so you collect upfront cash while leaving a little room for the shares to rise.",
+        "Hold the position through Day 10\u2014each quiet day that passes makes the call you sold cheaper."
       ],
       objectives: [
         { type: "open", strategy: "covered-call", sym: "BRGR", label: "Open a covered call on BRGR" },
         { type: "holdThrough", day: 10, sym: "BRGR", label: "Hold the BRGR position through Day 10" },
         { type: "maxDrawdown", pct: 0.15, label: "Keep drawdown under 15%" }
       ],
-      debriefPass: "You collected steady theta while the slow-bleed tape went nowhere. Notice how the short call premium lowered your effective cost basis and buffered the mild downward drift across all ten sessions.",
-      debriefFail: "Check whether you paired the 100 shares with a short call on BRGR and held through Day 10. In a slow-bleed regime where realized volatility undershoots implied, selling covered premium is how you get paid to wait."
+      debriefPass: "You got paid upfront cash while Burgess Restaurant Group drifted through ten quiet days. That cash payment lowered your breakeven price and cushioned the mild dip, though you still carried the downside risk of the 100 shares.",
+      debriefFail: "Make sure you bought 100 shares of BRGR and sold 1 call above today's price on the same ticket, then held through Day 10. Selling a call against 100 shares pays you cash in a flat week, as long as you size the trade within the 15% loss limit."
     },
     {
       id: "crash-insurance",
@@ -2191,19 +2191,19 @@
       seed: 20102,
       startCash: 25e3,
       endDay: 6,
-      brief: "Calm surface readings can hide sudden regime shifts, and hedging after a gap down means paying panic prices for protection.\n\n**Open a protective put on PWRS** (100 shares plus 1 long put) on Day 1 and hold through Day 5 while keeping your total drawdown under 12%.",
+      brief: "PowerSun Energy (PWRS, ~$95) looks calm on Day 1, but waiting until a crash starts means paying storm-season prices for protection. Maria can lock in a hard dollar floor right now by pairing 100 shares with 1 put option.\n\n**Open a protective put on PWRS** (buy 100 shares plus 1 put on the same ticket) on Day 1 and hold through Day 5 while keeping your account drop under 12%.",
       hints: [
-        "A protective put combines +100 shares and +1 put on the same ticket.",
-        "Buy your put on Day 1 before the Day 2 panic regime shift inflates implied volatility and gaps the market lower.",
-        "Pick an at-the-money or slightly out-of-the-money put strike to put a hard floor under your share losses."
+        "A protective put combines +100 shares of PWRS and +1 put on the same order ticket.",
+        "Buy your put on Day 1 while the market is still calm, before the Day 2 selloff makes protection much more expensive.",
+        "Pick a put strike right at or just below today's ~$95 price to put a tight dollar floor under your 100 shares."
       ],
       objectives: [
         { type: "open", strategy: "protective-put", sym: "PWRS", label: "Open stock + protective put on PWRS" },
         { type: "maxDrawdown", pct: 0.12, label: "Keep max drawdown under 12%" },
         { type: "holdThrough", day: 5, sym: "PWRS", label: "Hold protection through Day 5" }
       ],
-      debriefPass: "When the Day 2 panic shock and Days 3\u20134 aftershocks hit the index, your long put gained intrinsic value and vega just as the shares fell. That hard floor under your equity curve is the exact tradeoff of prepaid insurance.",
-      debriefFail: "Unhedged or oversized equity exposure gets mauled when correlations spike during a panic regime shift. Always attach the put on Day 1 while implied volatility is calm and keep your share size within the drawdown budget."
+      debriefPass: "When the Day 2 selloff and Days 3\u20134 drops hit PowerSun Energy, your put climbed in dollar value right as your 100 shares fell. Paying a small upfront fee and accepting a small deductible locked in a hard dollar floor before the storm arrived.",
+      debriefFail: "Holding 100 shares without a put\u2014or buying too many shares\u2014breaks the 12% loss limit when the Day 2 selloff hits. Pair 100 shares of PWRS with 1 put on Day 1 while protection is still cheap, and hold through Day 5."
     },
     {
       id: "theta-tax-conviction",
@@ -2517,6 +2517,7 @@
     if (!def) return { err: "Unknown mission" };
     const gate = canStartMission(id);
     if (gate.err) return gate;
+    if (S && S.status === "active" && S.purpose) S = null;
     const market2 = createMarket({ seed: def.seed, scenarioId: def.scenarioId });
     S = {
       def,
@@ -2530,6 +2531,28 @@
       failReason: null
     };
     log("\u{1F680}", `Mission start: ${def.title}`);
+    bus.emit("mission", S);
+    return { ok: true, session: S };
+  }
+  function startDemo(def, purpose = "watch") {
+    if (!def || !Array.isArray(def.steps)) return { err: "Unknown demo" };
+    if (S && S.status === "active" && !S.purpose) {
+      return { err: "A mission is in progress \u2014 finish or abandon it before starting a demo." };
+    }
+    const market2 = createMarket({ seed: def.seed, scenarioId: def.scenarioId });
+    S = {
+      def,
+      purpose,
+      market: market2,
+      cash: def.startCash ?? 25e3,
+      positions: [],
+      log: [],
+      marks: [{ day: market2.day, eq: def.startCash ?? 25e3 }],
+      objectives: [],
+      status: "active",
+      failReason: null
+    };
+    log("\u{1F680}", `Demo: ${def.title}`);
     bus.emit("mission", S);
     return { ok: true, session: S };
   }
@@ -2619,6 +2642,7 @@
   }
   function evaluate(trigger, pos) {
     if (!S || S.status !== "active") return;
+    if (S.purpose) return;
     const eq = equity2();
     const start5 = S.def.startCash ?? 25e3;
     for (const o of S.objectives) {
@@ -3841,7 +3865,7 @@
         host.appendChild(el(
           "p",
           { class: "sub", style: "max-width:60ch" },
-          tip || "Open the Live Market and buy a call on LMND \u2014 tap an ASK in the chain. Paper money only."
+          tip || "Watch a covered call get built, one step at a time. Paper money only."
         ));
         host.appendChild(el(
           "div",
@@ -3850,12 +3874,12 @@
           el(
             "p",
             { class: "sub" },
-            "We will open Live Market with a coach callout pointing at the chain. Completing any fill advances this step."
+            "Watch Maria buy the shares and sell the call. You can replay it, then try the clicks yourself."
           ),
           el(
             "div",
             { class: "btn-row mt1" },
-            el("a", { class: "btn primary", href: "#/market/LMND/coach" }, "Open Live Market \u2192")
+            el("a", { class: "btn primary", href: "#/demo/covered-call/watch" }, "Watch the demo \u2192")
           )
         ));
         host.appendChild(skipRow(() => {
@@ -4254,6 +4278,357 @@
     persist();
   }
 
+  // src/ui/demo-player.js
+  var AUTO_MS = 4e3;
+  var activeDestroy = null;
+  function mountCoach(opts) {
+    if (activeDestroy) {
+      const prev = activeDestroy;
+      activeDestroy = null;
+      prev();
+    }
+    const steps = opts.steps || [];
+    const mq = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : null;
+    let manual = !opts.auto || !!(mq && mq.matches);
+    let i = 0;
+    let paused = false;
+    let error = "";
+    let anchorMissing = false;
+    let timer = null;
+    let poll = null;
+    const ran = /* @__PURE__ */ new Set();
+    const skipped = /* @__PURE__ */ new Set();
+    let scrolledFor = "";
+    let dead = false;
+    const ring = el("div", { class: "oa-coach-ring", "aria-hidden": "true" });
+    ring.style.display = "none";
+    const say = el("p", { class: "oa-coach-say", "aria-live": "polite" });
+    const errEl = el("p", { class: "small muted oa-coach-err" });
+    const count = el("div", { class: "eyebrow num" }, "");
+    const backBtn = el("button", { type: "button", class: "btn" }, "Back");
+    const nextBtn = el("button", { type: "button", class: "btn primary" }, "Next");
+    const pauseBtn = el("button", { type: "button", class: "btn" }, "Pause");
+    const replayBtn = el("button", { type: "button", class: "btn" }, "Replay");
+    const skipBtn = el("button", { type: "button", class: "btn" }, "Skip");
+    const bar = el(
+      "div",
+      {
+        class: "oa-coach-bar",
+        role: "dialog",
+        "aria-label": "Guide"
+      },
+      count,
+      say,
+      errEl,
+      el("div", { class: "btn-row" }, backBtn, nextBtn, pauseBtn, replayBtn, skipBtn)
+    );
+    document.body.appendChild(ring);
+    document.body.appendChild(bar);
+    function clearTimer() {
+      if (timer) {
+        clearTimeout(timer);
+        timer = null;
+      }
+    }
+    function step() {
+      return steps[i] || null;
+    }
+    function findAnchor(name) {
+      if (!name) return null;
+      const nodes = document.querySelectorAll('[data-coach="' + CSS.escape(name) + '"]');
+      for (const n of nodes) {
+        const r = n.getBoundingClientRect();
+        if (r.width > 2 && r.height > 2) return n;
+      }
+      return null;
+    }
+    function canLeave() {
+      if (anchorMissing) return true;
+      if (error) return false;
+      const s2 = step();
+      if (!s2) return false;
+      if (opts.ready && !opts.ready(s2)) return false;
+      return true;
+    }
+    function paintBar() {
+      const s2 = step();
+      const last = i >= steps.length - 1;
+      count.textContent = steps.length ? i + 1 + " / " + steps.length : "";
+      say.textContent = s2 ? s2.say : "";
+      errEl.textContent = error || "";
+      errEl.style.display = error ? "" : "none";
+      backBtn.disabled = i <= 0;
+      const leave = canLeave();
+      nextBtn.disabled = !leave && !error;
+      nextBtn.textContent = error ? "Retry" : last ? "Finish" : "Next";
+      pauseBtn.hidden = manual;
+      pauseBtn.textContent = paused ? "Resume" : "Pause";
+      skipBtn.hidden = !anchorMissing;
+    }
+    function place() {
+      const s2 = step();
+      const node = s2 ? findAnchor(s2.anchor || "") : null;
+      anchorMissing = !!(s2 && s2.anchor && !node);
+      if (!node) {
+        ring.style.display = "none";
+        paintBar();
+        if (!manual && !paused && !timer && canLeave()) arm(AUTO_MS);
+        return;
+      }
+      if (scrolledFor !== (s2.id || String(i))) {
+        scrolledFor = s2.id || String(i);
+        try {
+          node.scrollIntoView({ block: "nearest", inline: "nearest" });
+        } catch {
+        }
+      }
+      const r = node.getBoundingClientRect();
+      const pad = 6;
+      ring.style.display = "block";
+      ring.style.left = r.left - pad + "px";
+      ring.style.top = r.top - pad + "px";
+      ring.style.width = Math.max(0, r.width + pad * 2) + "px";
+      ring.style.height = Math.max(0, r.height + pad * 2) + "px";
+      paintBar();
+      if (!manual && !paused && !timer && canLeave()) arm(AUTO_MS);
+    }
+    function arm(ms) {
+      clearTimer();
+      if (manual || paused || dead) return;
+      if (!canLeave()) return;
+      timer = setTimeout(() => forward(), ms == null ? AUTO_MS : ms);
+    }
+    function enter() {
+      clearTimer();
+      error = "";
+      const s2 = step();
+      if (!s2) {
+        finish2();
+        return;
+      }
+      try {
+        s2.prepare?.();
+      } catch {
+      }
+      if (opts.onPerform && s2.id && !ran.has(s2.id)) {
+        const res = opts.onPerform(s2);
+        if (res && res.err) {
+          error = res.err;
+          place();
+          return;
+        }
+        ran.add(s2.id);
+      }
+      place();
+      if (!manual && canLeave()) arm(AUTO_MS);
+    }
+    function forward() {
+      if (dead) return;
+      if (error) {
+        enter();
+        return;
+      }
+      if (!canLeave()) {
+        place();
+        return;
+      }
+      if (anchorMissing) {
+        const s2 = step();
+        if (s2 && opts.ready && !opts.ready(s2)) skipped.add(s2.id || String(i));
+      }
+      if (i >= steps.length - 1) {
+        finish2();
+        return;
+      }
+      i += 1;
+      enter();
+    }
+    function back() {
+      if (i <= 0) return;
+      clearTimer();
+      error = "";
+      i -= 1;
+      enter();
+    }
+    function finish2() {
+      if (dead) return;
+      clearTimer();
+      const done = opts.onFinish;
+      const skippedCount = skipped.size;
+      destroy();
+      done?.(skippedCount);
+    }
+    function exit() {
+      if (dead) return;
+      clearTimer();
+      const go = opts.onExit;
+      destroy();
+      go?.();
+    }
+    function restart() {
+      if (dead) return;
+      clearTimer();
+      i = 0;
+      paused = false;
+      error = "";
+      ran.clear();
+      skipped.clear();
+      scrolledFor = "";
+      try {
+        opts.onReplay?.();
+      } catch {
+      }
+      enter();
+    }
+    function onKey(e) {
+      if (dead) return;
+      const t = (
+        /** @type {HTMLElement} */
+        e.target
+      );
+      const typing = t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable);
+      if (e.key === "Escape") {
+        e.preventDefault();
+        exit();
+        return;
+      }
+      if (typing) return;
+      if (e.key === "ArrowRight") {
+        e.preventDefault();
+        forward();
+      } else if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        back();
+      } else if (e.key === " " && !manual) {
+        e.preventDefault();
+        paused = !paused;
+        if (paused) clearTimer();
+        else arm(AUTO_MS);
+        paintBar();
+      }
+    }
+    function onResize() {
+      place();
+    }
+    function onMotion() {
+      manual = !opts.auto || !!(mq && mq.matches);
+      if (manual) clearTimer();
+      else if (!paused) arm(AUTO_MS);
+      paintBar();
+    }
+    backBtn.addEventListener("click", back);
+    nextBtn.addEventListener("click", forward);
+    pauseBtn.addEventListener("click", () => {
+      paused = !paused;
+      if (paused) clearTimer();
+      else arm(AUTO_MS);
+      paintBar();
+    });
+    replayBtn.addEventListener("click", restart);
+    skipBtn.addEventListener("click", () => {
+      anchorMissing = true;
+      if (i >= steps.length - 1) finish2();
+      else {
+        i += 1;
+        enter();
+      }
+    });
+    document.addEventListener("keydown", onKey);
+    window.addEventListener("resize", onResize);
+    if (mq && mq.addEventListener) mq.addEventListener("change", onMotion);
+    poll = setInterval(() => {
+      if (!dead) place();
+    }, 400);
+    function destroy() {
+      if (dead) return;
+      dead = true;
+      clearTimer();
+      if (poll) clearInterval(poll);
+      document.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", onResize);
+      if (mq && mq.removeEventListener) mq.removeEventListener("change", onMotion);
+      ring.remove();
+      bar.remove();
+      if (activeDestroy === destroy) activeDestroy = null;
+    }
+    activeDestroy = destroy;
+    enter();
+    return { destroy, refresh: place, restart };
+  }
+
+  // src/ui/tour.js
+  var KEY3 = "oa.tour";
+  function markTour() {
+    try {
+      localStorage.setItem(KEY3, "1");
+    } catch {
+    }
+  }
+  function mobile() {
+    return !!(window.matchMedia && window.matchMedia("(max-width: 640px)").matches);
+  }
+  function prepare(anchor) {
+    if (!mobile()) {
+      closeSheets();
+      return;
+    }
+    if (anchor === "nav-missions") openPracticeSheet();
+    else if (anchor === "nav-journal") openYouSheet();
+    else closeSheets();
+  }
+  var STOPS = [
+    {
+      id: "next",
+      anchor: "next-step",
+      say: "This bar names the one next thing to do. One sentence, one button, on every screen."
+    },
+    {
+      id: "lessons",
+      anchor: "nav-learn",
+      say: "Lessons are where the idea is explained. Read it here, then practice the clicks."
+    },
+    {
+      id: "practice",
+      anchor: "nav-practice",
+      say: "Practice is the simulated floor \u2014 the Live Market. The money is paper. The decisions are yours."
+    },
+    {
+      id: "missions",
+      anchor: "nav-missions",
+      say: "Missions are short drills with a clear goal, on a sandbox account that is not your main book."
+    },
+    {
+      id: "journal",
+      anchor: "nav-journal",
+      say: "Journal is where you review the decision, not the luck. It sits with You, two taps away."
+    }
+  ];
+  var active2 = null;
+  function teardown(mark) {
+    const a = active2;
+    if (!a) return;
+    active2 = null;
+    window.removeEventListener("hashchange", a.onNav);
+    try {
+      a.coach.destroy();
+    } catch {
+    }
+    closeSheets();
+    if (mark) markTour();
+  }
+  function startTour() {
+    teardown(false);
+    const coach = mountCoach({
+      steps: STOPS.map((s2) => ({ ...s2, prepare: () => prepare(s2.anchor) })),
+      auto: true,
+      onExit: () => teardown(true),
+      onFinish: () => teardown(true)
+    });
+    const onNav = () => teardown(true);
+    active2 = { coach, onNav };
+    window.addEventListener("hashchange", onNav);
+  }
+
   // src/ui/views/settings.js
   function downloadBackup() {
     const json = exportJson();
@@ -4270,7 +4645,7 @@
     const build2 = isFamilyBuild() ? "founder" : "commercial";
     const hash = (
       /** @type {any} */
-      "2026-11-13"
+      "2026-11-14"
     );
     return `${hash} \xB7 ${build2}`;
   }
@@ -4533,6 +4908,15 @@
         "Blue / orange is colorblind-friendly (Okabe\u2013Ito palette). Inverted follows the East Asian convention \u2014 red means up."
       ));
       root.appendChild(appearance);
+      const tourCard = el("div", { class: "card mt2 settings-section" });
+      tourCard.appendChild(el("h3", {}, "Show me around"));
+      tourCard.appendChild(el(
+        "p",
+        { class: "sub" },
+        "Five stops: the next-step bar, Lessons, Practice, Missions, and Journal. Replay it any time."
+      ));
+      tourCard.appendChild(el("button", { type: "button", class: "btn primary", onclick: () => startTour() }, "Show me around"));
+      root.appendChild(tourCard);
       const about = el("div", { class: "card mt2 settings-section" });
       about.appendChild(el("h3", {}, "About"));
       about.appendChild(el(
@@ -4931,422 +5315,974 @@
     }
   };
 
-  // src/ui/shell.js
-  var contentEl;
-  var tapeInner;
-  var clockEl;
-  var navEl;
-  var profileEl;
-  var liveDot;
-  var tabbarEl;
-  var currentCleanup = null;
-  var syncCloudCleanup = null;
-  var VIEWS = {};
-  var sheetHost = null;
-  var NAV = [
-    { sect: "Learn" },
-    { id: "home", icon: "\u{1F3E0}", ic: "home", label: "Home" },
-    { id: "learn", icon: "\u{1F4DA}", ic: "book", label: "Curriculum" },
-    { sect: "Apply" },
-    { id: "market", icon: "\u{1F4FA}", ic: "monitor", label: "Live Market" },
-    { id: "strategy", icon: "\u{1F9E9}", ic: "layers", label: "Strategy Lab" },
-    { id: "greeks", icon: "\u{1F3DB}\uFE0F", ic: "temple", label: "Greeks Lab" },
-    { id: "vol", icon: "\u{1F30A}", ic: "wave", label: "Volatility Lab" },
-    { id: "risk", icon: "\u{1F4CA}", ic: "grid", label: "Risk Desk" },
-    { id: "journal", icon: "\u{1F4D3}", ic: "notebook", label: "Journal" },
-    { id: "missions", icon: "\u{1F9ED}", ic: "compass", label: "Missions" },
-    { sect: "You" },
-    { id: "progress", icon: "\u{1F3C6}", ic: "trophy", label: "Progress" },
-    { id: "settings", icon: "\u2699\uFE0F", ic: "gear", label: "Settings" },
-    { id: "legal", icon: "\u2696\uFE0F", ic: "scale", label: "Disclosures" }
-  ];
-  var LABS = [
-    { id: "strategy", icon: "\u{1F9E9}", ic: "layers", label: "Strategy Lab" },
-    { id: "greeks", icon: "\u{1F3DB}\uFE0F", ic: "temple", label: "Greeks Lab" },
-    { id: "vol", icon: "\u{1F30A}", ic: "wave", label: "Volatility Lab" },
-    { id: "risk", icon: "\u{1F4CA}", ic: "grid", label: "Risk Desk" },
-    { id: "missions", icon: "\u{1F9ED}", ic: "compass", label: "Missions" },
-    { id: "journal", icon: "\u{1F4D3}", ic: "notebook", label: "Journal" }
-  ];
-  var LAB_IDS = new Set(LABS.map((l) => l.id));
-  var YOU_IDS = /* @__PURE__ */ new Set(["progress", "settings", "upgrade", "welcome", "legal", "start"]);
-  function navItems() {
-    return NAV;
-  }
-  function closeSheet() {
-    if (sheetHost) {
-      sheetHost.remove();
-      sheetHost = null;
-    }
-  }
-  function openSheet(title, items) {
-    closeSheet();
-    const list2 = el(
-      "div",
-      { class: "oa-sheet", role: "dialog", "aria-label": title },
-      el("div", { class: "oa-sheet-handle", "aria-hidden": "true" }),
-      el("div", { class: "eyebrow" }, title)
-    );
-    for (const it of items) {
-      list2.appendChild(el(
-        "button",
+  // src/content/demos.js
+  var DEMOS = [
+    {
+      id: "covered-call",
+      title: "The covered call, step by step",
+      lessonId: "c-covered-calls",
+      missionId: "first-covered-call",
+      symbol: "BRGR",
+      seed: 20101,
+      scenarioId: "slow-bleed",
+      startCash: 25e3,
+      intro: "Maria owns 100 shares of Burgess Restaurant Group and thinks the price will drift sideways for a while. She can get paid cash today by promising to sell her shares at a higher price. Watch how she sets that up.",
+      steps: [
         {
-          type: "button",
-          class: "oa-sheet-item",
-          onclick: () => {
-            closeSheet();
-            it.onClick();
-          }
+          id: "setup",
+          anchor: "demo-positions",
+          say: "Here is the setup. Burgess trades near $67. Maria wants to own 100 shares AND get paid cash today for promising to sell them at a higher price. One order does both.",
+          watch: { type: "advanceDays", n: 0 },
+          expect: null
         },
-        it.ic ? icon(it.ic, { cls: "si" }) : el("span", { class: "si" }, it.icon),
-        el("span", {}, it.label)
-      ));
+        {
+          id: "sell-call",
+          anchor: "demo-trade",
+          say: "Maria buys 100 shares and sells one call above today's price \u2014 one ticket, one position. The call buyer pays her cash right now for the right to take her shares at that strike.",
+          watch: { type: "trade", legs: [
+            { kind: "stock", side: 1, qty: 100 },
+            { kind: "call", side: -1, qty: 1, strikeAbove: 2, expiry: "far" }
+          ], label: "Covered call" },
+          expect: { classify: "covered-call" }
+        },
+        {
+          id: "decay",
+          anchor: "demo-day",
+          say: "Time passes and nothing dramatic happens. The call Maria sold gets cheaper every day \u2014 that fade is her payment settling in. Let five quiet days go by.",
+          watch: { type: "advanceDays", n: 5 },
+          expect: { advancedTo: 6 }
+        },
+        {
+          id: "wrap",
+          anchor: "demo-positions",
+          say: "In plain words: Maria keeps the cash she was paid no matter what. If Burgess finishes above the strike, her shares sell at that price \u2014 a good price she chose in advance.",
+          watch: { type: "advanceDays", n: 2 },
+          expect: null
+        }
+      ],
+      outro: "The honest downside: the shares themselves can still fall, and the cash Maria collected only softens that fall \u2014 it does not prevent it. She also gives up any gains above the strike. That is the whole trade."
+    },
+    {
+      id: "long-call",
+      title: "Buying a call, step by step",
+      lessonId: "c-buying-calls",
+      missionId: "theta-tax-conviction",
+      symbol: "RCKT",
+      seed: 20103,
+      scenarioId: "slow-bleed",
+      startCash: 25e3,
+      intro: "Sam thinks Rocket Robotics ($182) could jump this week, but he does not want to risk $18,200 buying 100 shares. Instead, he pays a capped upfront fee for one call option and sets a strict time limit to get out if the rally does not show up.",
+      steps: [
+        {
+          id: "buy-call",
+          anchor: "demo-trade",
+          say: "Sam buys 1 call right near today's $182 price with a far deadline. His worst-case loss is strictly capped at the upfront cash he pays for this contract.",
+          watch: { type: "trade", legs: [{ kind: "call", side: 1, qty: 1, strikeAbove: 0, expiry: "far" }], label: "Long call" },
+          expect: { classify: "long-call" }
+        },
+        {
+          id: "wait-three",
+          anchor: "demo-day",
+          say: "Rocket climbs over the next three days and Sam's call gains value \u2014 but notice it gains less than 100 shares would have. Time decay charges rent every afternoon, even while you are winning.",
+          watch: { type: "advanceDays", n: 3 },
+          expect: { advancedTo: 4 }
+        },
+        {
+          id: "wait-one",
+          anchor: "demo-day",
+          say: "Another up day. Sam set himself a deadline BEFORE buying: if the rally had not shown up by now, he would sell and salvage the remaining value instead of holding and hoping.",
+          watch: { type: "advanceDays", n: 1 },
+          expect: { advancedTo: 5 }
+        },
+        {
+          id: "exit-early",
+          anchor: "demo-positions",
+          say: "In plain words: Sam risked a small, known fee; the move came; he cashes out up about $1,600. When the move does not come, this exact exit discipline is what stops the fee from melting to zero.",
+          watch: { type: "close" },
+          expect: { flat: true }
+        }
+      ],
+      outro: "The honest downside: buying a call requires getting direction, size of the move, and timing right all at once. If the stock stays flat or climbs too slowly, you lose money even when your direction was right."
+    },
+    {
+      id: "protective-put",
+      title: "The protective put, step by step",
+      lessonId: "c-puts-protective",
+      missionId: "crash-insurance",
+      symbol: "PWRS",
+      seed: 20102,
+      scenarioId: "crash-week",
+      startCash: 25e3,
+      intro: "Maria wants to hold 100 shares of PowerSun Energy ($95), but she worries a sudden market drop could knock thousands of dollars off her shares. Before storm clouds gather, she pairs her 100 shares with 1 put option to lock in a hard dollar floor.",
+      steps: [
+        {
+          id: "open-hedged",
+          anchor: "demo-trade",
+          say: "On Day 1, while prices are calm, Maria buys 100 shares of PowerSun and 1 put just below today's price on the same ticket. The put gives her the right to sell all 100 shares at the strike price.",
+          watch: { type: "trade", legs: [
+            { kind: "stock", side: 1, qty: 100 },
+            { kind: "put", side: 1, qty: 1, strikeBelow: 1, expiry: "far" }
+          ], label: "Protective put" },
+          expect: { classify: "protective-put" }
+        },
+        {
+          id: "shock-day",
+          anchor: "demo-day",
+          say: "Advance two days into the market selloff. PowerSun drops sharply, hurting the 100 shares, but Maria's put jumps in value at the exact same time.",
+          watch: { type: "advanceDays", n: 2 },
+          expect: { advancedTo: 3 }
+        },
+        {
+          id: "aftershocks",
+          anchor: "demo-day",
+          say: "Two more rocky days unfold \u2014 and here is the surprise. In a panic, protection itself gets more valuable: Maria's put is now growing FASTER than her shares are falling.",
+          watch: { type: "advanceDays", n: 2 },
+          expect: { advancedTo: 5 }
+        },
+        {
+          id: "hold-floor",
+          anchor: "demo-positions",
+          say: "In plain words: Maria paid a small fee so a crash could not hurt her \u2014 and this week the insurance worked so well that she ended slightly AHEAD while the whole market fell.",
+          watch: { type: "advanceDays", n: 1 },
+          expect: { advancedTo: 6 }
+        }
+      ],
+      outro: "The honest downside: protection is not free. If PowerSun rallies instead of falling, the put expires at $0 and Maria's profit trails an unhedged shareholder by the upfront fee she paid."
+    },
+    {
+      id: "cash-secured-put",
+      title: "The cash-secured put, step by step",
+      lessonId: "c-puts-protective",
+      missionId: "paid-to-shop",
+      symbol: "BRGR",
+      seed: 20104,
+      scenarioId: "slow-bleed",
+      startCash: 25e3,
+      intro: "Sam would happily own 100 shares of Burgess Restaurant Group ($67) if he could buy them a few dollars cheaper. Instead of waiting for a dip for free, he gets paid cash today by promising to buy 100 shares at a lower strike price while setting aside the cash to pay for them.",
+      steps: [
+        {
+          id: "sell-put",
+          anchor: "demo-trade",
+          say: "Sam sells 1 put with a strike price two steps below today's $67 price. He collects cash right now, and the account locks up enough cash to buy 100 shares at that strike if Burgess drops.",
+          watch: { type: "trade", legs: [{ kind: "put", side: -1, qty: 1, strikeBelow: 2, expiry: "far" }], label: "Cash-secured put" },
+          expect: { classify: "cash-secured-put" }
+        },
+        {
+          id: "quiet-days",
+          anchor: "demo-day",
+          say: "Five days pass and Burgess drifts DOWN toward Sam's strike. On paper, his promise now marks a little against him. This is the trade working as designed \u2014 not failing.",
+          watch: { type: "advanceDays", n: 5 },
+          expect: { advancedTo: 6 }
+        },
+        {
+          id: "more-decay",
+          anchor: "demo-day",
+          say: "Three more soft days. Remember: Sam set the cash aside because he WANTS the shares at that price. The stock falling toward his strike is the deal arriving, not a disaster.",
+          watch: { type: "advanceDays", n: 3 },
+          expect: { advancedTo: 9 }
+        },
+        {
+          id: "wrap",
+          anchor: "demo-positions",
+          say: "In plain words: Sam is paid to wait at a price he already liked. Down about $170 on paper at Day 10, he either keeps the full premium if Burgess holds above the strike \u2014 or buys shares he wanted anyway, at a discount.",
+          watch: { type: "advanceDays", n: 1 },
+          expect: { advancedTo: 10 }
+        }
+      ],
+      outro: "The honest downside: if Burgess crashes far below the strike price, Sam must still buy 100 shares at the strike\u2014so he can lose money almost dollar for dollar on a big drop, cushioned only by the upfront cash he collected."
+    },
+    {
+      id: "call-vertical",
+      title: "The call spread, step by step",
+      lessonId: "c-vertical-spreads",
+      missionId: "defined-conviction-vertical",
+      symbol: "RCKT",
+      seed: 20105,
+      scenarioId: "earnings-crush",
+      startCash: 25e3,
+      intro: "Maria thinks Rocket Robotics ($182) will climb into its Day 6 earnings report, but options are pricey ahead of the news. She buys a call near today's price and sells a higher-strike call against it to cut her upfront cost and lower her breakeven.",
+      steps: [
+        {
+          id: "open-spread",
+          anchor: "demo-trade",
+          say: "Maria buys 1 call near $182 and sells 1 call two strikes higher in the same expiration. The cash from the higher call pays for part of the lower call.",
+          watch: { type: "trade", legs: [
+            { kind: "call", side: 1, qty: 1, strikeAbove: 0, expiry: "near" },
+            { kind: "call", side: -1, qty: 1, strikeAbove: 2, expiry: "near" }
+          ], label: "Call vertical" },
+          expect: { classify: "call-vertical" }
+        },
+        {
+          id: "into-print",
+          anchor: "demo-day",
+          say: "Four days pass and the rally does not show. The spread marks down \u2014 but because Maria sold the higher call, her worst case was fixed in dollars on day one.",
+          watch: { type: "advanceDays", n: 4 },
+          expect: { advancedTo: 5 }
+        },
+        {
+          id: "close-spread",
+          anchor: "demo-positions",
+          say: "In plain words: the move did not come, so Maria exits BEFORE the earnings coin-flip with a small controlled loss \u2014 about $390, not thousands. Defined risk means bad weeks stay small.",
+          watch: { type: "close" },
+          expect: { flat: true }
+        }
+      ],
+      outro: "The honest downside: by selling the higher call to cheapen her entry, Maria caps her maximum profit at the upper strike. And if Rocket Robotics drops below the lower strike, she can still lose the net cash she paid up front."
+    },
+    {
+      id: "long-straddle",
+      title: "The earnings straddle trap, step by step",
+      lessonId: "c-straddles-strangles",
+      missionId: "iv-crush-trap",
+      symbol: "RCKT",
+      seed: 20106,
+      scenarioId: "earnings-crush",
+      startCash: 25e3,
+      intro: "Sam hears Rocket Robotics ($182) reports earnings on Day 6 and figures the stock has to jump one way or the other. He buys both a call and a put at the exact same strike\u2014a straddle\u2014without realizing the option prices already have a huge move baked in.",
+      steps: [
+        {
+          id: "buy-straddle",
+          anchor: "demo-trade",
+          say: "Sam buys 1 call and 1 put right at today's strike price on the same ticket. Because everyone expects earnings fireworks, he pays an inflated upfront fee on both sides.",
+          watch: { type: "trade", legs: [
+            { kind: "call", side: 1, qty: 1, strikeAbove: 0, expiry: "far" },
+            { kind: "put", side: 1, qty: 1, strikeAbove: 0, expiry: "far" }
+          ], label: "Long straddle" },
+          expect: { classify: "long-straddle" }
+        },
+        {
+          id: "wait-for-news",
+          anchor: "demo-day",
+          say: "Advance four days to the afternoon before earnings. Both options are still expensive, and Sam needs a massive stock move just to cover the double fee he paid.",
+          watch: { type: "advanceDays", n: 4 },
+          expect: { advancedTo: 5 }
+        },
+        {
+          id: "earnings-crush",
+          anchor: "demo-day",
+          say: "Advance through Day 6 earnings. The report lands with a modest move instead of a shock\u2014and once the suspense is over, the extra storm pricing collapses out of both the call and the put at once.",
+          watch: { type: "advanceDays", n: 1 },
+          expect: { advancedTo: 6 }
+        },
+        {
+          id: "close-loser",
+          anchor: "demo-positions",
+          say: "In plain words: when you buy both sides before headline news, you lose unless the real move beats the huge move already priced in. Sam closes the trade to cap the damage.",
+          watch: { type: "close" },
+          expect: { flat: true }
+        }
+      ],
+      outro: "The honest downside: buying a straddle before big news means paying peak prices for two melting contracts at once. Watching this trade lose in paper money is the cheapest tuition in options\u2014it saves you from paying double fees right before a post-news price crush."
     }
-    sheetHost = el("div", { class: "oa-sheet-bg", onclick: (e) => {
-      if (e.target === sheetHost) closeSheet();
-    } }, list2);
-    document.body.appendChild(sheetHost);
-  }
-  function openLabsSheet() {
-    openSheet("Labs", LABS.map((l) => ({
-      ic: l.ic,
-      icon: l.icon,
-      label: l.label,
-      onClick: () => {
-        location.hash = "#/" + l.id;
-      }
-    })));
-  }
-  function openYouSheet() {
-    const items = [
-      { ic: "trophy", icon: "\u{1F3C6}", label: "Progress", onClick: () => {
-        location.hash = "#/progress";
-      } },
-      { ic: "gear", icon: "\u2699\uFE0F", label: "Settings", onClick: () => {
-        location.hash = "#/settings";
-      } },
-      { ic: "user", icon: "\u{1F464}", label: "Switch profile", onClick: () => profilePicker() },
-      { ic: "contrast", icon: "\u25D0", label: "Toggle theme", onClick: () => toggleTheme() }
-    ];
-    if (!isFamilyBuild() && tier() === "free") {
-      items.push({ ic: "sparkle", icon: "\u2728", label: "Upgrade to Academy", onClick: () => {
-        location.hash = "#/upgrade";
-      } });
-    }
-    for (const it of youSheetAccountItems()) items.push(it);
-    openSheet("You", items);
-  }
-  function buildTabbar() {
-    const tabs = [
-      { id: "learn", ic: "book", label: "Learn", href: "#/learn" },
-      { id: "market", ic: "monitor", label: "Market", href: "#/market" },
-      { id: "labs", ic: "layers", label: "Labs", onClick: openLabsSheet }
-    ];
-    tabs.push({ id: "you", ic: "user", label: "You", onClick: openYouSheet });
-    tabbarEl = el("nav", { class: "oa-tabbar", "aria-label": "Primary" });
-    for (const t of tabs) {
-      if (t.href) {
-        tabbarEl.appendChild(el(
-          "a",
-          { href: t.href, "data-tab": t.id },
-          icon(t.ic, { cls: "ti" }),
-          el("span", {}, t.label)
-        ));
-      } else {
-        tabbarEl.appendChild(el(
-          "button",
-          { type: "button", "data-tab": t.id, onclick: t.onClick },
-          icon(t.ic, { cls: "ti" }),
-          el("span", {}, t.label)
-        ));
-      }
-    }
-    return tabbarEl;
-  }
-  function refreshTabActive(routeName) {
-    if (!tabbarEl) return;
-    const learnActive = routeName === "learn" || routeName === "home";
-    const labsActive = LAB_IDS.has(routeName);
-    const youActive = YOU_IDS.has(routeName);
-    tabbarEl.querySelectorAll("[data-tab]").forEach((a) => {
-      const id = a.getAttribute("data-tab");
-      let on = id === routeName;
-      if (id === "learn") on = learnActive;
-      if (id === "labs") on = labsActive;
-      if (id === "you") on = youActive;
-      a.classList.toggle("active", on);
-    });
-  }
-  function build() {
-    const app = document.getElementById("oa-app");
-    app.innerHTML = "";
-    navEl = el("nav", { class: "oa-nav" });
-    for (const n of navItems()) {
-      if (n.sect) {
-        navEl.appendChild(el("div", { class: "oa-nav-sect" }, n.sect));
-        continue;
-      }
-      navEl.appendChild(el(
-        "a",
-        { href: "#/" + n.id, "data-nav": n.id },
-        n.ic ? icon(n.ic, { cls: "ni" }) : el("span", { class: "ni" }, n.icon),
-        el("span", { class: "lbl" }, n.label)
-      ));
-    }
-    profileEl = el("div", {
-      class: "oa-profile",
-      tabindex: "0",
-      role: "button",
-      "aria-label": "Switch profile",
-      onclick: () => profilePicker(),
-      onkeydown: (e) => {
-        if (e.key === "Enter") profilePicker();
-      }
-    });
-    const rail = el(
-      "aside",
-      { class: "oa-rail" },
-      el(
-        "div",
-        { class: "oa-logo" },
-        el("div", { class: "oa-logo-mark" }, "\u0394"),
-        el(
-          "div",
-          {},
-          el("div", { class: "oa-logo-name" }, "Options Academy"),
-          el("div", { class: "oa-logo-sub" }, "Academy Exchange")
-        )
-      ),
-      navEl,
-      profileEl
-    );
-    tapeInner = el("div", { class: "oa-tape-inner" });
-    liveDot = el("span", { class: "oa-live-dot" });
-    clockEl = el("span", {}, "");
-    const themeBtn = el("button", { class: "theme-btn", title: "Toggle light/dark", "aria-label": "Toggle theme", onclick: toggleTheme }, icon("contrast"));
-    const tape = el(
-      "div",
-      { class: "oa-tape" },
-      tapeInner,
-      el("div", { class: "oa-tape-clock" }, liveDot, clockEl, themeBtn)
-    );
-    contentEl = el("div", { class: "oa-content" });
-    const main = el("main", { class: "oa-main" }, tape, contentEl);
-    app.appendChild(rail);
-    app.appendChild(main);
-    app.appendChild(buildTabbar());
-    renderTape();
-    refreshProfile();
-  }
-  function toggleTheme() {
-    const root = document.documentElement;
-    const cur = root.getAttribute("data-theme") || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-    root.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+  ];
+  var demoById = (id) => DEMOS.find((d) => d.id === id) || null;
+
+  // src/ui/next-step.js
+  var KEY4 = "oa.demos";
+  function readDemos() {
     try {
-      localStorage.setItem("oa.theme", root.getAttribute("data-theme"));
+      const raw = JSON.parse(localStorage.getItem(KEY4) || "{}");
+      return raw && typeof raw === "object" ? raw : {};
+    } catch {
+      return {};
+    }
+  }
+  function markDemo(id, mode) {
+    const all = readDemos();
+    const now = Date.now();
+    if (typeof all[id] !== "number") all[id] = now;
+    if (mode === "do") all[id + ":do"] = now;
+    try {
+      localStorage.setItem(KEY4, JSON.stringify(all));
     } catch {
     }
   }
-  function renderTape() {
-    tapeInner.innerHTML = "";
-    for (const t of market.list()) {
-      const q = market.quote(t.sym);
-      const up = q.chg >= 0;
-      tapeInner.appendChild(el(
-        "span",
-        { class: "oa-tq", onclick: () => location.hash = "#/market/" + t.sym },
-        el("span", { class: "sym" }, t.sym),
-        el("span", { class: "px" }, F.usd(q.S)),
-        el("span", { class: "chg " + (up ? "up" : "down") }, (up ? "\u25B2" : "\u25BC") + F.pctSigned(q.chgPct))
-      ));
-    }
-    clockEl.textContent = market.clockLabel() + " \xB7 " + (market.running ? market.speed + "\xD7" : "paused");
-    liveDot.className = "oa-live-dot" + (market.running ? "" : " paused");
-  }
-  function refreshProfile() {
-    const p = active();
-    if (syncCloudCleanup) {
-      try {
-        syncCloudCleanup();
-      } catch {
+  function flatten(curriculum2) {
+    const out = [];
+    for (const t of curriculum2?.tracks || []) {
+      for (const m of t.modules || []) {
+        for (const l of m.lessons || []) out.push(l);
       }
-      syncCloudCleanup = null;
     }
-    profileEl.innerHTML = "";
-    if (!p) {
-      profileEl.appendChild(el("div", { class: "pn" }, "Choose profile\u2026"));
-      return;
+    return out;
+  }
+  function seasoned(profile) {
+    if (!profile) return false;
+    const n = Object.keys(profile.lessons || {}).length;
+    return profile.xp >= 100 || n >= 2 || (profile.trades || []).length > 0;
+  }
+  function nextStep(profile, curriculum2, demos, onboarding) {
+    const lessons = flatten(curriculum2);
+    const first = lessons[0];
+    const firstHref = first ? "#/learn/lesson/" + first.id : "#/learn";
+    if (!profile) {
+      return {
+        text: first ? `Start with the first lesson: ${first.title}.` : "Open Lessons to begin.",
+        href: firstHref
+      };
     }
-    const lv = levelOf(p.xp);
-    profileEl.appendChild(avEl(p));
-    profileEl.appendChild(el(
-      "div",
-      { class: "pt" },
-      el("div", { class: "pn" }, p.name),
-      el("div", { class: "px num" }, `Lv ${lv.n} ${lv.name} \xB7 ${p.xp} XP`)
+    const setupOpen = onboarding && !onboarding.done && (onboarding.step || 0) < 5 && !seasoned(profile);
+    const anyDone = lessons.some((l) => profile.lessons && profile.lessons[l.id]);
+    if (setupOpen && !anyDone) {
+      return { text: "Finish the short setup so the next lesson fits you.", href: "#/welcome" };
+    }
+    const book = demos || {};
+    for (const lesson of lessons) {
+      const done = !!(profile.lessons && profile.lessons[lesson.id]);
+      if (!done) {
+        return { text: `Next lesson: ${lesson.title}.`, href: "#/learn/lesson/" + lesson.id };
+      }
+      for (const demo of DEMOS.filter((d) => d.lessonId === lesson.id)) {
+        const watched = typeof book[demo.id] === "number";
+        const did = typeof book[demo.id + ":do"] === "number";
+        if (!watched) return { text: `Watch the demo: ${demo.title}.`, href: "#/demo/" + demo.id + "/watch" };
+        if (!did) return { text: `Do it guided: ${demo.title}.`, href: "#/demo/" + demo.id + "/do" };
+        if (demo.missionId && !profile.missions?.[demo.missionId]?.passed) {
+          return { text: `Start the mission that follows ${demo.title}.`, href: "#/missions/" + demo.missionId };
+        }
+      }
+    }
+    return { text: "Practice on the floor \u2014 the Live Market is ready when you are.", href: "#/market" };
+  }
+
+  // src/ui/views/missions.js
+  function resolveDemoLeg(session3, sym, leg) {
+    if (leg.kind === "stock") return { kind: "stock", side: leg.side, qty: leg.qty };
+    const strikes = session3.market.strikes(sym);
+    const spot = session3.market.quote(sym).S;
+    let atm = strikes[0];
+    for (const k of strikes) if (Math.abs(k - spot) < Math.abs(atm - spot)) atm = k;
+    const at = Math.max(0, strikes.indexOf(atm));
+    let off = 0;
+    if (leg.strikeAbove != null) off = leg.strikeAbove;
+    else if (leg.strikeBelow != null) off = -leg.strikeBelow;
+    const strike = strikes[Math.max(0, Math.min(strikes.length - 1, at + off))];
+    const exps = session3.market.expiries(sym);
+    const exp = leg.expiry === "far" ? exps[exps.length - 1] : exps[0];
+    return { kind: leg.kind, side: leg.side, qty: leg.qty, strike, expDay: exp.day };
+  }
+  function runWatch(demo, step) {
+    const S2 = session();
+    if (!S2) return { err: "No demo session" };
+    const w = step.watch;
+    if (!w) return { ok: true };
+    if (w.type === "trade") {
+      const legs = (w.legs || []).map((l) => resolveDemoLeg(S2, demo.symbol, l));
+      return trade(demo.symbol, legs, w.label || demo.title);
+    }
+    if (w.type === "advanceDays") {
+      const n = w.n || 1;
+      for (let k = 0; k < n; k++) advanceDay();
+      return { ok: true };
+    }
+    if (w.type === "close") {
+      const id = session()?.positions[0]?.id;
+      if (!id) return { err: "No open position to close" };
+      return closePos(id);
+    }
+    return { err: "Unknown demo step" };
+  }
+  function demoExpectMet(session3, step, baseline) {
+    if (!session3) return false;
+    const e = step.expect;
+    if (e && e.classify) {
+      return session3.positions.some((p) => p.label === e.classify || classify(p.legs) === e.classify);
+    }
+    if (e && e.advancedTo != null) return session3.market.day >= e.advancedTo;
+    if (e && e.flat) return session3.positions.length === 0;
+    const w = step.watch;
+    if (!w) return true;
+    if (w.type === "trade") return session3.positions.length > (baseline?.positions ?? 0);
+    if (w.type === "advanceDays") return session3.market.day >= (baseline?.day ?? 0) + (w.n || 1);
+    if (w.type === "close") return session3.positions.length < (baseline?.positions ?? 1);
+    return true;
+  }
+  var PRESETS = [
+    { id: "long-call", name: "Long Call", legs: () => [{ kind: "call", side: 1, qty: 1, k: 0 }] },
+    { id: "long-put", name: "Long Put", legs: () => [{ kind: "put", side: 1, qty: 1, k: 0 }] },
+    { id: "covered-call", name: "Covered Call", legs: () => [{ kind: "stock", side: 1, qty: 100 }, { kind: "call", side: -1, qty: 1, k: 1 }] },
+    { id: "protective-put", name: "Protective Put", legs: () => [{ kind: "stock", side: 1, qty: 100 }, { kind: "put", side: 1, qty: 1, k: -1 }] },
+    { id: "csp", name: "Cash-Secured Put", legs: () => [{ kind: "put", side: -1, qty: 1, k: -1 }] },
+    { id: "bull-call", name: "Bull Call Spread", legs: () => [{ kind: "call", side: 1, qty: 1, k: 0 }, { kind: "call", side: -1, qty: 1, k: 2 }] },
+    { id: "bear-put", name: "Bear Put Spread", legs: () => [{ kind: "put", side: 1, qty: 1, k: 0 }, { kind: "put", side: -1, qty: 1, k: -2 }] },
+    { id: "straddle", name: "Long Straddle", legs: () => [{ kind: "call", side: 1, qty: 1, k: 0 }, { kind: "put", side: 1, qty: 1, k: 0 }] }
+  ];
+  function briefFirstLine(brief) {
+    const line2 = String(brief || "").split(/\n/)[0] || "";
+    return line2.replace(/\*\*/g, "").slice(0, 140);
+  }
+  function renderHub(root) {
+    root.appendChild(viewHeader("Missions", "Guided trading drills"));
+    root.appendChild(el(
+      "p",
+      { class: "sub", style: "max-width:68ch" },
+      "Sandboxed markets with clear objectives. Defined-risk only \u2014 practice the playbook before you freestyle on the Live Market."
     ));
-    syncCloudCleanup = mountSyncCloud(profileEl);
-  }
-  var EMOJIS = ["\u{1F981}", "\u{1F98A}", "\u{1F43C}", "\u{1F989}", "\u{1F42C}", "\u{1F984}", "\u{1F42F}", "\u{1F680}", "\u{1F31F}", "\u{1F3AF}", "\u{1F9E0}", "\u{1F3C4}"];
-  function avEl(p, cls = "av") {
-    if (isFamilyBuild()) return el("span", { class: cls }, p.emoji);
-    return el("span", { class: cls + " monogram" }, (p.name || "?").trim().charAt(0).toUpperCase());
-  }
-  function profilePicker(firstRun = false) {
-    const wrap = el("div", {});
-    wrap.appendChild(el("h2", {}, firstRun === true ? "Welcome to Options Academy" : "Select a trader profile"));
-    wrap.appendChild(el("p", { class: "sub" }, firstRun === true ? "A simulated trading floor: learn a concept, then apply it on a live simulated market. Each profile tracks its own progress, XP, and paper-money account." : "Switch profiles or add a new trader."));
-    const grid = el("div", { class: "profile-grid" });
-    for (const p of profiles()) {
-      const lv = levelOf(p.xp);
-      grid.appendChild(el(
+    root.appendChild(simDisclaimer());
+    const free = !isFamilyBuild() && tier() === "free";
+    const all = list();
+    const week1 = all.filter((m) => !String(m.id).startsWith("w2-")).slice(0, 10);
+    const week2 = all.filter((m) => String(m.id).startsWith("w2-"));
+    const rest = all.filter((m) => !week1.includes(m) && !week2.includes(m));
+    function missionCard(m) {
+      const locked = free && !FREE_LIMITS.missions.includes(m.id);
+      const statusPill = m.done ? el("span", { class: "pill gain" }, "\u2713 Done") : locked ? el("a", { class: "pill brass lock-chip", href: "#/upgrade", style: "text-decoration:none" }, icon("lock"), " Upgrade") : el("span", { class: "pill brass" }, m.skill || "mission");
+      return el(
         "div",
-        {
-          class: "profile-tile" + (active()?.id === p.id ? " sel" : ""),
-          tabindex: "0",
-          role: "button",
-          onclick: () => {
-            setActive(p.id);
-            m.close();
-            refreshProfile();
-            route();
-          }
-        },
-        avEl(p),
-        el("div", { class: "pn", style: "font-weight:600" }, p.name),
-        el("div", { class: "small muted" }, "Trader"),
-        el("div", { class: "small num muted" }, `Lv ${lv.n} \xB7 ${p.xp} XP`)
-      ));
+        { class: "card mission-card" },
+        el(
+          "div",
+          { class: "flex-between" },
+          iconFor(m.icon, "compass", { cls: "mi" }),
+          statusPill
+        ),
+        el("h3", { style: "margin:0" }, m.title),
+        el("p", { class: "sub", style: "margin:0" }, briefFirstLine(m.brief)),
+        el(
+          "div",
+          { class: "btn-row mt1" },
+          el("button", { class: "btn primary", onclick: () => {
+            const res = start2(m.id);
+            if (res.err) {
+              gateToast(res.err);
+              return;
+            }
+            location.hash = "#/missions/" + m.id;
+          } }, m.done ? "Replay \u2192" : locked ? "Preview \u2192" : "Start \u2192")
+        )
+      );
     }
-    grid.appendChild(el(
-      "div",
-      { class: "profile-tile", tabindex: "0", role: "button", onclick: () => {
-        m.close();
-        addProfileModal();
-      } },
-      el("div", { class: "av" }, icon("plus")),
-      el("div", { style: "font-weight:600" }, "New profile")
-    ));
-    wrap.appendChild(grid);
-    const m = modal(wrap, { onClose: firstRun === true ? false : void 0 });
-    return m;
+    function section(title, list2) {
+      if (!list2.length) return;
+      root.appendChild(el("h3", { class: "mission-week-head mt2" }, title));
+      const grid = el("div", { class: "grid2 mt1" });
+      for (const m of list2) grid.appendChild(missionCard(m));
+      root.appendChild(grid);
+    }
+    section("Week 1", week1);
+    section("Week 2", week2);
+    section("More missions", rest);
   }
-  function addProfileModal(opts = {}) {
-    let emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
-    const nameIn = el("input", { type: "text", placeholder: "Name", "aria-label": "Profile name", style: "padding:8px 10px;border:1px solid var(--hairline);border-radius:6px;width:100%;background:var(--card);" });
-    const emojiRow = el("div", { class: "btn-row", style: "margin:10px 0" });
-    const emBtns = EMOJIS.map((e2) => {
-      const b = el("button", { class: "btn sm" + (e2 === emoji ? " primary" : ""), onclick: () => {
-        emoji = e2;
-        emBtns.forEach((x) => x.classList.remove("primary"));
-        b.classList.add("primary");
-      } }, e2);
-      return b;
-    });
-    emBtns.forEach((b) => emojiRow.appendChild(b));
-    const needAck = !isFamilyBuild();
-    const ackBox = el("input", { type: "checkbox", id: "oa-ack", style: "margin-top:3px;flex:0 0 auto" });
-    const ackRow = needAck ? el(
-      "label",
-      { for: "oa-ack", class: "small", style: "display:flex;gap:8px;align-items:flex-start;margin-top:12px;max-width:46ch;cursor:pointer" },
-      ackBox,
-      el("span", { class: "muted" }, ACK_TEXT, " ", el("a", { href: "#/legal" }, "Disclosures"))
-    ) : null;
+  function confirmLeave(onYes) {
     const wrap = el(
       "div",
       {},
-      el("h2", {}, "New profile"),
-      el("div", { class: "field mt2" }, el("label", {}, "Name"), nameIn),
-      isFamilyBuild() ? el("div", { class: "mt1" }, el("div", { class: "field" }, el("label", {}, "Avatar")), emojiRow) : null,
-      ackRow,
+      el("h2", {}, "Leave mission?"),
+      el("p", { class: "sub" }, "Leaving abandons the current session. Progress on this run is not saved."),
       el(
         "div",
         { class: "btn-row mt2" },
+        el("button", { class: "btn", onclick: () => m.close() }, "Stay"),
         el("button", { class: "btn primary", onclick: () => {
-          if (needAck && !ackBox.checked) {
-            toast("Please confirm the education-only acknowledgment to continue.", "loss");
-            return;
-          }
-          const name = nameIn.value.trim() || "Learner";
-          const p = addProfile(name, emoji);
           m.close();
-          refreshProfile();
-          toast(`Welcome, ${name}! You start with ${F.usd(1e5, 0)} of paper money.`, "gain");
-          const dest = opts.then || "#/welcome";
-          start(p?.id || active()?.id);
-          if ((location.hash || "") === "#/start") location.replace(dest);
-          else location.hash = dest;
-          route();
-        } }, "Start learning")
+          onYes();
+        } }, "Abandon")
       )
     );
     const m = modal(wrap);
-    nameIn.focus();
   }
-  function route() {
-    closeSheet();
-    const hash = location.hash || "#/home";
-    const parts = hash.replace(/^#\//, "").split("/");
-    let name = (parts[0] || "home").split("?")[0] || "home";
-    if (name === "kids") {
-      location.replace("#/learn");
-      return;
-    }
-    if (!profiles().length && name !== "start" && name !== "legal") {
-      location.replace("#/start");
-      return;
-    }
-    const landing = name === "start";
-    document.body.classList.toggle("oa-landing", landing);
-    const view16 = VIEWS[name] || VIEWS.home;
-    if (currentCleanup) {
-      try {
-        currentCleanup();
-      } catch {
+  function renderRunner(root, id, demo, demoMode, hooks) {
+    let S2 = session();
+    if (demo) {
+      if (!S2 || !S2.purpose || S2.def.id !== demo.id) {
+        root.appendChild(el("p", {}, "This demo is not running."));
+        root.appendChild(el("a", { class: "btn mt1", href: "#/learn" }, "\u2190 Lessons"));
+        return;
       }
-      currentCleanup = null;
+    } else if (!S2 || S2.def.id !== id || S2.purpose) {
+      if (S2 && S2.purpose) abandon();
+      const res = start2(id);
+      if (res.err) {
+        gateToast(res.err);
+        root.appendChild(el("p", {}, res.err.includes("upgrade") || res.err.includes("Academy") ? "This mission is locked on the free tier." : "Mission not found."));
+        root.appendChild(el(
+          "div",
+          { class: "btn-row mt1" },
+          el("a", { class: "btn", href: "#/missions" }, "\u2190 Back to missions"),
+          !isFamilyBuild() ? el("a", { class: "btn primary", href: "#/upgrade" }, "Upgrade") : null
+        ));
+        return;
+      }
+      S2 = res.session;
     }
-    navEl.querySelectorAll("a").forEach((a) => a.classList.toggle("active", a.dataset.nav === name));
-    refreshTabActive(name);
-    contentEl.innerHTML = "";
-    window.scrollTo(0, 0);
-    currentCleanup = view16.render(contentEl, parts.slice(1)) || null;
-  }
-  function boot(views) {
-    VIEWS = { welcome: view, upgrade: view2, settings: view3, start: view5, ...views };
-    try {
-      const th = localStorage.getItem("oa.theme");
-      if (th) document.documentElement.setAttribute("data-theme", th);
-    } catch {
+    let priceChart = null, eqChart = null;
+    let sym = demo?.symbol || S2.market.list()[0]?.sym || "BRGR";
+    let expIdx = 0;
+    let presetId = "";
+    let legsSpec = [];
+    let abandoned = false;
+    let coach = null;
+    const baselines = /* @__PURE__ */ new Map();
+    const shell = el("div", { class: "mission-runner" });
+    root.appendChild(shell);
+    function leave() {
+      confirmLeave(() => {
+        abandoned = true;
+        abandon();
+        location.hash = demo ? "#/learn/lesson/" + demo.lessonId : "#/missions";
+      });
     }
-    try {
-      const pl = localStorage.getItem("oa.pl");
-      if (pl) document.documentElement.setAttribute("data-pl", pl);
-    } catch {
+    function atmStrike2(mkt, s2) {
+      const q = mkt.quote(s2);
+      const strikes = mkt.strikes(s2);
+      return strikes.reduce((a, b) => Math.abs(b - q.S) < Math.abs(a - q.S) ? b : a);
     }
-    build();
-    market.on("tick", renderTape);
-    market.on("state", renderTape);
-    bus.on("profile", refreshProfile);
-    bus.on("profile-picker", () => profilePicker());
-    bus.on("add-profile", (opts) => addProfileModal(opts && typeof opts === "object" ? opts : {}));
-    bus.on("tape", renderTape);
-    setInterval(() => saveMarketSnapshot(market.snapshot()), 15e3);
-    document.addEventListener("visibilitychange", () => {
-      if (document.hidden) {
-        if (market.running) {
-          market.pause();
-          market._autoPaused = true;
+    function strikeAt(mkt, s2, off) {
+      const strikes = mkt.strikes(s2);
+      const atm = atmStrike2(mkt, s2);
+      const i = strikes.indexOf(atm);
+      return strikes[Math.max(0, Math.min(strikes.length - 1, i + off))];
+    }
+    function applyPreset(p) {
+      const mkt = S2.market;
+      const exps = mkt.expiries(sym);
+      const exp = exps[Math.min(expIdx, exps.length - 1)];
+      legsSpec = p.legs().map((L) => {
+        if (L.kind === "stock") return { kind: "stock", side: Math.sign(L.side), qty: Math.abs(L.qty) };
+        const strike = strikeAt(mkt, sym, L.k);
+        return {
+          kind: L.kind,
+          side: Math.sign(L.side),
+          qty: Math.abs(L.side) * (L.qty ?? 1),
+          strike,
+          expDay: exp.day
+        };
+      });
+    }
+    function previewCost() {
+      if (!legsSpec.length) return 0;
+      return legsSpec.reduce((s2, L) => {
+        if (L.kind === "stock") return s2 + L.side * L.qty * S2.market.quote(sym).S;
+        const q = S2.market.optQuote(sym, L.strike, L.expDay, L.kind);
+        const px = L.side > 0 ? q.ask : q.bid;
+        return s2 + L.side * L.qty * 100 * px;
+      }, 0);
+    }
+    function paint() {
+      S2 = session();
+      if (!S2) return;
+      shell.innerHTML = "";
+      priceChart = null;
+      eqChart = null;
+      if (S2.status === "passed" || S2.status === "failed") {
+        const pass2 = S2.status === "passed";
+        if (pass2 && S2.def.id === "first-covered-call") completeStep(4);
+        if (pass2) maybeBackupNudge();
+        shell.appendChild(el(
+          "div",
+          { class: "mission-banner" + (pass2 ? "" : " fail") },
+          el("div", {}, icon(pass2 ? "trophy" : "burst", { size: 34 })),
+          el("h2", { style: "margin:8px 0 4px" }, pass2 ? "Mission passed" : "Mission failed"),
+          pass2 ? el("p", { class: "sub", html: md(S2.def.debriefPass || "") }) : el(
+            "div",
+            {},
+            el("p", { class: "sub" }, S2.failReason || ""),
+            el("div", { class: "mt1", html: md(S2.def.debriefFail || "") })
+          ),
+          pass2 ? el("p", { class: "small muted num" }, "+75 XP") : null,
+          el(
+            "div",
+            { class: "btn-row mt2", style: "justify-content:center" },
+            el("a", { class: "btn", href: "#/missions", onclick: () => {
+              abandoned = true;
+              abandon();
+            } }, "Back to missions"),
+            pass2 && S2.def.id === "first-covered-call" ? el("a", { class: "btn primary", href: "#/welcome" }, "Continue setup \u2192") : null,
+            !pass2 ? el("button", { class: "btn primary", onclick: () => {
+              abandoned = true;
+              start2(id);
+              abandoned = false;
+              paint();
+            } }, "Retry") : null
+          )
+        ));
+        return;
+      }
+      const head = el("div", { class: "flex-between" });
+      head.appendChild(el(
+        "div",
+        {},
+        el(
+          "div",
+          { class: "crumb" },
+          el(
+            "a",
+            { href: demo ? "#/learn/lesson/" + demo.lessonId : "#/missions", onclick: (e) => {
+              e.preventDefault();
+              leave();
+            } },
+            demo ? "\u2190 Lesson" : "\u2190 Missions"
+          )
+        ),
+        el("div", { class: "eyebrow" }, demo ? demoMode === "do" ? "Do it guided" : "Watch" : "Mission"),
+        el("h1", {}, demo ? demo.title : S2.def.title)
+      ));
+      head.appendChild(el("button", { class: "btn sm", type: "button", onclick: leave }, "Abandon"));
+      shell.appendChild(head);
+      const top = el("div", { class: "row mt2" });
+      const briefCard = el("div", { class: "card w50" });
+      const mktCard = el("div", { class: "card w50" });
+      top.appendChild(briefCard);
+      top.appendChild(mktCard);
+      shell.appendChild(top);
+      if (demo) {
+        briefCard.appendChild(el("h3", {}, demoMode === "do" ? "Your turn" : "What you are watching"));
+        briefCard.appendChild(el("p", { class: "sub", style: "margin-bottom:0" }, demo.intro));
+      } else {
+        briefCard.appendChild(el("h3", {}, "Brief"));
+        briefCard.appendChild(el("div", { class: "lesson-prose", html: md(S2.def.brief) }));
+        if (S2.def.hints?.length) {
+          const hintsBox = el(
+            "details",
+            { class: "mt1" },
+            el("summary", { style: "cursor:pointer;font-weight:600;font-size:13px" }, "Hints"),
+            el("ul", {}, ...S2.def.hints.map((h) => el("li", { class: "small" }, h)))
+          );
+          briefCard.appendChild(hintsBox);
         }
-      } else if (market._autoPaused) {
-        market._autoPaused = false;
-        market.start();
+        briefCard.appendChild(el("h3", { class: "mt2" }, "Objectives"));
+        const ol = el("ul", { class: "mission-objectives" });
+        for (const o of S2.objectives) {
+          ol.appendChild(el(
+            "li",
+            {},
+            el("span", { class: "num", style: "flex:0 0 1.2em" }, o.met ? "\u2713" : "\u25CB"),
+            el("span", {}, o.label || o.type)
+          ));
+        }
+        briefCard.appendChild(ol);
       }
-    });
-    market.start();
-    window.addEventListener("hashchange", route);
-    route();
+      const mainSym = (S2.def.objectives || []).find((o) => o.sym)?.sym || sym;
+      if (S2.market.tickers[mainSym]) sym = mainSym;
+      const t = S2.market.tickers[sym];
+      const q = S2.market.quote(sym);
+      mktCard.appendChild(el(
+        "div",
+        { class: "flex-between" },
+        el("h3", {}, sym),
+        el("span", { class: "pill brass num" }, demo ? `Day ${S2.market.day}` : `Day ${S2.market.day} / ${S2.def.endDay}`)
+      ));
+      mktCard.appendChild(el(
+        "div",
+        { class: "pos-greeks mb1" },
+        el("span", { class: "num" }, F.usd(q.S)),
+        el("span", { class: "num" }, F.usd(equity2(), 0) + " equity")
+      ));
+      const priceBox = el("div", {});
+      mktCard.appendChild(priceBox);
+      const closes = (t?.closes || []).map((c) => ({ x: c.day, y: c.p }));
+      const intra = (t?.intraday || []).map((p) => ({ x: S2.market.day + p.m / 390, y: p.p }));
+      const pts = closes.concat(intra.length ? [{ x: S2.market.day, y: t.S }] : []);
+      if (pts.length >= 2) {
+        priceChart = line(priceBox, {
+          height: 160,
+          series: [{ name: sym, color: "--s1", points: pts, width: 2, area: true }],
+          fmtX: (d) => "D" + Math.round(d),
+          fmtY: (y) => F.usd(y, 0),
+          tipLabel: ""
+        });
+      }
+      const eqBox = el("div", { class: "mt1" });
+      mktCard.appendChild(el("div", { class: "chart-title mt1" }, "Equity"));
+      mktCard.appendChild(eqBox);
+      if (S2.marks.length >= 2) {
+        eqChart = line(eqBox, {
+          height: 90,
+          series: [{ name: "Eq", color: "--s2", points: S2.marks.map((m) => ({ x: m.day, y: m.eq })), area: true }],
+          fmtX: (d) => "D" + Math.round(d),
+          fmtY: (y) => F.usd(y / 1e3, 0) + "k",
+          tipLabel: ""
+        });
+      } else {
+        eqBox.appendChild(el("div", { class: "small muted num" }, F.usd(equity2(), 0)));
+      }
+      mktCard.appendChild(el(
+        "div",
+        { class: "btn-row mt1" },
+        el("button", {
+          type: "button",
+          class: "btn primary",
+          "data-coach": demo ? "demo-day" : void 0,
+          onclick: () => advanceDay()
+        }, "\u23ED Next day")
+      ));
+      const bot = el("div", { class: "row mt2" });
+      const tradeCard = el("div", { class: "card w50", "data-coach": demo ? "demo-trade" : void 0 });
+      const posCard = el("div", { class: "card w50", "data-coach": demo ? "demo-positions" : void 0 });
+      bot.appendChild(tradeCard);
+      bot.appendChild(posCard);
+      shell.appendChild(bot);
+      tradeCard.appendChild(el("h3", {}, "Trade"));
+      if (demo) {
+        tradeCard.appendChild(el(
+          "div",
+          { class: "btn-row mb1" },
+          el("button", { type: "button", class: "btn", onclick: () => {
+            const res = trade(sym, [{ kind: "stock", side: 1, qty: 100 }], "Buy 100 shares");
+            if (res.err) toast(res.err, "loss");
+            else toast("Bought 100 shares", "gain");
+          } }, "Buy 100 shares")
+        ));
+      }
+      const symSel = el("select", {});
+      for (const tk of S2.market.list()) {
+        symSel.appendChild(el("option", { value: tk.sym, selected: tk.sym === sym }, tk.sym));
+      }
+      symSel.addEventListener("change", () => {
+        sym = symSel.value;
+        legsSpec = [];
+        presetId = "";
+        paint();
+      });
+      const expSel = el("select", {});
+      S2.market.expiries(sym).forEach((e, i) => {
+        expSel.appendChild(el("option", { value: i, selected: i === expIdx }, e.label));
+      });
+      expSel.addEventListener("change", () => {
+        expIdx = +expSel.value;
+        if (presetId) {
+          const p = PRESETS.find((x) => x.id === presetId);
+          if (p) applyPreset(p);
+        }
+        paint();
+      });
+      const presetSel = el("select", {});
+      presetSel.appendChild(el("option", { value: "" }, "Choose a strategy\u2026"));
+      PRESETS.forEach((p) => presetSel.appendChild(el("option", { value: p.id, selected: p.id === presetId }, p.name)));
+      presetSel.addEventListener("change", () => {
+        presetId = presetSel.value;
+        const p = PRESETS.find((x) => x.id === presetId);
+        if (p) applyPreset(p);
+        else legsSpec = [];
+        paint();
+      });
+      tradeCard.appendChild(el(
+        "div",
+        { class: "row" },
+        el("div", { class: "field", style: "flex:1" }, el("label", {}, "Symbol"), symSel),
+        el("div", { class: "field", style: "flex:1" }, el("label", {}, "Expiry"), expSel),
+        el("div", { class: "field", style: "flex:1" }, el("label", {}, "Strategy"), presetSel)
+      ));
+      if (legsSpec.length) {
+        const cost = previewCost();
+        tradeCard.appendChild(el(
+          "div",
+          { class: "small muted mt1" },
+          legsSpec.map((L) => {
+            if (L.kind === "stock") return `${L.side > 0 ? "+" : "\u2212"}${L.qty} sh`;
+            return `${L.side > 0 ? "+" : "\u2212"}${L.qty} ${F.usd(L.strike, 0)}${L.kind === "call" ? "C" : "P"}`;
+          }).join(" \xB7 ")
+        ));
+        tradeCard.appendChild(el(
+          "div",
+          { class: "btn-row mt1" },
+          el(
+            "span",
+            { class: "num", style: "font-weight:700" },
+            (cost >= 0 ? "Debit " : "Credit ") + F.usd(Math.abs(cost))
+          ),
+          el("button", { class: "btn primary", onclick: () => {
+            const label = PRESETS.find((p) => p.id === presetId)?.name || "Mission trade";
+            const res = trade(sym, legsSpec, label);
+            if (res.err) gateToast(res.err);
+            else toast(`${label} opened`, "gain");
+          } }, "Trade")
+        ));
+      } else {
+        tradeCard.appendChild(el("p", { class: "small muted mt1" }, "Pick a preset to preview cost and trade."));
+      }
+      posCard.appendChild(el("h3", {}, "Positions"));
+      if (!S2.positions.length) {
+        posCard.appendChild(el("p", { class: "small muted" }, "No open positions."));
+      } else {
+        for (const pos of S2.positions) {
+          const val = positionValue(pos);
+          posCard.appendChild(el(
+            "div",
+            { class: "flex-between mb1" },
+            el(
+              "div",
+              {},
+              el("div", { style: "font-weight:600" }, `${pos.sym} \xB7 ${pos.label}`),
+              el("div", { class: "small num muted" }, F.usd(val, 0))
+            ),
+            el("button", { class: "btn sm", onclick: () => {
+              const res = closePos(pos.id);
+              if (res?.err) toast(res.err, "loss");
+            } }, "Close")
+          ));
+        }
+      }
+      posCard.appendChild(el("h3", { class: "mt2" }, "Mission log"));
+      const feed2 = el("div", { class: "event-feed" });
+      for (const row of S2.log.slice(0, 16)) {
+        feed2.appendChild(el(
+          "div",
+          { class: "event-item" },
+          el("span", { class: "et" }, `Day ${row.day}`),
+          el("span", { class: "ev-row" }, iconFor(row.icon, "news", { cls: "ev-ic" }), " " + row.text)
+        ));
+      }
+      posCard.appendChild(feed2);
+      coach?.refresh();
+    }
+    paint();
+    const unMission = bus.on("mission", () => paint());
+    if (demo) {
+      const mode = demoMode === "do" ? "do" : "watch";
+      coach = mountCoach({
+        steps: demo.steps,
+        auto: mode === "watch",
+        onPerform: mode === "watch" ? (step) => runWatch(demo, step) : void 0,
+        ready: mode === "do" ? (step) => {
+          const sess = session();
+          if (!sess) return false;
+          if (step.id && !baselines.has(step.id)) {
+            baselines.set(step.id, { day: sess.market.day, positions: sess.positions.length });
+          }
+          return demoExpectMet(sess, step, step.id ? baselines.get(step.id) : null);
+        } : void 0,
+        onExit: () => {
+          abandoned = true;
+          abandon();
+          location.hash = "#/learn/lesson/" + demo.lessonId;
+        },
+        onFinish: (skippedCount) => {
+          abandoned = true;
+          if (mode === "watch" || !skippedCount) markDemo(demo.id, mode);
+          else toast("Finished with skipped steps \u2014 this run was not recorded. Replay it when the controls are available.", "loss");
+          abandon();
+          hooks?.onFinish?.(skippedCount);
+        },
+        onReplay: () => {
+          baselines.clear();
+          abandon();
+          const res = startDemo(demo, mode);
+          if (res?.err) toast(res.err, "loss");
+        }
+      });
+    }
+    return () => {
+      unMission();
+      if (coach) {
+        coach.destroy();
+        coach = null;
+      }
+      priceChart && priceChart.destroy();
+      eqChart && eqChart.destroy();
+      if (!abandoned) {
+        const cur = session();
+        if (cur && cur.status === "active" && cur.purpose) abandon();
+      }
+    };
   }
+  function renderDemo(root, params) {
+    const id = params[0];
+    const mode = params[1] === "do" ? "do" : "watch";
+    const def = demoById(id);
+    if (!def) {
+      root.appendChild(el("p", {}, "Demo not found."));
+      root.appendChild(el("a", { class: "btn mt1", href: "#/learn" }, "\u2190 Lessons"));
+      return;
+    }
+    let phase = "intro";
+    let note = "";
+    let runCleanup = null;
+    function paint() {
+      if (runCleanup) {
+        runCleanup();
+        runCleanup = null;
+      }
+      root.innerHTML = "";
+      if (phase === "intro") renderIntro();
+      else if (phase === "play") {
+        runCleanup = renderRunner(root, def.id, def, mode, {
+          onFinish: () => {
+            phase = "outro";
+            paint();
+          }
+        }) || null;
+        root.appendChild(simDisclaimer());
+      } else renderOutro();
+    }
+    function begin() {
+      const res = startDemo(def, mode);
+      if (res.err) {
+        note = res.err;
+        paint();
+        return;
+      }
+      note = "";
+      phase = "play";
+      paint();
+    }
+    function renderIntro() {
+      root.appendChild(viewHeader(mode === "do" ? "Do it guided" : "Watch", def.title));
+      root.appendChild(simDisclaimer());
+      root.appendChild(el("p", { class: "sub mt2", style: "max-width:68ch" }, def.intro));
+      if (note) {
+        root.appendChild(el("p", { class: "mt1" }, note));
+        const cur = session();
+        if (cur && cur.status === "active" && !cur.purpose) {
+          root.appendChild(el(
+            "div",
+            { class: "btn-row mt1" },
+            el("button", { type: "button", class: "btn", onclick: () => {
+              confirmLeave(() => {
+                abandon();
+                note = "";
+                begin();
+              });
+            } }, "Abandon mission")
+          ));
+        }
+      }
+      root.appendChild(el(
+        "div",
+        { class: "btn-row mt2" },
+        el("button", { type: "button", class: "btn primary", onclick: begin }, mode === "do" ? "Start guided" : "Play"),
+        el("a", { class: "btn", href: "#/learn/lesson/" + def.lessonId }, "Back to lesson")
+      ));
+    }
+    function renderOutro() {
+      root.appendChild(viewHeader("Done", def.title));
+      root.appendChild(simDisclaimer());
+      root.appendChild(el("p", { class: "sub mt2", style: "max-width:68ch" }, def.outro));
+      const row = el("div", { class: "btn-row mt2" });
+      if (mode === "watch") {
+        row.appendChild(el("a", { class: "btn primary", href: "#/demo/" + def.id + "/do" }, "Do it guided"));
+      }
+      if (def.missionId) {
+        row.appendChild(el("a", {
+          class: "btn" + (mode === "do" ? "" : ""),
+          href: "#/missions/" + def.missionId
+        }, "Start the real mission"));
+      }
+      if (mode === "do") {
+        row.appendChild(el("a", { class: "btn primary", href: "#/market/" + def.symbol }, "Place it for real on Practice \u2192"));
+      }
+      row.appendChild(el("a", { class: "btn", href: "#/learn/lesson/" + def.lessonId }, "Back to lesson"));
+      root.appendChild(row);
+    }
+    paint();
+    return () => {
+      if (runCleanup) {
+        runCleanup();
+        runCleanup = null;
+      }
+    };
+  }
+  var view6 = {
+    render(root, params) {
+      if (params[0]) return renderRunner(root, params[0]);
+      renderHub(root);
+    }
+  };
+  var demoView = {
+    render(root, params) {
+      return renderDemo(root, params || []);
+    }
+  };
 
   // src/content/curriculum.js
   var curriculum = {
@@ -5363,154 +6299,148 @@
             "lessons": [
               {
                 "id": "f-what-is-probability",
-                "title": "Base Rates, Sample Size, and the Law of Large Numbers",
-                "objective": "Treat probability as a long-run frequency between 0 and 1, separate single-trade noise from statistical edge, and avoid the gambler's fallacy.",
-                "body": `Every market decision lives between certainty (1.0) and impossibility (0.0). When an option chain implies a 25% probability that Lumend Brands (LMND, trading near $42) finishes above $45 by expiration, the market is quoting a **base rate**: across hundreds of comparable setups with identical volatility and time remaining, roughly one in four finishes in-the-money. Probability does not predict what happens on Friday; it prices the distribution of outcomes across a large sample.
-
-That distinction separates disciplined traders from tourists. Over a small sample \u2014 five or ten trades \u2014 **variance dominates**. A 25%-probability trade can easily win three times in a row or fail twelve times straight without anything being broken in your model. Only as the sample grows toward 100 or 1,000 independent trials does the realized win rate converge toward the true probability. Statisticians call this convergence the **law of large numbers**; trading desks call it surviving long enough for your edge to show up.
-
-Forgetting sample size breeds two opposite errors. The first is the **gambler's fallacy**: assuming that after four consecutive losses on independent setups, a win is "due" and increasing position size. The market keeps no memory of your P&L ledger; the fifth trade carries the exact same probability as the first. The second error is abandoning a sound strategy after a normal three-trade drawdown, mistaking routine statistical noise for a broken thesis.
-
-When you read a probability on a trading screen \u2014 whether a 70% historical earnings-beat rate or a 30-delta call option \u2014 translate it immediately into frequency language: "In ten independent occurrences under these conditions, roughly three pay off and seven expire worthless." Thinking in distributions rather than single-outcome prophecies is the foundation of risk management.`,
+                "title": "What a 25% Chance Really Means",
+                "objective": "Read a percentage chance as how often something happens over many tries, and see why losing streaks happen even when the odds are fair.",
+                "body": "You have flipped a coin at a kitchen table to settle who buys dinner. Even on a fair 50% coin, or 1 in 2, tails can land four times in a row before heads shows up. In markets, that starting how-often number is called a **base rate**, such as a 25% chance, or 1 in 4, that Lumend Brands ($42) finishes above $45. The coin analogy stops there: a coin never changes its shape, while a company's business shifts every quarter.\n\nSuppose Maria pays $50 for a trade on Lumend Brands ($42) that wins 25% of the time, or about 1 in 4 tries. Across a tiny **sample size** of just 4 trades, Maria can easily lose all 4 and be down $200 without the odds being broken. Only across 100 separate tries do her wins settle near 25 out of 100. In plain words: a 25% chance describes what happens across 100 tries, never what happens on Friday.\n\nLosing 4 times in a row tempts Sam into a costly mistake. After losing $50 four times for $200 total on Burgess Restaurant Group ($67), Sam assumes a win is due and bets $500 on trade five. The market does not remember Sam's past $200 loss, so trade five still carries the exact same 25% chance, or 1 in 4. Betting bigger to chase a streak is how a normal rough patch empties an account.\n\nThe flip side is quitting too soon. If Maria risks $40 per trade on a setup that wins 60% of the time, or 3 in 5, she will still hit three losses in a row for $120. She keeps each bet at $40 so a normal losing streak never knocks her out. In plain words: size every trade small enough that an unlucky week never ends your ability to keep playing.",
                 "key_takeaways": [
-                  "Probability (0 to 1) measures long-run frequency across many independent trials, never a guarantee for the next trade.",
-                  "Small samples are dominated by variance; convergence to the true odds requires a large sample (the law of large numbers).",
-                  "Independent trades have no memory \u2014 a losing streak never makes the next trade 'due' (the gambler's fallacy).",
-                  "Read market probabilities as base rates ('3 out of 10 setups like this'), not forecasts of a single outcome."
+                  "A 25% chance, or 1 in 4, tells you how often a setup wins across 100 tries, never what happens next.",
+                  "Over 4 or 5 trades, lucky and unlucky streaks are completely normal.",
+                  "Separate trades have no memory\u2014four losses in a row never make the fifth trade due to win.",
+                  "Keep every bet small enough in dollars that a routine losing streak cannot wipe you out."
                 ],
                 "sim": "market",
-                "sim_task": "On the Live Market, open the option chain for Lumend Brands (LMND, ~$42) and locate an out-of-the-money call near 0.25 delta (roughly a 25% implied probability of finishing in-the-money). Paper-trade one contract and step the clock forward to expiration across five separate sessions, logging how streaky short-run outcomes can be even when the underlying odds hold steady.",
+                "sim_task": "Open Practice (Live Market), click LMND in the Watchlist, and click Buy 10 sh, then Place order. Click \u23ED Next day five times and watch how daily gains and losses streak even in a calm week.",
                 "quiz": [
                   {
-                    "q": "An option setup has a 30% probability of finishing in-the-money. What does that figure actually mean?",
+                    "q": "Maria sees a trade on Lumend Brands ($42) with a 30% chance, or 3 in 10, of paying off at the deadline. What does that 30% number mean?",
                     "choices": [
-                      "The option will gain 30% in price",
-                      "Across a large sample of identical setups, roughly 30% finish in-the-money",
-                      "Exactly 3 out of every 10 trades are guaranteed to win",
-                      "The probability cannot be estimated until expiration"
+                      "The trade is guaranteed to gain 30% in price today",
+                      "Across 100 similar setups, roughly 30 pay off and 70 do not",
+                      "Exactly 3 out of every 10 trades will win on a strict schedule",
+                      "No one can estimate the odds until the trade ends"
                     ],
                     "answer": 1,
-                    "explain": "A 30% probability describes the long-run frequency over many comparable trials \u2014 roughly 30 winners per 100 trades \u2014 not a quota for any 10-trade stretch."
+                    "explain": "A 30% chance, or 3 in 10, describes how often the trade pays off across a large batch of tries, not a promise for the next 10 trades."
                   },
                   {
-                    "q": "You take four independent 50%-probability trades and lose all four. What is the probability of winning on the fifth independent setup?",
+                    "q": "Sam takes four separate trades that each have a 50% chance, or 1 in 2, of winning $100, and he loses all four. What is his chance of winning on a fifth separate trade with the same setup?",
                     "choices": [
-                      "Greater than 50% \u2014 a win is statistically overdue",
-                      "Less than 50% \u2014 the strategy is in a cold streak",
-                      "Still 50%",
-                      "Zero"
+                      "Higher than 50%, because a winner is overdue",
+                      "Lower than 50%, because the setup is on a cold streak",
+                      "Still 50%, or 1 in 2",
+                      "Zero, because four losses prove the trade never works"
                     ],
                     "answer": 2,
-                    "explain": "Independent trials have no memory. Assuming a win is 'due' after a streak of losses is the gambler's fallacy and leads traders to oversize at the worst time."
+                    "explain": "Separate trades have no memory of your past losses. Thinking a win is due pushes people to bet too much at the worst possible moment."
                   },
                   {
-                    "q": "A macro model assigns an 80% probability that the Academy 500 Index (FAM500) holds above support this week. How should a trader interpret that number?",
+                    "q": "A forecast gives the Academy 500 ($500) an 80% chance, or 4 in 5, of staying above $490 this week. How should Maria use that number?",
                     "choices": [
-                      "The index will spend 80% of the week above support",
-                      "In roughly 8 out of 10 weeks with identical macro conditions, support holds \u2014 and in 2 out of 10 it breaks",
-                      "Support is guaranteed to hold",
-                      "The analyst is 80% confident in their career"
+                      "Expect the index to spend 80% of the week above $490",
+                      "Expect it to hold in about 8 out of 10 similar weeks, and drop below $490 in about 2 out of 10",
+                      "Treat $490 as a guaranteed floor that cannot break",
+                      "Put her whole account into the trade because 80% cannot lose"
                     ],
                     "answer": 1,
-                    "explain": "Probabilistic forecasts describe an ensemble of similar regimes: 80% means failure still occurs roughly one time in five, so position sizing must survive the 20% tail."
+                    "explain": "An 80% chance, or 4 in 5, means the floor still breaks about 1 time in 5, so Maria must size her trade to survive that 20% outcome."
                   }
                 ]
               },
               {
                 "id": "f-expected-value",
-                "title": "Expected Value: Pricing the Edge",
-                "objective": "Calculate expected value (EV) across discrete outcomes, separate process quality from single-trade results, and size positions to survive variance.",
-                "body": "Consider a short-dated directional trade on Burgess Restaurant Group (BRGR, ~$67): you pay $200 in premium for a setup that has a 20% probability of returning $750 at expiration and an 80% probability of expiring worthless ($0). Should you take the trade? Intuition gets distracted by the 3.75-to-1 payout; a professional computes **expected value (EV)**.\n\n**Expected value** is the probability-weighted average outcome per trade over a large sample. Multiply each scenario's payoff by its probability and sum the parts: here, the expected gross payoff is ($750 \xD7 0.20) + ($0 \xD7 0.80) = $150. Subtract the $200 entry cost, and your net EV is **\u2212$50 per trade**. Run that exact setup 100 times and you should expect to bleed roughly $5,000 before fees \u2014 even though you will celebrate around twenty dramatic $550 net winners along the way.\n\nThat is the trap that sustains overpriced speculative markets: **negative-EV trades still produce vivid, memorable winners.** Conversely, suppose the market reprices that contract to $110 while the 20% payoff probability holds steady. Now your $150 expected payoff costs $110, yielding **+$40 of positive EV** per trade. Over 100 repetitions, that edge compounds into roughly $4,000 of expected profit.\n\nTwo desk rules follow immediately. First, expected value describes the *long-run average*, never today's print: a +$40-EV trade still loses 80% of the time in our example, meaning five or six consecutive losses are completely routine. If you risk 25% of your account on each try, a normal losing streak bankrupts you before the positive expectancy ever materializes. Second, never judge a decision by a single outcome: **good trade, bad result** (and bad trade, lucky result) happens every day. Audit your process by its expected value, not by the last ticket.",
+                "title": "How to Tell if a Bet Is Worth Taking",
+                "objective": "Weigh a trade's payout against its price and odds to see if it makes or loses money on average over time.",
+                "body": "You have probably bought a $10 charity raffle ticket for a chance at a $500 grill. If 100 tickets are sold, your 1% chance, or 1 in 100, makes that ticket worth $5 on average ($500 \xD7 1% is $5), which is its **expected value**. Paying $10 for $5 of average value means you lose $5 per ticket over the long run. The raffle analogy stops there: raffle prizes are fixed in advance, while market prices change every second as people trade.\n\nNow apply that same math to Burgess Restaurant Group ($67). Sam pays $200 for a trade with a 20% chance, or 1 in 5, of paying $750 and an 80% chance, or 4 in 5, of paying $0. The average payout is $150 ($750 \xD7 20% is $150), so paying $200 leaves Sam $50 behind per trade. When the average payout beats the cost\u2014say Maria pays only $110 for that same $150 average payout\u2014that +$40 gap is her **edge**. In plain words: multiply what you can win by how often you win, then subtract what you paid.\n\nWhy do people keep buying Sam's $200 trade if it loses $50 on average? Because 1 time in 5 it still pays $750, and a $550 profit feels like genius in the moment. Over 100 repeats, though, paying $200 for $150 of value drains about $5,000 from Sam's account ($50 \xD7 100 trades is $5,000). A single loud winner never proves a trade was priced fairly.\n\nEven Maria's +$40 trade still loses 80% of the time, or 4 times in 5. Five losses in a row at $110 each will cost her $550 before the next winner lands. If Maria bets half her cash on every try, a normal losing week will wipe her out before her +$40 average shows up. In plain words: judge a trade by its average math before you enter, not by whether the last try won or lost.",
                 "key_takeaways": [
-                  "Expected value (EV) = sum of (each outcome \xD7 its probability) minus the cost of entry.",
-                  "A $150 expected payoff that costs $200 has a net EV of \u2212$50 per trade \u2014 a long-run loser regardless of occasional big wins.",
-                  "Negative-EV strategies still produce loud winners; positive-EV strategies still suffer routine losing streaks.",
-                  "Keep position size small enough that a statistically normal drawdown cannot knock you out of the market."
+                  "Expected value is the average payout per try: multiply the prize by the odds, then subtract your entry cost.",
+                  "Paying $200 for a 20% chance, or 1 in 5, at $750 ($150 average) loses $50 per trade over time.",
+                  "Bad bets still produce occasional big winners; good bets still run into normal losing streaks.",
+                  "Keep each trade small in dollars so five normal losses in a row never empty your account."
                 ],
                 "sim": "market",
-                "sim_task": "On the Live Market, inspect the option chain for Burgess Restaurant Group (BRGR, ~$67). Compare an expensive far-OTM call (around 0.10 delta) against a near-the-money call (around 0.50 delta): estimate the move required for each to break even, paper-trade one contract of each across several simulated weeks, and track how entry price dictates net expected value.",
+                "sim_task": "Open Practice (Live Market), click BRGR in the Watchlist, and look at the Option chain. Compare the Ask price on a call near $67 with a call far above $67, then click Ask on the near-$67 call and click Place order to paper-trade one contract.",
                 "quiz": [
                   {
-                    "q": "A trade costs $200 to enter. It has a 25% probability of paying out $600 and a 75% probability of expiring at $0. What is the net expected value per trade?",
+                    "q": "Maria pays $200 for a trade on Burgess Restaurant Group ($67). It has a 25% chance, or 1 in 4, of paying $600 and a 75% chance, or 3 in 4, of paying $0. What is her average profit or loss per trade?",
                     "choices": [
                       "+$150 per trade",
                       "\u2212$50 per trade",
-                      "$0 (breakeven)",
+                      "$0 (breaks even)",
                       "+$400 per trade"
                     ],
                     "answer": 1,
-                    "explain": "Expected gross payoff = $600 \xD7 0.25 = $150. Subtracting the $200 entry cost leaves \u2212$50 per trade on average."
+                    "explain": "A 25% chance at $600 is worth $150 on average ($600 \xD7 25% is $150). Paying $200 for $150 of average value leaves \u2212$50 per trade."
                   },
                   {
-                    "q": "A trader buys a far out-of-the-money weekly option, triples their money on an unexpected headline, and claims the setup is a proven money-maker. What is the flaw in that reasoning?",
+                    "q": "Sam pays $80 for a cheap long-shot weekly trade on Lumend Brands ($42), triples his money to $240 on surprise news, and calls it a sure money-maker. What is wrong with his claim?",
                     "choices": [
-                      "None \u2014 a profitable outcome proves positive EV",
-                      "One outcome never establishes expected value; negative-EV setups regularly produce isolated winners",
-                      "Weekly options only work on Fridays",
-                      "They should double their size on the next trade while hot"
+                      "Nothing\u2014making a profit proves the math was in his favor",
+                      "One lucky win does not prove a positive average; overpriced bets still win once in a while",
+                      "Weekly trades only work on Fridays",
+                      "He should double his bet to $160 on the next try while he is hot"
                     ],
                     "answer": 1,
-                    "explain": "A single realization cannot validate expectancy. Negative-EV lottery-style trades must pay off occasionally or no one would buy them; over a full sample, the overpriced premium erodes capital."
+                    "explain": "Even a bad bet has to pay off once in a while or nobody would buy it. Over 100 tries, overpaying for long shots drains your cash."
                   },
                   {
-                    "q": "You have a rigorously tested strategy with positive expected value, but your first three trades all lose. What is the disciplined response?",
+                    "q": "Maria has a trade that makes +$30 on average across 100 tries, but her first three tries each lose $100. What should she do next?",
                     "choices": [
-                      "Scrap the model immediately",
-                      "Recognize that losing streaks are normal even with positive EV, and keep position sizing small enough to weather them",
-                      "Double your position size on trade four to recover the drawdown at once",
-                      "Positive EV means three losses in a row are mathematically impossible"
+                      "Throw the strategy away right now",
+                      "Expect normal losing streaks and keep her bet size small enough to survive them",
+                      "Bet $600 on try four to win back all $300 at once",
+                      "Assume the math was wrong, because three losses in a row cannot happen"
                     ],
                     "answer": 1,
-                    "explain": "Expectancy governs the long run, not three trials. Martingale-style doubling after losses turns a survivable streak into account ruin."
+                    "explain": "A positive average works over dozens of tries, not three. Doubling up after losses turns a survivable $300 dip into an account-ending loss."
                   }
                 ]
               },
               {
                 "id": "f-risk-vs-reward",
-                "title": "Risk, Reward, and Payoff Asymmetry",
-                "objective": "Evaluate trades by their full payoff distribution rather than win rate alone, and anchor every decision on worst-case survival.",
-                "body": 'Suppose you can allocate $10,000 into a risk-free Treasury bill yielding a guaranteed $500, or into an equity position with a 50% chance of gaining $1,250 and a 50% chance of losing $0 (breaking even). The equity allocation has the higher expected value ($625 vs. $500), yet a trader who needs that exact $500 to meet a fixed liability next month may rationally choose the Treasury bill. **Expected value is only half of capital allocation; the other half is dispersion and worst-case survival.**\n\nIn liquid markets, **risk** (the magnitude and probability of adverse outcomes) and **reward** (the compensation for bearing that uncertainty) are structurally linked. Higher expected returns exist precisely because investors demand compensation for enduring drawdowns. Whenever a promoter pitches high, steady returns with "near-zero risk," they are either concealing a catastrophic tail risk or running a fraud.\n\nBefore entering any position on a professional desk, two questions come before the profit target: **"What is the maximum possible loss?"** and **"Can my capital base survive that worst case intact?"** A positive-EV trade whose worst-case scenario forces a margin call or liquidates your account is an uninvestable trade. Rule one of compounding is staying solvent.\n\nFinally, never confuse **win rate** with low risk. Consider a strategy that collects $100 ninety times out of 100, and loses $2,000 the other ten times. A 90% win rate looks seductive on a marketing sheet, yet its net expectancy is (90 \xD7 $100) \u2212 (10 \xD7 $2,000) = **\u2212$11,000 per 100 trades**. Unhedged option selling often hides exactly this **negative skew**: frequent small credits punctuated by rare, account-erasing blowups. Always inspect the full payoff shape \u2014 both the probability of loss and the severity of the tail.',
+                "title": "Surviving the Worst Case Comes First",
+                "objective": "Ask what the worst-case dollar loss is before chasing a profit, and see why a 90% win rate can still lose money.",
+                "body": "You would never drive a 15-ton truck across a wooden bridge rated for 10 tons just because it holds up 9 times out of 10. In trading, the drop from your account peak to its bottom during a losing stretch is called a **drawdown**, such as a $10,000 account dropping $2,000 to $8,000. Before Maria looks at what she might make on Rocket Robotics ($182), she asks whether her account can survive the worst-case dollar loss. The bridge analogy stops there: a collapsed bridge ends the trip forever, while a small cash loss can be recovered if you protect your core savings.\n\nBeginners often brag about their **win rate**, which is the share of trades that make money, such as winning 90 out of 100 tries (90%, or 9 in 10). Suppose Sam collects $100 on 90 trades (+$9,000 total) by making promises on PowerSun Energy ($95), but loses $2,000 on the other 10 trades (\u2212$20,000 total). Despite winning 9 times out of 10, Sam finishes down $11,000 across those 100 trades ($9,000 minus $20,000 is \u2212$11,000). In plain words: winning often means nothing if one bad day wipes out two years of small wins.\n\nEven a good average payout is not the whole story if you need cash on a deadline. Suppose Maria has $10,000 and needs $500 for tuition next month: a safe government bill pays a sure $500, while shares of Lumend Brands ($42) have a 50% chance, or 1 in 2, of gaining $1,250 and a 50% chance of gaining $0. The shares average $625 ($1,250 \xD7 50% is $625), but Maria picks the sure $500 because a $0 month means missing tuition.\n\nHigher potential returns exist in markets because someone has to stomach the bumpy ride. When a stranger online promises Maria an 8% monthly return ($800 a month on $10,000) with zero chance of losing money, she walks away. That pitch is either lying or hiding a rare $5,000 crash that has not hit yet. In plain words: always check the worst-case dollar loss first, and make sure you can afford it on your worst day.",
                 "key_takeaways": [
-                  "Expected return and risk are structurally linked; outsized reward requires bearing real drawdown risk.",
-                  "Always ask two questions first: What is the worst-case loss, and can my account survive it?",
-                  "High win rate is meaningless without payoff magnitude \u2014 one tail loss can erase dozens of small wins.",
-                  "Any pitch promising high returns with zero risk is either hiding a fat left tail or selling fraud."
+                  "Higher potential returns always come with real downside swings.",
+                  "Ask two questions before every trade: what is the worst-case dollar loss, and can my account survive it?",
+                  "A 90% win rate, or 9 in 10, still loses money if the 10% losses are huge ($9,000 won vs. $20,000 lost).",
+                  "Anyone promising high, steady returns with zero risk is either lying or hiding a rare crash loss."
                 ],
                 "sim": "market",
-                "sim_task": "On the Live Market, compare low-volatility Galaxy Media (GLXY, ~$23.50) with high-volatility Rocket Robotics (RCKT, ~$182). Size an equal-dollar stock position (~$3,600: 150 shares of GLXY vs. 20 shares of RCKT), step forward ten trading days, and compare the daily P&L swings and worst single-day drawdown of each position.",
+                "sim_task": "Open Practice (Live Market), click GLXY in the Watchlist, and click Buy 100 sh (~$2,350), then Place order. Then click RCKT, click Buy 10 sh (~$1,820), then Place order, and click \u23ED Next day five times to compare how much each stock swings in dollars.",
                 "quiz": [
                   {
-                    "q": "A trading strategy wins $100 on 90% of its trades and loses $2,000 on the remaining 10%. Over 100 trades, what is its expected net P&L?",
+                    "q": "Sam runs a strategy that wins $100 on 90% of trades (9 in 10) and loses $2,000 on the other 10% (1 in 10). Across 100 trades, what is his net result?",
                     "choices": [
-                      "Profitable \u2014 a 90% win rate guarantees an edge",
-                      "\u2212$11,000 per 100 trades",
-                      "Breakeven if you stop after a winning week",
-                      "Impossible to determine without knowing the ticker"
+                      "A solid profit, because a 90% win rate guarantees success",
+                      "\u2212$11,000 across the 100 trades",
+                      "Breakeven if he stops after a winning week",
+                      "Impossible to know without the stock ticker"
                     ],
                     "answer": 1,
-                    "explain": "90 wins \xD7 $100 = +$9,000; 10 losses \xD7 $2,000 = \u2212$20,000. Net result = \u2212$11,000. Win rate without loss severity tells you nothing about expectancy."
+                    "explain": "Ninety wins at $100 bring in +$9,000, while ten losses at $2,000 cost \u2212$20,000, leaving \u2212$11,000 net. Win rate without loss size is a trap."
                   },
                   {
-                    "q": "Why might a portfolio manager rationally prefer a guaranteed $500 Treasury return over a volatile position with a $625 expected value?",
+                    "q": "Maria needs $500 next month to pay a bill. Why might she pick a guaranteed $500 return over a stock trade that averages $625 but has a 50% chance, or 1 in 2, of paying $0?",
                     "choices": [
-                      "Portfolio managers ignore math",
-                      "If failing to clear $500 triggers a costly constraint or margin liability, eliminating downside variance outweighs the extra $125 of EV",
-                      "Guaranteed returns always have higher expected value",
-                      "Volatile positions never pay out"
+                      "She forgot how to multiply probabilities",
+                      "Missing the $500 bill causes real harm, so avoiding the $0 outcome matters more than the extra $125 average",
+                      "Guaranteed returns always have a higher average payout",
+                      "Stock trades never pay out in real life"
                     ],
                     "answer": 1,
-                    "explain": "Utility depends on constraints and ruin thresholds. When a shortfall carries severe consequences, variance reduction is worth paying for in forgone EV."
+                    "explain": "When coming up short breaks a real-life obligation, locking in the sure $500 is smarter than chasing an extra $125 on average."
                   },
                   {
-                    "q": "An online newsletter advertises a 'guaranteed 8% monthly options income strategy with zero downside risk.' What can you conclude immediately?",
+                    "q": "An ad promises Sam a 'guaranteed 8% monthly options income with zero downside risk.' What should Sam conclude right away?",
                     "choices": [
-                      "It is a rare institutional inefficiency worth testing",
-                      "It is either fraudulent or concealing severe tail risk \u2014 market returns require bearing commensurate risk",
-                      "You should allocate 5% of your portfolio to verify the track record",
-                      "8% per month is standard for covered call writing"
+                      "He found a rare loophole worth testing with half his savings",
+                      "It is either a scam or hiding a huge crash loss, because real returns require taking real risk",
+                      "He should put 5% of his cash in to see if the payouts arrive",
+                      "Making 8% every month with no risk is normal for options"
                     ],
                     "answer": 1,
-                    "explain": "No liquid market pays ~150% annualized returns risk-free. Strategies marketed this way either fabricate results or sell deep out-of-the-money tail risk that eventually blows up."
+                    "explain": "No real market pays nearly 100% a year without risk. Pitches like this either fake their numbers or hide a rare crash that wipes out the account."
                   }
                 ]
               }
@@ -5522,99 +6452,99 @@ When you read a probability on a trading screen \u2014 whether a 70% historical 
             "lessons": [
               {
                 "id": "f-what-is-a-stock",
-                "title": "Equity Ownership and How Markets Price the Future",
-                "objective": "Understand a common share as a residual claim on a business's cash flows and assets, and see how continuous two-sided markets aggregate expectations into price.",
-                "body": "Suppose Burgess Restaurant Group (BRGR) operates a profitable regional chain and wants $10 million to build twenty new locations. Management can borrow the capital from a bank \u2014 taking on mandatory interest payments that could sink the company during a recession \u2014 or it can issue **common stock**: dividing ownership of the enterprise into fractional shares and selling them to investors. Every share represents a proportional **residual claim** on the company's net assets and future earnings.\n\nWhy do investors part with cash for equity? Because if the expanded chain generates strong free cash flow year after year, each share entitles its holder to a proportional claim on those compounding earnings \u2014 paid out via dividends or retained to grow intrinsic value. Equity investing is not a wager on ticker symbols; it is the purchase of a productive cash-flow engine.\n\nOnce issued, those shares trade in a **secondary market** \u2014 an electronic order book where buyers post **bids** (the highest price they will pay) and sellers post **asks** (the lowest price they will accept). When a holder wants liquidity, they do not ask Burgess Restaurant Group for their money back; they sell their shares to another participant at the current market-clearing price. With BRGR trading near $67, that figure is simply the live equilibrium where marginal optimists and marginal pessimists agree to exchange cash for equity.\n\nWhy does BRGR trade at $67 in the morning and $65.80 by the close? Because market prices are **forward-looking discounting machines**. Every commodity cost report, consumer spending print, competitor announcement, or interest-rate shift alters investors' projections of future cash flows. Price movement is the continuous repricing of collective expectations.",
+                "title": "What Owning a Share of Stock Really Means",
+                "objective": "See how a share of stock gives you a slice of a real business, and how buyers and sellers set its price every second.",
+                "body": "You have split the cost of a yard-sale table with friends so everyone gets a share of the cash. When Burgess Restaurant Group ($67) wants $670,000 for new kitchens, it sells 10,000 ownership slices called **common stock** at $67 each. Buying 10 shares for $670 ($67 \xD7 10 shares is $670) gives Maria a real slice of future profits. The yard-sale analogy stops there: Maria can sell her shares in seconds without asking the other owners.\n\nWhen Maria sells her 10 shares, she does not ask Burgess Restaurant Group for her $670 back. On the exchange, buyers post a top offer of $66.95 and sellers ask $67.05, leaving a $0.10 gap called the **bid-ask spread**. Sam pays $67.05 per share ($670.50 for 10 shares) to buy now, or gets $66.95 ($669.50 total) when selling. In plain words: a share is worth what a buyer will pay today, and crossing the gap between buyers and sellers costs a small fee.\n\nWhy does Lumend Brands trade at $42 in the morning and $40 by lunch? All day long, people update what they think the company will earn next year. If a surprise report says shipping costs jumped, buyers lower their offers from $42 to $40, cutting the value of Maria's 100 shares from $4,200 to $4,000 ($2 \xD7 100 shares is $200). Nobody at the exchange sets an official price\u2014the last trade between a buyer and a seller is the price.\n\nBefore buying 100 shares of Lumend Brands at $42 for $4,200, Sam checks his worst-case dollar loss. Unlike a bank loan, a company makes no promise to pay Sam back his $4,200 if sales collapse. If Lumend Brands goes out of business and the share price hits $0, Sam loses the entire $4,200 he paid, though he can never lose more than that $4,200. In plain words: buying shares gives you open-ended upside if the business grows, and your worst case in dollars is the full amount you paid.",
                 "key_takeaways": [
-                  "A share of common stock is a fractional ownership claim on a real business's net assets and future cash flows.",
-                  "Secondary markets match buyers (bids) and sellers (asks) to provide continuous liquidity without tapping the company's treasury.",
-                  "The market price is the live clearing point between optimists and pessimists \u2014 a discounting of future cash flows.",
-                  "Prices move continuously as new information changes consensus expectations about earnings and risk."
+                  "A share of common stock is a real slice of a business, its assets, and its future profits.",
+                  "You sell shares to other people on the exchange, where the gap between buyer and seller prices is the bid-ask spread.",
+                  "Stock prices move all day as news changes what people think future profits are worth.",
+                  "If you pay $4,200 for 100 shares at $42, your upside is uncapped and your worst-case loss is the full $4,200."
                 ],
                 "sim": "market",
-                "sim_task": "On the Live Market, pull up Burgess Restaurant Group (BRGR, ~$67) and Lumend Brands (LMND, ~$42). Buy 50 shares of BRGR, observe the bid-ask spread on the order ticket, and advance the simulation through several days of news headlines to watch how the market reprices the equity in real time.",
+                "sim_task": "Open Practice (Live Market), click BRGR in the Watchlist, and click Buy 10 sh, then Place order. Check the Bid and Ask columns in the Option chain below, then click \u23ED Next day three times to watch news move your 10 shares in dollars.",
                 "quiz": [
                   {
-                    "q": "When you purchase 100 shares of Burgess Restaurant Group (BRGR), what do you legally own?",
+                    "q": "Maria pays $6,700 for 100 shares of Burgess Restaurant Group at $67 a share. What does she own?",
                     "choices": [
-                      "A senior debt contract that the company must repay with interest",
-                      "A fractional ownership claim on the company's net assets and future earnings",
-                      "A revenue voucher redeemable at company locations",
-                      "A purely synthetic betting slip with no tie to the underlying business"
+                      "A loan that the company must pay back with interest next year",
+                      "A real ownership slice of the company's kitchens, assets, and future profits",
+                      "A gift card that only works at Burgess Restaurant locations",
+                      "A side bet with the exchange that has nothing to do with the business"
                     ],
                     "answer": 1,
-                    "explain": "Common stock is residual equity ownership. Shareholders participate in the business's compounding earnings and asset value after debt obligations are met."
+                    "explain": "Common stock is real ownership. Maria shares in future profits and growth, with no promise that the company will pay back her $6,700."
                   },
                   {
-                    "q": "Why does a publicly traded stock's price fluctuate throughout the trading session?",
+                    "q": "Why does Burgess Restaurant Group move from $67.00 at the open to $65.50 by the afternoon?",
                     "choices": [
-                      "Exchanges reset official valuations every hour",
-                      "Buyers and sellers continuously update their valuations as new information alters future cash-flow expectations",
-                      "Share prices follow a purely mechanical random-number generator",
-                      "The issuing company reprices its shares whenever it needs working capital"
+                      "The stock exchange resets official company prices once an hour",
+                      "Buyers and sellers change what they are willing to pay as new news comes out",
+                      "A random number machine inside the exchange picks the afternoon price",
+                      "The company changes its own stock price whenever it needs extra cash"
                     ],
                     "answer": 1,
-                    "explain": "Price discovery is continuous. Every shift in macro data, sector news, or order flow changes where marginal buyers and sellers meet on the order book."
+                    "explain": "Stock prices move whenever news or orders change where buyers and sellers agree to trade."
                   },
                   {
-                    "q": "An investor bought shares of Lumend Brands (LMND) at $38 last quarter. Following a strong earnings beat, what are those shares worth today?",
+                    "q": "Sam bought 100 shares of Lumend Brands at $38 ($3,800 total) last month. Today, after strong sales news, the top buyer offer is $42 ($4,200 total). What are Sam's shares worth right now?",
                     "choices": [
-                      "Exactly $38 \u2014 book cost determines market value",
-                      "Whatever price a willing buyer currently bids in the secondary market, likely above $38",
-                      "Nothing until the company liquidates its factories",
-                      "The book value of inventory per share"
+                      "Still $3,800, because what Sam paid sets the value",
+                      "$4,200, because shares are worth what a buyer will pay for them today",
+                      "$0 until the company sells its buildings",
+                      "Only the value of the boxes sitting in the company warehouse"
                     ],
                     "answer": 1,
-                    "explain": "Historical cost is irrelevant to current value; a security is worth the current market-clearing bid where a buyer and seller agree to transact."
+                    "explain": "Past purchase prices do not matter to the market. Sam's 100 shares are worth the $42 per share ($4,200 total) that a buyer will pay right now."
                   }
                 ]
               },
               {
                 "id": "f-diversification",
-                "title": "Correlation, Variance Reduction, and Diversification",
-                "objective": "Understand how combining imperfectly correlated assets reduces portfolio variance without sacrificing expected return, and recognize when apparent diversification fails.",
-                "body": "Consider an airline and an energy producer such as PowerSun Energy (PWRS, ~$95). When crude oil and wholesale energy prices spike, the airline's operating margins compress while the energy producer's cash flows surge; when energy prices slump, the tailwinds reverse. Held in isolation, each equity exposes you to violent macro swings. Held together in a balanced portfolio, the energy windfalls cushion the airline drawdowns. Your combined equity curve smooths out \u2014 not because either business became less volatile, but because their shocks **offset**. That variance reduction is **diversification**.\n\nThe mathematical engine behind diversification is **correlation** \u2014 how closely two assets move together in response to the same shock. Owning five high-growth robotics companies alongside Rocket Robotics (RCKT, ~$182) is **not** diversification: a single spike in interest rates or a tech-sector valuation reset hammers all five simultaneously. True diversification requires combining exposures driven by genuinely different economic factors \u2014 pairing consumer staples like Lumend Brands (LMND, ~$42), energy (PWRS, ~$95), and broad index exposure (FAM500, ~$500).\n\nWhy do professionals call diversification the closest thing to a free lunch in finance? Because portfolio expected return is the weighted average of the holdings' expected returns, while portfolio volatility \u2014 thanks to imperfect correlation \u2014 is **strictly less** than the weighted average of their individual volatilities. You improve your return-to-risk ratio and keep your worst-case drawdown survivable.\n\nOne critical caveat: **correlations are not static.** In a severe liquidity crisis or broad market panic, correlations across equities often spike toward 1.0 as leveraged funds liquidate everything at once. Diversification dampens idiosyncratic and sector shocks \u2014 a vital seatbelt \u2014 but capping systemic market crash risk requires explicit hedging tools like index puts, which we introduce next.",
+                "title": "Why Owning Different Businesses Smooths the Ride",
+                "objective": "Spread your cash across businesses that react differently to the same news, and see when that protection can fail.",
+                "body": "You have packed both an umbrella and sunglasses for a trip so neither forecast ruins your day. Splitting $9,500 across businesses that react differently to the same news\u2014like $4,750 in PowerSun Energy ($95) and $4,750 in Burgess Restaurant Group ($67)\u2014is called **diversification**. When fuel prices jump, a $400 gain on PowerSun can offset a $300 dip on Burgess. The trip analogy stops there: weather gear never fails at once, while all stocks can drop together in a panic.\n\nHow closely two stocks move together on the same day is called **correlation**, measured on a scale from \u22121 to +1 where +1 means they move in lockstep. Suppose Sam puts $9,100 across five fast-growing robotics companies, including 10 shares of Rocket Robotics ($182) for $1,820. Because all five share a correlation near +1, a single jump in interest rates can knock 10% off every one of them, costing Sam $910 in one afternoon. In plain words: owning five stocks in the same industry is just one big bet wearing five different shirts.\n\nNow compare Maria's mix of Lumend Brands ($42), PowerSun Energy ($95), and Burgess Restaurant Group ($67). Suppose each stock has a 60% chance, or 3 in 5, of gaining $300 this year and a 40% chance, or 2 in 5, of losing $150, for an average gain of $120 per stock. By holding $3,000 in each instead of $9,000 in just one, Maria keeps the same $360 combined average gain while cutting her daily dollar swings nearly in half. One company's rough quarter gets cushioned by a steady quarter at the other two.\n\nThere is one catch every stock owner must respect. During a sudden market-wide scare, nervous traders sell everything at once to raise cash, pushing correlations across almost all stocks toward +1. In a 20% market drop, even Maria's $9,000 three-stock mix can lose $1,800 in a single week. In plain words: spreading cash across different industries protects you from one company blowing up, but only true insurance\u2014like the option contracts you will meet next\u2014puts a hard floor under a market-wide crash.",
                 "key_takeaways": [
-                  "Diversification reduces portfolio variance by combining assets that react differently to the same economic shocks.",
-                  "Owning multiple stocks in the same high-beta sector is concentration in disguise; correlation matters more than ticker count.",
-                  "Imperfect correlation lowers portfolio volatility without lowering expected return \u2014 improving risk-adjusted performance.",
-                  "In systemic market sell-offs, equity correlations rise; diversification smooths sector shocks but does not replace explicit crash protection."
+                  "Diversification spreads your cash across businesses that react differently to the same news.",
+                  "Owning five companies in the same tech sector is one big bet in disguise because their correlation sits near +1.",
+                  "Mixing unrelated businesses cuts your daily dollar swings without lowering your average expected gain.",
+                  "In a market-wide panic, almost all stocks fall together\u2014only direct insurance puts a hard dollar floor under a crash."
                 ],
                 "sim": "market",
-                "sim_task": "On the Live Market, construct a two-asset portfolio by pairing 50 shares of PowerSun Energy (PWRS, ~$95) with 70 shares of Burgess Restaurant Group (BRGR, ~$67), and compare its daily P&L fluctuations over ten simulated sessions against putting the entire ~$9,500 into high-beta Rocket Robotics (RCKT, ~$182).",
+                "sim_task": "Open Practice (Live Market), click PWRS in the Watchlist, and click Buy 10 sh (~$950), then Place order. Then click BRGR, click Buy 10 sh (~$670), then Place order. Click \u23ED Next day five times and compare how the two positions offset each other in Open positions.",
                 "quiz": [
                   {
-                    "q": "Which portfolio achieves the strongest genuine diversification?",
+                    "q": "Maria has $9,000 to invest. Which mix gives her the strongest protection against a single industry slump?",
                     "choices": [
-                      "Five high-volatility robotics and AI hardware stocks",
-                      "An energy producer (PWRS), a consumer staple brand (LMND), and a restaurant operator (BRGR)",
-                      "Two share classes of the same media company",
-                      "A single concentrated position in Rocket Robotics (RCKT)"
+                      "Five high-growth robotics and AI hardware companies",
+                      "$3,000 each in PowerSun Energy ($95), Lumend Brands ($42), and Burgess Restaurant Group ($67)",
+                      "Two different share classes of the same media company",
+                      "All $9,000 in 50 shares of Rocket Robotics ($182)"
                     ],
                     "answer": 1,
-                    "explain": "Energy, consumer staples, and restaurants respond differently to inflation, fuel costs, and rate cycles. Five robotics stocks share the same factor exposure and sell off together."
+                    "explain": "Energy, household goods, and restaurants react differently to fuel costs and shopper habits. Five robotics stocks get hit by the exact same news at the same time."
                   },
                   {
-                    "q": "What risk does equity diversification primarily mitigate?",
+                    "q": "What kind of loss does spreading your money across different industries do the best job of preventing?",
                     "choices": [
-                      "All possible portfolio declines in every market environment",
-                      "Idiosyncratic and single-sector blowups that could otherwise cripple a concentrated account",
-                      "Brokerage transaction fees",
-                      "Short-term capital gains taxes"
+                      "Every possible drop in your account during a market-wide crash",
+                      "A bad earnings report or scandal at one company or sector wiping out your savings",
+                      "The $0.65 per-contract trading fee",
+                      "Taxes on profitable trades at the end of the year"
                     ],
                     "answer": 1,
-                    "explain": "Diversification prevents a single earnings disaster, regulatory ruling, or sector slump from destroying your capital base, keeping drawdowns survivable."
+                    "explain": "Spreading your cash across industries keeps a single company blowup from wrecking your whole account, though a broad market panic can still pull most stocks down together."
                   },
                   {
-                    "q": "Why is diversification described as improving risk-adjusted return?",
+                    "q": "Why does combining unrelated stocks give Maria a smoother ride without lowering her average expected gain?",
                     "choices": [
-                      "It eliminates commissions",
-                      "When imperfectly correlated assets are combined, portfolio volatility drops below the average volatility of the parts while expected return stays equal to the weighted average",
-                      "It guarantees positive returns every quarter",
-                      "Diversified stocks always have higher dividend yields"
+                      "The exchange waives trading fees when you hold three tickers",
+                      "Good days in one business cancel out rough days in another, while the average expected dollar gain of the parts stays the same",
+                      "A three-stock mix is guaranteed to make money every single week",
+                      "Unrelated stocks always pay larger cash dividends"
                     ],
                     "answer": 1,
-                    "explain": "Offsetting fluctuations cancel out part of the variance without diluting the combined expected return \u2014 delivering less risk per unit of expected reward."
+                    "explain": "When stocks do not move in lockstep, their daily ups and downs partly cancel out, shrinking your account swings while keeping your combined average return intact."
                   }
                 ]
               }
@@ -5626,99 +6556,99 @@ When you read a probability on a trading screen \u2014 whether a 70% historical 
             "lessons": [
               {
                 "id": "f-lemonade-insurance",
-                "title": "Risk Transfer: Why Both Sides of an Insurance Contract Win",
-                "objective": "Analyze insurance as an asymmetric risk transfer: paying a small, certain premium to eliminate a ruinous tail loss while the underwriter profits on average across a pooled book.",
-                "body": "Consider a commercial orchard expecting $300,000 in net harvest revenue \u2014 unless a late spring freeze hits, wiping out the crop and leaving the grower with $80,000 in unrecoverable input costs. One freeze hurts; two consecutive freezes trigger foreclosure. An agricultural insurer offers a frost policy: **pay a $15,000 fixed premium before the season starts, and if temperatures drop below the threshold, the policy pays out $120,000.**\n\nEvery risk-transfer contract has this exact anatomy. The $15,000 is the **premium** \u2014 a known, prepaid expense absorbed in every scenario. The $120,000 is the **contingent payout** \u2014 capital that arrives only when the adverse tail event occurs. By purchasing the policy, the grower deliberately trims their best-case sunny-year profit from $300,000 to $285,000 in exchange for lifting their worst-case freeze outcome from a ruinous \u2212$80,000 to a survivable +$25,000.\n\nNow run the expected-value math from the underwriter's desk. If meteorological data shows a 1-in-10 annual probability of a severe freeze, the insurer collects $15,000 per year ($150,000 per decade) and expects to pay out $120,000 once per decade \u2014 earning a **+$30,000 expected underwriting margin** by pooling thousands of uncorrelated farms across regions. For the grower, buying the policy has a *negative* standalone dollar EV (\u2212$3,000 per year), yet signing it is completely rational: **expected value is the wrong objective when the tail event causes bankruptcy.**\n\nHold on to this economic symmetry: **the hedger pays a small, certain drag to amputate a catastrophic left tail; the underwriter collects a risk premium for warehousing that tail across a diversified book.** Both parties improve their position. When you step onto an options desk in the next lesson, you will see that an equity put option is this exact underwriting contract standardized for the stock market.",
+                "title": "How Insurance Works for Both Sides",
+                "objective": "See how paying a small, known fee up front caps a painful loss, while the seller profits on average across many policies.",
+                "body": "You have paid $25 at a rental-car counter so a bumper dent does not stick you with a $1,500 repair bill. That $25 upfront fee\u2014paid whether or not you dent the car\u2014is called the **premium**. You give up a sure $25 today so the rental company promises to cover a $1,500 loss. The rental-car analogy stops there: you cannot resell a car waiver mid-trip, while market protection contracts trade all day.\n\nNow watch Maria protect 100 shares of PowerSun Energy ($95) worth $9,500. She pays Sam $300 up front for his promise to buy her 100 shares at $90 ($9,000 total) if the stock drops. The $5 per-share gap between $95 and $90 ($500 on 100 shares) is her **deductible**\u2014the first $500 dip she absorbs herself. In plain words: Maria pays $300 and takes the first $500 dip so her worst-case loss is capped at $800, even if PowerSun crashes.\n\nWhy would Sam take the other side and promise to cover a crash for just $300? Suppose a bad drop to $75 (costing Sam $1,500 to buy $75 shares at $90) happens only 10% of the time, or 1 in 10 tries. Across 10 separate deals, Sam collects $300 ten times for $3,000 total and pays out $1,500 once, leaving him $1,500 ahead on average ($150 per trade). Sam wins over many tries by spreading his promises across dozens of small trades, while Maria sleeps soundly knowing one crash cannot sink her.\n\nThe honest cost for Maria shows up when the weather stays calm. If PowerSun climbs from $95 to $105, her 100 shares grow by $1,000 to $10,500, and the $300 protection contract expires unused, leaving her with a $700 net gain ($1,000 minus $300 is $700). Paying $300 for protection she did not end up needing was not a mistake\u2014it was the price of capping her worst day at $800. In plain words: buying protection trims a slice off your best-case gain so you can put a hard dollar floor under your worst-case loss.",
                 "key_takeaways": [
-                  "Insurance trades a small, certain upfront cost (the premium) for a contingent payout that caps a catastrophic loss.",
-                  "Underwriters earn positive EV by pooling risks; hedgers rationally pay negative EV to eliminate ruinous tail outcomes.",
-                  "Hedging reshapes the return distribution: it trims the upside slightly to place a hard floor under the downside.",
-                  "Every put option in financial markets is built on this exact risk-transfer bargain between hedger and underwriter."
+                  "A premium is the fixed cash fee you pay up front\u2014and never get back\u2014to hand off a painful loss.",
+                  "A deductible is the first slice of a drop you absorb yourself before the seller's promise kicks in.",
+                  "The seller makes money on average across many quiet tries, while the buyer gladly pays to cap a worst-case crash.",
+                  "When the stock rises and protection goes unused, the fee you paid was still worth the floor it gave you."
                 ],
                 "sim": "market",
-                "sim_task": "On the Live Market, inspect the option chain for PowerSun Energy (PWRS, ~$95). Compare the quoted premiums of a 30-day 90-strike put and an 85-strike put: calculate what percentage of the $95 share price each 'deductible' level costs to insure for one month.",
+                "sim_task": "Open Practice (Live Market), click PWRS in the Watchlist (~$95), and scroll to the Option chain. Look at the Put side on the right and compare the Ask price on the $90 strike versus the $85 strike to see how a bigger deductible lowers your upfront fee.",
                 "quiz": [
                   {
-                    "q": "In a commercial frost or property insurance contract, what is the 'premium'?",
+                    "q": "Maria pays Sam $300 up front for a contract that protects her 100 shares of PowerSun Energy ($95). What is that $300 fee called?",
                     "choices": [
-                      "The contingent payout received after a loss occurs",
-                      "The fixed, upfront cost paid by the hedger regardless of whether a loss occurs",
-                      "The net profit earned in a loss-free year",
-                      "The deductible absorbed by the business owner"
+                      "The payout she receives after a crash",
+                      "The premium\u2014the fixed upfront price Maria pays whether or not the stock falls",
+                      "The profit Maria earns in a calm month",
+                      "The deductible Maria absorbs before protection starts"
                     ],
                     "answer": 1,
-                    "explain": "The premium is the known, certain cost paid up front to transfer tail risk to the underwriter, kept by the seller whether or not the insured event happens."
+                    "explain": "The premium is the known upfront cash Maria pays to Sam. Sam keeps that $300 whether PowerSun crashes or rallies."
                   },
                   {
-                    "q": "If an insurance underwriter prices policies to earn a positive expected profit margin, why do businesses and investors still rationally buy coverage?",
+                    "q": "If Sam prices his protection contracts so that he makes $150 on average per trade across 100 tries, why does Maria still buy one from him?",
                     "choices": [
-                      "They shouldn't \u2014 rational actors never accept negative dollar EV",
-                      "Because paying a small, survivable fee to eliminate a bankruptcy-inducing tail loss is rational even at negative standalone EV",
-                      "Because underwriters usually miscalculate the odds",
-                      "Because insurance policies guarantee positive investment returns"
+                      "She should not\u2014no rational person ever pays for protection that loses money on average",
+                      "Paying a survivable $300 fee to block a painful $3,000 crash loss makes sense when one big drop would hurt her",
+                      "Sellers almost always miscalculate the odds in the buyer's favor",
+                      "Buying protection guarantees Maria will make money every month"
                     ],
                     "answer": 1,
-                    "explain": "Maximizing raw EV only applies when you can survive every outcome and repeat the bet indefinitely. When a tail loss threatens solvency, paying a risk premium to cap the downside is optimal."
+                    "explain": "When a big drop would derail your plans, paying a small, known $300 fee to cap your worst-case loss is smart even though the seller profits on average."
                   },
                   {
-                    "q": "How does purchasing insurance reshape a business's or portfolio's distribution of outcomes?",
+                    "q": "How does paying $300 to protect 100 shares of PowerSun Energy ($95) change Maria's best-case and worst-case outcomes?",
                     "choices": [
-                      "Both best-case and worst-case outcomes improve",
-                      "The best case is reduced by the premium paid, while the worst case is floored at a survivable level",
-                      "Both best-case and worst-case outcomes worsen",
-                      "The distribution stays identical"
+                      "Both her best-case gain and her worst-case loss get better",
+                      "Her best-case gain is trimmed by the $300 fee, while her worst-case loss gets a hard dollar floor",
+                      "Both her best-case gain and her worst-case loss get worse",
+                      "Her outcomes stay the exact same as holding the shares alone"
                     ],
                     "answer": 1,
-                    "explain": "In quiet periods you trail an uninsured peer by the premium paid; in a crisis the payout floors your loss. Insurance trims the right tail slightly to cut off the left tail."
+                    "explain": "In a rally Maria trails an unprotected shareholder by the $300 fee she paid, but in a crash Sam's promise puts a hard floor under her loss."
                   }
                 ]
               },
               {
                 "id": "f-bridge-to-options",
-                "title": "From Commercial Insurance to Equity Put Options",
-                "objective": "Map insurance mechanics directly onto listed put options: strike as deductible floor, expiration as policy term, premium as cost, and implied volatility as storm-season pricing.",
-                "body": "Suppose you hold 100 shares of PowerSun Energy (PWRS) trading at $95 \u2014 a $9,500 equity position. You want to hold the shares for long-term appreciation, but an upcoming regulatory ruling and earnings print could trigger a 30% gap down. Rather than liquidating your core holding, you turn to the options market and buy one **PWRS 90-strike put option** expiring in 60 days for a premium of $3.00 per share ($300 total, since one standard contract covers 100 shares).\n\nMap the contract terms directly to an insurance policy. The **$90 strike price** is your guaranteed floor: no matter how far PWRS falls before the 60-day **expiration**, you hold the contractual right to sell your 100 shares at $90 ($9,000). The **$5 gap** between today's $95 price and the $90 strike acts like your **deductible** \u2014 the first $500 of decline you absorb yourself. If PWRS rallies to $115, the put expires worthless; your shares are worth $11,500 and the $300 premium was simply the cost of two months' protection. If PWRS crashes to $65 on bad news, you exercise (or sell) the put, capping your maximum loss at $500 of share decline plus $300 of premium = **$800 total**, instead of a $3,000 drawdown.\n\nWho stands on the other side of your trade? An **option writer** acting as the underwriter: collecting your $300 premium up front and accepting the legal obligation to buy 100 shares at $90 if PWRS breaks below the strike. Just like coastal property insurance in hurricane season, option premiums are not fixed \u2014 when market turbulence rises or traders scramble for protection ahead of a major catalyst, put premiums expand across the board (a force you will soon measure as **implied volatility**).\n\nCarry this institutional framing through every track ahead: options are not casino chips. They are **precision instruments for transferring and reshaping risk** \u2014 whether you are buying a floor under an equity position, renting out upside you do not need, or underwriting protection for a fee.",
+                "title": "How a Put Option Insures 100 Shares",
+                "objective": "Match the parts of an insurance policy to a put option: the 100-share bundle, the strike price floor, the deadline, and the upfront fee.",
+                "body": "You have read a home policy page that lists your coverage floor, your deductible, and your renewal date. On the stock exchange, that same protection contract for 100 shares is called a **put option**, such as paying $200 to insure 100 shares of Lumend Brands ($42). One contract always covers 100 shares, so a $2.00 quote costs $200 ($2 \xD7 100 shares is $200). The home-policy analogy stops there: anyone can trade a put option in seconds without an adjuster.\n\nMaria owns 100 shares of Lumend Brands at $42 ($4,200 total) and buys one 60-day $40 put for $2.00 a share ($200 total). That locked-in $40 exit price is the **strike price**, giving Maria the right to sell her 100 shares at $40 ($4,000 total) before the 60-day deadline. If Lumend crashes to $28, she still sells at $40, capping her total loss at $400 ($200 share dip plus $200 fee). In plain words: the strike price is your guaranteed floor, and the gap between today's price and the strike is your deductible.\n\nWho makes that promise on the other side of Maria's trade? Sam, the option seller, collects Maria's $200 cash today and must buy her 100 shares at $40 ($4,000 total) if Lumend drops below $40 by the deadline. Just like coastal insurance ahead of a storm, Sam charges more when big news is coming. In a quiet week Sam might charge $1.50 ($150 total) for that $40 put, while before big earnings news he charges $3.50 ($350 total).\n\nWhat if good news lands instead and Lumend climbs from $42 to $50? Maria's 100 shares grow by $800 to $5,000, her $40 put expires at $0, and she walks away up $600 net ($800 stock gain minus $200 fee is $600). Sam keeps the $200 fee as his payment for standing ready to take the crash that never happened. In plain words: every option contract is a simple trade between someone paying cash to reshape risk and someone getting paid cash to take that risk on.",
                 "key_takeaways": [
-                  "A protective put is listed equity insurance: paying a premium buys the contractual right to sell 100 shares at the strike price until expiration.",
-                  "If the stock rallies and the put expires worthless, the premium was not a mistake \u2014 it was the cost of a floored worst case.",
-                  "Put premiums expand when expected turbulence and hedging demand rise, just like property coverage ahead of storm season.",
-                  "Approach every option trade by asking: what risk is being transferred here, and who is paying whom to warehouse it?"
+                  "A put option gives its buyer the right to sell 100 shares at the strike price on or before the deadline.",
+                  "One standard option covers 100 shares, so a $2.00 per-share price costs $200 in real cash ($2 \xD7 100 shares is $200).",
+                  "The option seller collects the buyer's cash up front and promises to buy the 100 shares at the strike price if the stock drops.",
+                  "Option prices rise before big news or stormy markets because sellers demand higher fees to take on bigger jump risk."
                 ],
                 "sim": "market",
-                "sim_task": "On the Live Market, buy 100 shares of Lumend Brands (LMND, ~$42) and simultaneously buy one 60-day 40-strike put option. Advance the simulator through two weeks of trading, observing how the put's value responds on down days versus up days and verifying that your combined position's worst-case loss stays strictly capped.",
+                "sim_task": "Open Practice (Live Market), click LMND in the Watchlist (~$42), and click Buy 100 sh. In the Option chain, click the Ask price on the Put side at the $40 strike, then click Place order and Trade anyway. Click \u23ED Next day five times and watch how the put cushions down days.",
                 "quiz": [
                   {
-                    "q": "Buying a protective put option against 100 shares of stock you own is economically equivalent to:",
+                    "q": "Maria owns 100 shares of Lumend Brands at $42 and buys one 60-day $40 put option for $200. What is this trade doing for her?",
                     "choices": [
-                      "Buying a lottery ticket on the company's earnings",
-                      "Purchasing a casualty insurance policy with a fixed term, a deductible (spot minus strike), and a prepaid premium",
-                      "Taking out a margin loan from your broker",
-                      "Short-selling the company's bonds"
+                      "Buying a lottery ticket that only pays if the company doubles",
+                      "Buying a 60-day insurance policy with a $40 per-share floor, a $2 per-share deductible ($200), and a $200 upfront fee",
+                      "Borrowing $4,000 from her broker to buy more shares",
+                      "Selling her 100 shares immediately at $40"
                     ],
                     "answer": 1,
-                    "explain": "A protective put transfers downside tail risk below the strike price to the option writer for a fixed term in exchange for an upfront premium."
+                    "explain": "Buying a put against 100 shares you own works just like an insurance policy: you pay $200 up front so your shares cannot be worth less than $40 each ($4,000 total) before the deadline."
                   },
                   {
-                    "q": "You pay $300 for a 90-strike put to protect 100 shares of PWRS at $95, and the stock rallies to $110 through expiration. Was buying the put an error?",
+                    "q": "Sam pays $300 for a 60-day $90 put to protect his 100 shares of PowerSun Energy ($95). PowerSun rallies to $110 (+$1,500 on the shares) and the put expires at $0. Was buying the put a mistake?",
                     "choices": [
-                      "Yes \u2014 the $300 expired worthless",
-                      "No \u2014 unused protection is the normal cost of capping downside risk during a window of uncertainty",
-                      "Yes \u2014 you should only buy puts when you are certain a crash will occur",
-                      "Only if the stock failed to pay a dividend"
+                      "Yes\u2014any contract that finishes at $0 was a wasted trade",
+                      "No\u2014paying $300 to cap his worst-case loss during a risky 60-day window did its job even though the storm missed",
+                      "Yes\u2014you should only buy puts when you know for sure a crash will happen",
+                      "Only if the company did not pay a cash dividend"
                     ],
                     "answer": 1,
-                    "explain": "Judge hedges ex-ante, not ex-post. Just as you do not regret an accident-free year on an insured property, the $300 bought a hard floor during a risky window."
+                    "explain": "You judge protection before the news hits, not after. Just like you do not regret a crash-free year on car insurance, the $300 bought a hard dollar floor while Sam held through uncertainty."
                   },
                   {
-                    "q": "Under what market conditions do put option premiums become significantly more expensive, even before the stock price falls?",
+                    "q": "When does the price of a $40 put on Lumend Brands ($42) jump from $1.50 ($150) to $3.50 ($350) even before the stock price moves?",
                     "choices": [
-                      "When volatility is low and investor sentiment is complacent",
-                      "When expected turbulence rises and institutional demand for downside protection increases",
-                      "Option premiums are fixed by the exchange and never change for a given strike",
-                      "Only on the final day of the calendar year"
+                      "When the market is dead calm and nobody expects news",
+                      "When big news or rocky markets make large price swings more likely, so sellers charge more for protection",
+                      "Never\u2014the exchange locks the price of a $40 put at $1.50 all year",
+                      "Only on the last trading day of December"
                     ],
                     "answer": 1,
-                    "explain": "Just like coastal insurance ahead of hurricane season, heightened uncertainty and hedging demand bid up option premiums \u2014 an increase in implied volatility."
+                    "explain": "Just like coastal insurance ahead of storm season, option sellers charge higher upfront fees when big news or jumpy markets raise the chance of a sharp drop."
                   }
                 ]
               }
@@ -5730,7 +6660,7 @@ When you read a probability on a trading screen \u2014 whether a 70% historical 
         "id": "core",
         "title": "Options Core",
         "audience": "Adult beginner",
-        "description": "From first definitions to spreads and volatility, following the arc of McMillan's Options as a Strategic Investment (5th ed.) \u2014 with every strategy built and stress-tested in the labs.",
+        "description": "What options are, what they cost, and the first strategies real people use \u2014 every one of them built and tried on the practice market before you risk a dollar.",
         "modules": [
           {
             "id": "c-language",
@@ -5738,60 +6668,54 @@ When you read a probability on a trading screen \u2014 whether a 70% historical 
             "lessons": [
               {
                 "id": "c-calls-puts-defined",
-                "title": "Calls, Puts, and the Anatomy of a Contract",
-                "objective": "Define calls and puts precisely, and master the five terms \u2014 strike, expiration, premium, underlying, multiplier \u2014 that appear in every options conversation.",
-                "body": `An option is a contract about a future transaction. A **call option** gives its buyer the right \u2014 not the obligation \u2014 to *buy* 100 shares of a stock at a fixed price, on or before a deadline. A **put option** gives the right to *sell* 100 shares at a fixed price. The fixed price is the **strike**; the deadline is the **expiration**; the stock itself is the **underlying**; and the price you pay for the contract is the **premium**. One US equity option controls 100 shares \u2014 the **multiplier** \u2014 so a quoted premium of $2.50 costs $250 in real money.
-
-Concrete example: SIM stock LMND trades at $100. The "LMND 105 call, 60 days" might cost $2.00 ($200). Buying it means: any time in the next 60 days, you may buy 100 LMND shares at $105, regardless of market price. If LMND runs to $120, that right is worth at least $15 per share \u2014 $1,500 against your $200 outlay. If LMND stays below $105, the right is worthless at expiration and your loss is the $200 premium. Known, capped, prepaid.
-
-Every option trade has two sides. The **buyer** pays premium and receives rights. The **seller** (or *writer*) collects premium and takes on **obligations**: a call writer must deliver shares at the strike if asked; a put writer must buy shares at the strike if asked. This asymmetry \u2014 buyer's risk capped at the premium, seller's risk potentially large \u2014 is the single most important structural fact in options. Most beginner disasters come from selling obligations without understanding them.
-
-Finally, orientation vocabulary you'll use constantly: a call is **in-the-money (ITM)** when the stock is above the strike, **out-of-the-money (OTM)** when below, and **at-the-money (ATM)** near the strike. Puts mirror this. These aren't judgments of quality \u2014 an OTM option isn't 'bad' \u2014 they describe where the strike sits relative to today's price, which, as you'll see next lesson, determines what the premium is made of.`,
+                "title": "Calls, Puts, and How One Contract Covers 100 Shares",
+                "objective": "Tell a call option from a put option, multiply per-share quotes by 100, and see who gets a choice versus who makes a promise.",
+                "body": "You have paid a $20 fee to hold a $300 flight price for 48 hours while checking your schedule. On the exchange, paying $200 for the right to buy 100 shares of Lumend Brands ($42) at $45 within 60 days is called a **call option**. If Lumend jumps to $52, Maria buys at $45; if not, she loses only her $200 fee. The flight-hold analogy stops there: airline holds cannot be resold, while options trade all day.\n\nWhile a call gives Maria the right to buy 100 shares at a locked-in strike price, a put gives her the right to sell 100 shares at that price. Every standard US stock option covers 100 shares\u2014a fixed 100-share bundle called the **multiplier**\u2014so an option quoted at $1.45 per share costs $145 in cash ($1.45 \xD7 100 shares is $145). If Sam buys one 60-day $65 put on Burgess Restaurant Group ($67) quoted at $2.00, he pays $200 up front for the right to sell 100 shares at $65 ($6,500 total). In plain words: calls lock in a buying ceiling, puts lock in a selling floor, and you always multiply the screen price by 100.\n\nEvery option trade has a buyer who gets a choice and a seller who makes a binding promise. When Maria buys that $45 call on Lumend Brands ($42) for $200, her worst-case loss is strictly capped at $200. Sam, who collected that $200, must deliver 100 shares at $45\u2014if Lumend hits $80, buying at $80 to sell at $45 costs him $3,300 net. Never sell an option without checking the worst-case dollar cost of keeping your promise.\n\nFinally, always compare the option's strike price to today's share price. With Lumend Brands at $42, a $40 call already sits $2 per share ($200 for 100 shares) below today's price, so using it right now would save Maria $200. A $45 call sits $3 above today's $42 price, so it pays nothing unless Lumend climbs past $45 before the deadline. In plain words: the buyer pays a capped fee for a choice, the seller gets paid for a promise, and the strike sets the finish line.",
                 "key_takeaways": [
-                  "Calls = right to buy at the strike; puts = right to sell at the strike; both expire on a known date.",
-                  "The multiplier is 100: a $2.00 premium is $200 of real money.",
-                  "Buyers pay premium for rights (risk capped); writers collect premium for obligations (risk can be large).",
-                  "ITM/ATM/OTM describe where the strike sits relative to the stock price, not whether the option is 'good'."
+                  "A call option gives its buyer the right to buy 100 shares at the strike price on or before the deadline.",
+                  "A put option gives its buyer the right to sell 100 shares at the strike price on or before the deadline.",
+                  "The multiplier is 100 shares per contract, so a $2.00 quoted price costs $200 in real cash ($2 \xD7 100 shares is $200).",
+                  "Buyers pay cash for a choice with a capped dollar loss; sellers collect cash and take on a binding obligation."
                 ],
-                "source": "OASI 5e ch. 1 (Definitions)",
+                "source": "Options Core \xB7 Contract Basics",
                 "sim": "strategy",
-                "sim_task": "In the Strategy Lab, buy one LMND 105 call (60 days) with LMND at $100. Read off the premium, max loss, and breakeven from the payoff diagram, then drag the expiration-day price slider to $120 and verify the profit matches (120 \u2212 105 \u2212 premium) \xD7 100.",
+                "sim_task": "Open Strategy Lab, select LMND in Underlying, and choose Long Call in Preset strategy. Change the Strike dropdown to a strike just above today's price, read the Net debit, Max loss, and Breakeven tiles, and hover across the At expiration line on the chart.",
                 "quiz": [
                   {
-                    "q": "You buy a LMND 95 put for $3.00 with the stock at $100. What is your maximum possible loss?",
+                    "q": "Maria buys one $40 put on Lumend Brands ($42) for $3.00 per share ($300 total). What is the most money she can possibly lose on this trade?",
                     "choices": [
-                      "Unlimited",
-                      "$300 \u2014 the premium paid",
-                      "$9,500",
-                      "$95 per share"
+                      "Unlimited dollars if Lumend rallies",
+                      "$300\u2014the upfront cash she paid for the contract",
+                      "$4,000\u2014the full value of 100 shares at the $40 strike",
+                      "$40 per share"
                     ],
                     "answer": 1,
-                    "explain": "Option buyers can never lose more than the premium. The worst case is the put expiring worthless: $3.00 \xD7 100 = $300."
+                    "explain": "An option buyer can never lose more than the upfront cash paid. In the worst case the put finishes at $0 and Maria loses $300 ($3.00 \xD7 100 shares is $300)."
                   },
                   {
-                    "q": "Who has obligations in an options contract?",
+                    "q": "In an option trade between Maria (the buyer) and Sam (the seller), who takes on a binding obligation after the trade is placed?",
                     "choices": [
-                      "The buyer",
-                      "The seller (writer)",
-                      "Both equally",
-                      "Neither \u2014 options are rights only"
+                      "Maria, the option buyer",
+                      "Sam, the option seller",
+                      "Both Maria and Sam equally",
+                      "Neither\u2014options give choices to both sides"
                     ],
                     "answer": 1,
-                    "explain": "The writer collects the premium in exchange for an obligation: deliver stock at the strike (short call) or buy stock at the strike (short put) if assigned. The buyer holds only rights."
+                    "explain": "Sam collects Maria's upfront cash in exchange for a binding promise to buy or sell 100 shares at the strike price if Maria chooses to use her contract."
                   },
                   {
-                    "q": "LMND trades at $100. Which option is in-the-money?",
+                    "q": "Lumend Brands trades at $42 today. Which of these contracts already has a strike price that would pay off if Maria used her right immediately?",
                     "choices": [
-                      "The 105 call",
-                      "The 95 call",
-                      "The 95 put",
-                      "The 100 straddle"
+                      "The $45 call (right to buy at $45)",
+                      "The $40 call (right to buy at $40)",
+                      "The $40 put (right to sell at $40)",
+                      "The $45 call and $40 put together"
                     ],
                     "answer": 1,
-                    "explain": "A call is ITM when the stock is above its strike: 100 > 95. The 105 call and 95 put are both OTM with the stock at $100."
+                    "explain": "With the stock at $42, the right to buy shares at $40 is already worth $2 per share ($200 total). Buying at $45 or selling at $40 would not pay off at a $42 stock price."
                   },
                   {
-                    "q": "An option quoted at $1.45 costs how much to buy (one contract, standard US equity)?",
+                    "q": "Sam sees an option on Burgess Restaurant Group ($67) quoted at $1.45 on the chain. How much cash does it cost to buy one standard contract (before the $0.65 fee)?",
                     "choices": [
                       "$1.45",
                       "$14.50",
@@ -5799,74 +6723,68 @@ Finally, orientation vocabulary you'll use constantly: a call is **in-the-money 
                       "$1,450"
                     ],
                     "answer": 2,
-                    "explain": "The 100-share multiplier applies to the premium: $1.45 \xD7 100 = $145. Forgetting the multiplier is a classic (and expensive) rookie error."
+                    "explain": "One standard US stock option covers 100 shares: $1.45 \xD7 100 shares is $145. Forgetting to multiply the screen quote by 100 is an expensive beginner mistake."
                   }
                 ]
               },
               {
                 "id": "c-pricing-intuition",
-                "title": "What You're Really Paying For: Intrinsic and Time Value",
-                "objective": "Decompose any option premium into intrinsic value and time value, and build intuition for the forces (moneyness, time, volatility) that set the price.",
-                "body": `Every option premium splits cleanly into two parts. **Intrinsic value** is what the option would be worth if exercised right now: for a call, max(stock \u2212 strike, 0); for a put, max(strike \u2212 stock, 0). With LMND at $103, the 100 call has $3 of intrinsic value. Everything else in the premium is **time value** (also called extrinsic value): if that call trades at $5.40, then $2.40 of it is time value \u2014 the price of *possibility*, what the market charges for everything that might still happen before expiration.
-
-Three forces set time value, and you can reason about each without any formula. **Time**: more days means more chances for the stock to make the option pay, so longer-dated options cost more \u2014 but note, 60 days doesn't cost twice as much as 30, because uncertainty grows roughly with the *square root* of time. **Moneyness**: time value is biggest at-the-money, where the option's fate is most genuinely undecided; deep ITM and far OTM options have little time value because their endings feel nearly written. **Volatility**: a jumpier stock has more chances of a big move, so *every* option on it \u2014 calls and puts alike \u2014 costs more. Volatility is to options what storm frequency is to insurance premiums.
-
-Time value is not a bonus; it's a **melting asset**. Every day that passes with nothing happening, a little of it evaporates \u2014 faster and faster as expiration approaches for at-the-money options. This decay (you'll later meet it formally as *theta*) is the rent option buyers pay and option sellers collect. Understanding who is paying rent to whom, and for what, is half of options literacy.
-
-One practical habit to start now: when you look at any option price, mentally split it. "LMND at $103, the 100 call at $5.40 \u2014 that's $3 intrinsic, $2.40 of melting time value." Ask whether the possibility you're buying is worth the rent. That one reflex \u2014 decompose, then judge \u2014 will keep you out of more bad trades than any strategy you'll ever learn.`,
+                "title": "What You Are Paying For: Real Value Now vs. Time Left",
+                "objective": "Split any option price into what it is worth right now and what you are paying for time and possible movement.",
+                "body": "You have bought a $15 bakery box that holds $10 of cookies inside a $5 tin. Option prices split into two pieces the same way. With Burgess Restaurant Group at $67, a $65 call lets Maria buy $67 shares for $65, giving it $2 per share ($200 for 100 shares) of right-now worth called **intrinsic value**. The bakery analogy stops there: a tin lasts forever, while an option's extra price melts away by the deadline.\n\nIf that $65 call on Burgess Restaurant Group ($67) trades for $3.40 ($340 total), and $2.00 ($200) is intrinsic value, what is the other $1.40 ($140)? That extra $1.40 per share ($140 total) is **time value**\u2014the cash Maria pays Sam for the chance that Burgess climbs even higher before the deadline. Time value is biggest when the strike price sits right at today's $67 stock price, where the outcome is a 50% coin flip, or 1 in 2. In plain words: every option price equals what the contract is worth right this second plus the extra fee for what might still happen.\n\nTwo forces make time value more expensive: more days on the clock and a jumpier stock. A 60-day call on Lumend Brands ($42) costs about $2.80 ($280) while a 30-day call costs $2.00 ($200)\u2014not double, because price swings grow with the square root of time. When news makes Lumend swing wider, Sam charges more for both calls and puts because big moves in either direction become more likely. More days or wilder swings always mean a bigger upfront fee.\n\nTime value is not a gift; it is a melting ice cube. Every quiet day that Burgess stays stuck at $67, a few dollars of Maria's $140 time value vanish into Sam's pocket until $0 of time value remains at the deadline. Before Maria buys any option, she splits the quote in her head: '$340 total is $200 of real value now plus $140 of melting time.' In plain words: always check how many dollars of an option's price will melt to $0 if the stock goes nowhere.",
                 "key_takeaways": [
-                  "Premium = intrinsic value + time value; intrinsic is what exercising now would yield.",
-                  "Time value peaks at-the-money and grows with time and volatility \u2014 it's the price of possibility.",
-                  "Time value melts every day (decay), accelerating near expiration for ATM options.",
-                  "Habit: decompose every premium into its two parts before judging whether it's worth paying."
+                  "Every option price splits into intrinsic value (what it is worth right now) plus time value (the price of what might happen).",
+                  "Time value is highest when the strike sits right at today's stock price, where the finish is most uncertain.",
+                  "When a stock becomes jumpier, both calls and puts get more expensive because big swings in either direction are more likely.",
+                  "Time value melts to $0 by the deadline, so buyers pay for time every quiet day while sellers collect it."
                 ],
-                "source": "OASI 5e ch. 1 (Definitions) and pricing-factor discussions in Part I",
+                "source": "Options Core \xB7 Pricing Intuition",
                 "sim": "greeks",
-                "sim_task": "In the Greeks Lab, load a LMND 100 call with the stock at $103. Read the intrinsic/time-value split, then (1) slide days-to-expiry from 60 to 7 and watch time value melt, and (2) slide volatility from 20% to 40% and watch it swell. Confirm intrinsic value never changes during either move.",
+                "sim_task": "Open Greeks Lab and look at the Call price tile for the $100 model stock. Drag Strike K to $95 so the call has $5 of right-now value, then drag Days to expiry from 60 down to 1 to watch the extra time value melt away, and drag the third slider from 20% to 40% to watch the price swell.",
                 "quiz": [
                   {
-                    "q": "LMND trades at $98. The 95 call costs $5.10. What's the split?",
+                    "q": "Burgess Restaurant Group trades at $68 today, and Maria sees the $65 call priced at $5.10 per share ($510 total). How does that $5.10 price split?",
                     "choices": [
-                      "$5.10 intrinsic, $0 time",
-                      "$3 intrinsic, $2.10 time",
-                      "$0 intrinsic, $5.10 time",
-                      "$2.10 intrinsic, $3 time"
+                      "$5.10 intrinsic value, $0 time value",
+                      "$3.00 intrinsic value ($300), $2.10 time value ($210)",
+                      "$0 intrinsic value, $5.10 time value",
+                      "$2.10 intrinsic value ($210), $3.00 time value ($300)"
                     ],
                     "answer": 1,
-                    "explain": "Intrinsic = max(98 \u2212 95, 0) = $3. The remaining $2.10 of the premium is time value."
+                    "explain": "Buying a $68 stock for $65 is worth $3.00 per share ($300) right now ($68 minus $65 is $3). The remaining $2.10 ($210) is time value."
                   },
                   {
-                    "q": "Which option carries the MOST time value, all else equal?",
+                    "q": "Lumend Brands trades at $42 today. Which 30-day call option carries the most time value in its price?",
                     "choices": [
-                      "Deep in-the-money call",
-                      "At-the-money call",
-                      "Far out-of-the-money call",
-                      "They're all equal"
+                      "A $30 call sitting far below today's $42 price",
+                      "A $42 call sitting right at today's $42 price",
+                      "A $55 call sitting far above today's $42 price",
+                      "All three calls carry the exact same dollar amount of time value"
                     ],
                     "answer": 1,
-                    "explain": "Time value peaks ATM, where the outcome is most uncertain. Deep ITM options behave almost like stock; far OTM options are mostly dead weight \u2014 both have little possibility left to price."
+                    "explain": "Time value peaks right at today's stock price ($42), where whether the option pays off is most uncertain."
                   },
                   {
-                    "q": "Volatility on LMND doubles overnight with the stock price unchanged. What happens to option premiums?",
+                    "q": "Surprise news makes expected price swings on Lumend Brands ($42) double overnight while the share price stays at $42. What happens to option prices?",
                     "choices": [
-                      "Calls rise, puts fall",
-                      "Puts rise, calls fall",
-                      "Both calls and puts rise",
-                      "Nothing until the stock moves"
+                      "Calls go up in price and puts go down",
+                      "Puts go up in price and calls go down",
+                      "Both calls and puts go up in price",
+                      "Nothing changes until the share price moves off $42"
                     ],
                     "answer": 2,
-                    "explain": "Higher expected movement increases the chance of big payoffs in BOTH directions, so all options gain time value \u2014 just as insurance costs more in storm season."
+                    "explain": "Bigger expected swings raise the chance of a large payout in both directions, so sellers charge more for calls and puts alike."
                   },
                   {
-                    "q": "Why doesn't a 60-day option cost twice as much as a 30-day option?",
+                    "q": "Why does a 60-day option on Burgess Restaurant Group ($67) cost about 1.4 times as much as a 30-day option instead of twice as much?",
                     "choices": [
-                      "Market makers give volume discounts",
-                      "Uncertainty grows roughly with the square root of time, not linearly",
-                      "Longer options are less popular",
-                      "It does cost exactly twice as much"
+                      "Exchanges offer a bulk discount on 60-day contracts",
+                      "The range of likely stock moves grows with the square root of time, not in a straight line",
+                      "Nobody likes trading 60-day options",
+                      "It actually does cost twice as much on every stock"
                     ],
                     "answer": 1,
-                    "explain": "Expected price dispersion scales with \u221Atime, so doubling the days multiplies the uncertainty by about 1.41, not 2 \u2014 and premiums follow suit."
+                    "explain": "Doubling the time from 30 days to 60 days widens the stock's likely trading range by about 1.41 times (the square root of 2), not 2 times."
                   }
                 ]
               }
@@ -5878,174 +6796,162 @@ One practical habit to start now: when you look at any option price, mentally sp
             "lessons": [
               {
                 "id": "c-buying-calls",
-                "title": "Buying Calls: Leverage with a Known Worst Case",
-                "objective": "Learn when buying a call makes sense, how to compute its breakeven, and why time decay makes 'being right' about direction insufficient.",
-                "body": `Buying a call is the simplest bullish option trade: you pay a premium for upside exposure with a hard floor under your losses. LMND at $100; the 60-day 105 call costs $2.00. Your **maximum loss is $200**, period. Your **breakeven at expiration is strike + premium = $107**. Above that, you keep dollar-for-dollar upside: at $115 the call is worth $10, a $800 profit on $200 risked \u2014 a 4-to-1 payoff from a 15% stock move. That amplification is **leverage**, and it's the honest appeal of call buying.
-
-Now the honest cost. For the trade to profit, LMND must rise **past $107 within 60 days**. The stock can go up 5% \u2014 you were *right* about direction \u2014 and your call can still expire worthless. Call buyers aren't just betting on direction; they're betting on direction, *magnitude*, and *deadline* simultaneously. The premium you paid is mostly time value, and time value melts whether or not your thesis is on schedule.
-
-Strike selection shapes the bet. The 100 (ATM) call might cost $4.50: more expensive, but breakeven is only $104.50 and it gains value quickly on any rally. The 115 call might cost $0.45: cheap lottery-ticket feel, but LMND needs a 15%+ move just to break even, and most such options expire worthless. McMillan's enduring advice runs against the beginner instinct: cheap far-OTM calls are usually the *worst* buys because their probability of paying is tiny; slightly ITM or ATM calls put more of your premium into intrinsic value that doesn't melt.
-
-Two discipline rules before your first real call purchase. First, size by max loss: only buy premium you're fully prepared to lose, because total loss is a routine outcome, not a tail event. Second, have an exit plan for *time*, not just price \u2014 a call bought at 60 days behaves very differently at 10 days, and "hold and hope" into the final week is how time decay eats accounts.`,
+                "title": "Buying a Call: Big Upside, Strict Deadline",
+                "objective": "Calculate the exact stock price a call needs to make money at the deadline, and see why being right too slowly still loses.",
+                "body": "You have bought a $50 discount card that only pays for itself after you spend enough to cover the $50 fee. If Maria pays $2.00 a share ($200 total) for a 60-day $45 call on Lumend Brands ($42), the stock must reach $47 ($45 strike plus $2 fee)\u2014her **breakeven price**\u2014just to get her $200 back at the deadline. Above $47, she gains $100 for every $1 Lumend rises. The card analogy stops there: Maria can resell her call anytime before the deadline.\n\nNow look at the catch that trips up beginners. If Lumend climbs from $42 to $46 by day 60, Maria was right that the stock would rise, yet her $45 call is worth only $1.00 ($100) and she still loses $100 of her $200 fee. Every calm day that passes without a big rally, her option loses a few dollars of time value\u2014a daily fade called **time decay**, such as losing $3 a day on a $200 call. In plain words: a call buyer must be right about direction, the dollar size of the move, and the deadline all at once.\n\nPicking a strike price changes the odds of the trade. On Burgess Restaurant Group ($67), a 60-day $67 call might cost $3.50 ($350 total), needing a rally to $70.50 ($67 plus $3.50) to break even. A cheap $80 call might cost just $0.40 ($40 total), tempting Sam because $40 feels harmless, but Burgess must surge past $80.40 in 60 days\u2014a long shot that wins less than 10% of the time, or 1 in 10. Buying $40 long shots ten times in a row quietly drains $400 just as surely as one big loss.\n\nBefore Maria buys any call, she follows two survival rules. First, she assumes losing the entire $200 fee is a normal outcome and never puts more cash into a call than she can afford to lose 100% of. Second, she picks a calendar day\u2014such as 15 days before the deadline\u2014to sell and salvage what is left if the rally has not arrived on schedule. In plain words: size every call purchase assuming the full fee can go to $0, and close early when the clock is running out on a flat stock.",
                 "key_takeaways": [
-                  "Call buyer's breakeven = strike + premium; max loss = premium; upside open-ended.",
-                  "You must be right on direction, size, AND timing \u2014 right-but-slow still loses.",
-                  "Cheap far-OTM calls are usually poor buys; ATM/slightly-ITM calls waste less premium on melting time value.",
-                  "Size positions assuming total loss of premium is a normal outcome."
+                  "A call buyer's breakeven price at the deadline is the strike price plus the per-share fee paid ($45 + $2 = $47).",
+                  "Your worst-case loss is capped at the upfront cash you paid, while your upside above breakeven is open-ended.",
+                  "You can be right that the stock goes up and still lose money if it does not pass your breakeven price before the deadline.",
+                  "Cheap calls far above today's stock price expire at $0 most of the time; always size assuming you can lose the full fee."
                 ],
-                "source": "OASI 5e ch. 3 (Call Buying)",
+                "source": "Options Core \xB7 Buying Calls",
                 "sim": "strategy",
-                "sim_task": "In the Strategy Lab with LMND at $100, build three bullish trades: the 100 call, the 105 call, and the 115 call (60 days each). Record each breakeven, then use the time-scrub slider to see which trades are profitable if LMND reaches $110 in 20 days versus in 59 days.",
+                "sim_task": "Open Strategy Lab, select LMND in Underlying (~$42), and choose Long Call in Preset strategy. Compare the Max loss, Breakeven, and Model-implied win odds tiles for a strike near $42 versus a strike $5 higher by changing the Strike dropdown.",
                 "quiz": [
                   {
-                    "q": "You buy the LMND 105 call for $2.00 with the stock at $100. At expiration LMND is $106. What's your P&L?",
+                    "q": "Maria buys one $45 call on Lumend Brands ($42) for $2.00 per share ($200 total). At the deadline, Lumend finishes at $46. What is Maria's net profit or loss?",
                     "choices": [
                       "+$100",
                       "\u2212$100",
-                      "+$600",
-                      "$0"
+                      "+$400",
+                      "$0 (breaks even)"
                     ],
                     "answer": 1,
-                    "explain": "The call is worth 106 \u2212 105 = $1.00 at expiry, but you paid $2.00. You lose $1.00 \xD7 100 = $100 \u2014 despite the stock rising 6%. Breakeven was $107."
+                    "explain": "At $46, the $45 call is worth $1.00 per share ($100), but Maria paid $2.00 ($200). She loses $100 even though the stock rose $4, because her breakeven price was $47."
                   },
                   {
-                    "q": "Why are very cheap, far out-of-the-money calls usually poor purchases?",
+                    "q": "Sam sees a 30-day $80 call on Burgess Restaurant Group ($67) for just $0.35 ($35 total). Why is habitually buying very cheap calls far above today's price usually a losing habit?",
                     "choices": [
-                      "Their commissions are higher",
-                      "Low cost means low risk, so they're actually good",
-                      "Their probability of finishing in-the-money is tiny, so most expire worthless",
-                      "They can't be sold before expiration"
+                      "Brokers charge higher fees on $35 contracts",
+                      "A $35 price means tiny risk, so it is actually a great habit",
+                      "The chance of the stock jumping past $80.35 before the deadline is tiny, so almost all of them finish at $0",
+                      "The exchange does not allow you to sell a $0.35 call before the deadline"
                     ],
                     "answer": 2,
-                    "explain": "The low price reflects a low probability of payoff. Habitually buying them is like buying lottery tickets \u2014 occasional wins, negative expectancy."
+                    "explain": "A $35 price tag is cheap for a reason: the odds of a huge jump before the deadline are tiny, so repeating that bet drains your cash over time."
                   },
                   {
-                    "q": "Which third dimension, beyond direction and size of move, must a call buyer get right?",
+                    "q": "Besides getting the direction and the dollar size of the move right, what third thing must a call buyer get right to make money?",
                     "choices": [
-                      "The dividend date",
-                      "Timing \u2014 the move must happen before expiration",
-                      "The Federal Reserve meeting",
-                      "The bid-ask spread"
+                      "The company's dividend date",
+                      "Timing\u2014the stock must move past the breakeven price before the expiration deadline",
+                      "The next interest-rate announcement",
+                      "The stock's ticker symbol"
                     ],
                     "answer": 1,
-                    "explain": "Options expire. A correct directional thesis that plays out a month after expiration pays nothing; the premium melts while you wait."
+                    "explain": "Options have a strict deadline. A stock rally that shows up two weeks after your call expires pays you $0 while time decay eats your upfront fee."
                   }
                 ]
               },
               {
                 "id": "c-puts-protective",
-                "title": "Buying Puts & Protective Puts: Profit from Falls, Insure What You Own",
-                "objective": "Use puts two ways: as a defined-risk bearish position, and as portfolio insurance attached to stock you own.",
-                "body": "A **long put** is the mirror of a long call: defined-risk exposure to a *falling* stock. LMND at $100; the 60-day 95 put costs $2.50. Breakeven at expiration is **strike \u2212 premium = $92.50**; below that you profit roughly dollar-for-dollar, down to a maximum if the stock somehow hit zero. Compare this to short-selling stock: the short seller has unlimited risk if LMND rallies, margin requirements, and borrow costs. The put buyer risks exactly $250, known in advance. That's the structural trade: you pay melting time value in exchange for a capped, prepaid worst case.\n\nThe second use is the one McMillan treats as fundamental for investors: the **protective put**. You own 100 LMND shares at $100 and buy the 95 put for $2.50. Now assemble the worst case: if LMND crashes to $70, you can still sell at $95. Total damage = $5 of stock decline + $2.50 premium = $750, versus $3,000 unprotected. Your upside remains open \u2014 at $120 you've made $2,000 on the stock minus the $250 insurance cost. You've reshaped the outcome: trimmed the top to put a hard floor under the bottom. This is the commercial frost-insurance policy from Foundations, contract for contract.\n\nWhen does protection earn its keep? Around identifiable dangers: concentrated positions you can't or won't sell (tax reasons, founder stock), earnings announcements, or simply sleep-at-night value when a position has grown large. The cost is real \u2014 spend 2.5% per quarter on puts forever and you'll surrender roughly 10% a year, which no portfolio survives. Professionals therefore insure *selectively*: specific risks, specific windows, or cheaper partial protection (lower strikes, or spreads you'll meet soon).\n\nNotice what this lesson did to the reputation of options. Used this way, a put doesn't add risk to your life \u2014 it *removes* it, for a fee. The combined position (stock + put) has strictly less risk than the stock alone. Anyone who tells you options are inherently dangerous hasn't understood this trade.",
+                "title": "Buying Puts: Profiting from a Drop or Insuring Your Shares",
+                "objective": "Use a put option two ways: alone to profit when a stock falls, or paired with 100 shares to put a hard dollar floor under a crash.",
+                "body": "You have paid $15 extra for a refundable hotel room so a canceled trip costs $15 instead of $300. Buying a put by itself\u2014a **long put**, like paying $250 for a 60-day $90 put on PowerSun Energy ($95)\u2014lets Sam profit from a drop with his worst loss capped at $250. His breakeven price at the deadline is $87.50 ($90 strike minus $2.50 fee). The hotel analogy stops there: a long put gains $100 for every $1 PowerSun drops below $87.50.\n\nNow pair that same put with 100 shares you already own. When Maria owns 100 shares of PowerSun Energy at $95 ($9,500) and buys one $90 put for $2.50 ($250), that stock-plus-put bundle is called a **protective put**. If PowerSun crashes to $70, her 100 shares drop by $2,500, but her put lets her sell at $90, capping her total worst-case loss at $750 ($500 share drop to $90 plus $250 fee is $750). In plain words: a protective put leaves your upside open if the stock rallies and locks in a hard dollar floor if the stock crashes.\n\nIf a protective put works so well in a crash, why doesn't Maria keep one on her 100 shares of PowerSun ($95) every single month of the year? Because paying $250 every two months six times a year costs $1,500 a year ($250 \xD7 6 is $1,500), eating roughly 16% of her $9,500 stock position even when nothing bad happens. Over five calm years, spending $1,500 a year drains $7,500 in fees. Smart stock owners buy put protection only around clear danger windows\u2014like an earnings report or a rocky month\u2014rather than paying for storm coverage on sunny days.\n\nNotice what pairing 100 shares with a put does to your risk. Holding 100 shares of PowerSun at $95 alone carries $9,500 of downside if the business fails, while holding those 100 shares plus the $90 put caps Maria's 60-day loss at $750. Used this way, an option does not make Maria's life riskier\u2014it takes $8,750 of crash risk off the table for a $250 fee. In plain words: buying a put alone is a capped-loss bet on a drop, and pairing a put with 100 shares makes owning stock safer than holding the shares by themselves.",
                 "key_takeaways": [
-                  "Long put breakeven = strike \u2212 premium; max loss = premium; a defined-risk alternative to shorting.",
-                  "Protective put = stock + put: upside kept (minus premium), downside floored at the strike.",
-                  "Continuous insurance is ruinously expensive \u2014 insure specific risks and windows, not all of life.",
-                  "Stock + put is LESS risky than stock alone; options can remove risk, not just add it."
+                  "A long put profits when a stock falls below (strike minus fee), with your worst-case loss capped at the fee you paid.",
+                  "A protective put pairs 100 shares with 1 put, capping your worst-case dollar loss while keeping your upside open.",
+                  "Buying puts all year long eats too much cash in fees ($250 \xD7 6 is $1,500 a year), so insure specific risky windows.",
+                  "Owning 100 shares plus a put is strictly less risky than owning the 100 shares alone."
                 ],
-                "source": "OASI 5e Put Buying and Protective Put chapters (Part III)",
+                "source": "Options Core \xB7 Protective Puts",
                 "sim": "strategy",
-                "sim_task": "In the Strategy Lab, build (a) 100 LMND shares alone and (b) 100 shares + one 95 put at $2.50. Overlay the payoff diagrams and find the exact crash price below which the protected version outperforms. Then check what the protection costs you if LMND instead rallies to $115.",
+                "sim_task": "Open Strategy Lab, select PWRS in Underlying (~$95), and choose Protective Put in Preset strategy. Read the Max loss and Max profit tiles, then compare that curve to choosing Long Put in Preset strategy.",
                 "quiz": [
                   {
-                    "q": "You own LMND at $100 with a protective 95 put bought for $2.50. LMND crashes to $70. What's your total loss?",
+                    "q": "Maria owns 100 shares of PowerSun Energy at $95 ($9,500) and buys one $90 put for $2.50 per share ($250 total). PowerSun crashes to $70 by the deadline. What is Maria's total dollar loss?",
                     "choices": [
-                      "$3,000",
+                      "$2,500",
                       "$750",
                       "$250",
                       "$500"
                     ],
                     "answer": 1,
-                    "explain": "The put lets you sell at $95: stock loss (100\u219295) = $500, plus premium $250 = $750 total \u2014 versus $3,000 unprotected."
+                    "explain": "The $90 put lets Maria sell her 100 shares at $90: she loses $500 on the shares ($95 down to $90) plus the $250 fee she paid, for $750 total instead of $2,500."
                   },
                   {
-                    "q": "Compared to short-selling stock, buying a put offers:",
+                    "q": "Sam thinks Lumend Brands ($42) is about to fall. Compared to borrowing shares to sell them short, what is the big advantage of buying a put option?",
                     "choices": [
-                      "Higher probability of profit",
-                      "Unlimited upside",
-                      "A known, capped maximum loss",
-                      "No time pressure"
+                      "A put is guaranteed to make money even if the stock stays flat",
+                      "Unlimited profit even if the stock rallies",
+                      "A known, strictly capped worst-case dollar loss equal to the upfront fee",
+                      "A put option never expires"
                     ],
                     "answer": 2,
-                    "explain": "The put buyer's worst case is the premium. Short stock has theoretically unlimited loss on a rally. The put's cost is time decay and the expiration deadline."
+                    "explain": "When Sam buys a put for $200, the most he can ever lose is $200. Shorting shares directly has uncapped dollar losses if the stock rockets higher."
                   },
                   {
-                    "q": "Why don't professionals keep protective puts on everything at all times?",
+                    "q": "Why don't stock owners keep protective puts on all of their shares every single month of the year?",
                     "choices": [
-                      "Puts are illegal in retirement accounts",
-                      "Continuous premiums compound into a huge drag \u2014 insurance is bought selectively",
-                      "Protective puts cap the upside at the strike",
-                      "Brokers limit put purchases"
+                      "Put options are not allowed on stocks above $50",
+                      "Paying $200 to $300 every few weeks adds up to a huge yearly drag on your returns, so protection is bought for specific risky windows",
+                      "A protective put caps how much you can make if the stock rallies",
+                      "Exchanges only sell puts during earnings week"
                     ],
                     "answer": 1,
-                    "explain": "Rolling 2-3% quarterly premiums can consume ~10% a year. Like real-world insurance, protection is most sensible for specific, identified risks and periods."
+                    "explain": "Spending 2% to 3% of a stock's value every quarter eats roughly 10% a year in fees. Buying protection selectively for risky windows keeps the cost under control."
                   }
                 ]
               },
               {
                 "id": "c-covered-calls",
-                "title": "Covered Calls: Renting Out Your Upside",
-                "objective": "Construct a covered call, locate its breakeven and maximum profit, and understand the real trade-off: income now for capped upside later.",
-                "body": `A **covered call** is the first strategy McMillan teaches after definitions, and for good reason: it's the gentlest introduction to being an option *seller*. You own 100 LMND shares at $100 and sell the 60-day 105 call for $2.00. You collect $200 today, yours to keep no matter what. In exchange, you've promised to sell your shares at $105 if called upon. The word "covered" means your obligation is backed by stock you already own \u2014 unlike a *naked* call, there's no open-ended risk on the upside, just a cap.
-
-Walk the outcomes. LMND finishes at $100: the call expires worthless, you keep $200 \u2014 about 2% in two months just for renting out upside you might not have used. LMND finishes at $103: you keep the $200 plus $300 of stock gains. LMND rockets to $125: your shares are called away at $105; you make $500 on the stock plus $200 premium \u2014 a fine profit, but you *gave up* $2,000 of further gains. LMND drops to $90: you lose $1,000 on the stock, softened by $200 of premium. Notice the shape: the covered call **wins in flat, mild-up, and mild-down markets**, underperforms in big rallies, and only cushions \u2014 never prevents \u2014 big losses.
-
-The seller's arithmetic: **breakeven = stock cost \u2212 premium = $98**. **Maximum profit = (strike \u2212 stock cost) + premium = $700**, reached at or above $105. Your true risk in this position is the stock itself; the call simply trades a slice of possible upside for certain cash today. That reframe matters because the classic covered-call mistake is emotional, not mathematical: writers feel "robbed" when the stock blows through the strike, forgetting they were *paid in advance* for exactly that scenario.
-
-Two craft points. First, strike choice is a dial: selling the 110 call brings less premium but more room to run; selling the 100 call maximizes income but caps gains immediately. Second, never write calls on stock you'd refuse to sell at the strike \u2014 assignment is not a malfunction; it's the contract working as designed. If $105 would genuinely pain you, you had no business promising your shares at $105.`,
+                "title": "Covered Calls: Getting Paid Cash to Cap Your Upside",
+                "objective": "Pair 100 shares with a call you sell, calculate your breakeven and profit cap, and weigh the upfront cash against the downside you still keep.",
+                "body": "You have taken a buyer's $40 non-refundable deposit to hold your $400 bicycle for them until Saturday. Owning 100 shares of Burgess Restaurant Group at $67 ($6,700) and selling Sam a 60-day $70 call for $2.00 a share ($200 paid to you today) is called a **covered call**. Maria keeps that $200 cash no matter what. The deposit analogy stops there: while Maria waits, her 100 shares can still fall in price and lose far more than $200.\n\nWalk through what happens to Maria's 100 shares of Burgess ($67) and her $200 cash at the deadline. If Burgess stays at $67, the $70 call expires at $0 and Maria keeps $200. If Burgess jumps to $75, Sam buys her 100 shares at $70\u2014a required handover called **assignment** that caps Maria's total profit at $500 ($300 share gain plus $200 cash). In plain words: selling a call against 100 shares pays you cash today in exchange for capping your upside above the strike.\n\nWhat about the downside when Burgess drops instead of rising? That $200 upfront payment lowers Maria's breakeven price by $2 a share from $67 down to $65 ($67 minus $2 is $65), which only cushions a small dip. If bad news knocks Burgess down to $57, Maria loses $1,000 on her shares and the $200 fee only trims the loss to \u2212$800. Never treat call cash as risk-free income, because you still carry the downside of owning 100 shares.\n\nWhy is it called 'covered'? Because Maria already owns the 100 shares she promised to deliver at $70, unlike an uncovered seller who owns 0 shares and faces unlimited dollar losses if the stock rockets to $120. Before Maria sells a $70 call, she asks herself one question: 'Will I be happy parting with my 100 shares at $70?' In plain words: only sell a covered call at a strike price where you would gladly sell your shares, and remember the shares themselves can still fall.",
                 "key_takeaways": [
-                  "Covered call = long 100 shares + short 1 call; premium is kept in every scenario.",
-                  "Breakeven = stock cost \u2212 premium; max profit = (strike \u2212 cost) + premium, capped at the strike.",
-                  "It outperforms in flat/mild markets and underperforms in big rallies; downside is cushioned, not protected.",
-                  "Only sell calls at strikes where you'd be genuinely content to part with the shares."
+                  "A covered call pairs 100 shares you own with 1 call you sell; you keep the upfront cash in every outcome.",
+                  "Your breakeven price is your share cost minus the call fee ($67 \u2212 $2 = $65); your max profit is capped at the strike plus the fee.",
+                  "A covered call beats holding stock alone in flat or gently drifting markets, trails in big rallies, and only cushions a crash.",
+                  "Only sell a call at a strike price where you are genuinely happy to hand over your 100 shares."
                 ],
-                "source": "OASI 5e ch. 2 (Covered Call Writing)",
+                "source": "Options Core \xB7 Covered Calls",
                 "sim": "strategy",
-                "sim_task": "Build a covered call on SIM stock LMND in the Strategy Lab (buy 100 shares at $100, sell the 60-day 105 call) and find its breakeven and max profit on the payoff diagram. Then re-run with the 110 and 100 strikes and compare premium collected versus upside kept.",
+                "sim_task": "Open Strategy Lab, select BRGR in Underlying (~$67), and choose Covered Call in Preset strategy. Check the Net credit, Max profit, Max loss, and Breakeven tiles, then click Send to Live Market to place the paper trade.",
                 "quiz": [
                   {
-                    "q": "LMND bought at $100; you sold the 105 call for $2.00. LMND expires at $130. Your total profit is:",
+                    "q": "Maria buys 100 shares of Burgess Restaurant Group at $67 ($6,700) and sells one $70 call for $2.00 per share ($200 cash). At the deadline, Burgess finishes at $80. What is Maria's total dollar profit?",
                     "choices": [
-                      "$3,200",
-                      "$700",
+                      "$1,500",
                       "$500",
-                      "$3,000"
+                      "$300",
+                      "$1,300"
                     ],
                     "answer": 1,
-                    "explain": "Shares are called at $105: stock gain $500 + premium $200 = $700. The cap is the price of the income \u2014 you knew the ceiling when you sold."
+                    "explain": "Maria's 100 shares are called away at the $70 strike for a $300 stock gain ($70 minus $67 \xD7 100 shares), plus the $200 cash she kept up front, for $500 total."
                   },
                   {
-                    "q": "What is the breakeven of that covered call position?",
+                    "q": "In that same trade (100 shares of Burgess bought at $67, plus one $70 call sold for $2.00), what is Maria's breakeven stock price at the deadline?",
                     "choices": [
-                      "$105",
-                      "$102",
-                      "$98",
-                      "$100"
+                      "$70",
+                      "$69",
+                      "$65",
+                      "$67"
                     ],
                     "answer": 2,
-                    "explain": "The $2 premium lowers your effective cost: $100 \u2212 $2 = $98. Below $98 at expiration, the position is a net loser."
+                    "explain": "The $2.00 per-share cash Maria collected up front lowers her breakeven price from $67 to $65 ($67 minus $2 is $65). Below $65, her share losses exceed the $200 cash."
                   },
                   {
-                    "q": "In which market does a covered call UNDERPERFORM simply holding the stock?",
+                    "q": "In which market outcome does a covered call make LESS money than simply holding the 100 shares by themselves?",
                     "choices": [
-                      "A big rally through the strike",
-                      "A flat market",
-                      "A mild decline",
-                      "A crash"
+                      "A big rally far above the strike price",
+                      "A flat month where the stock goes nowhere",
+                      "A small $1 dip in the stock price",
+                      "A sharp drop in the stock price"
                     ],
                     "answer": 0,
-                    "explain": "In flat, mildly-up, or down markets the premium makes the covered call the better holding. Only when the stock rallies well past strike + premium does the uncapped stockholder win."
+                    "explain": "In flat, slightly up, or down markets, the upfront cash makes the covered call finish ahead of stock alone. Only when the stock surges past the strike plus the fee does uncapped stock win."
                   },
                   {
-                    "q": "Why is a covered call vastly safer than a naked (uncovered) short call?",
+                    "q": "Why is selling a covered call so much safer than selling an uncovered (naked) call without owning the 100 shares?",
                     "choices": [
-                      "It isn't \u2014 they're identical",
-                      "The owned shares satisfy the delivery obligation, so there's no open-ended upside loss",
-                      "Covered calls can't be assigned",
-                      "Naked calls have no premium income"
+                      "It is not safer\u2014both trades have the exact same risk",
+                      "Because you already own the 100 shares to hand over at the strike, so a huge rally caps your gain instead of causing an unlimited cash loss",
+                      "Buyers are not allowed to use a covered call at the deadline",
+                      "Uncovered calls do not pay any upfront cash"
                     ],
                     "answer": 1,
-                    "explain": "A naked call writer must buy stock at any price to deliver \u2014 unlimited risk. The covered writer already holds the shares; the 'loss' in a rally is only forgone profit."
+                    "explain": "An uncovered seller who owns 0 shares must buy 100 shares at any runaway price to fulfill the promise. Owning the 100 shares up front means you simply hand over shares you already hold."
                   }
                 ]
               }
@@ -7410,6 +8316,473 @@ This is why the simulator matters more than the formula sheet. Run the same path
     ]
   };
 
+  // src/ui/shell.js
+  var contentEl;
+  var tapeInner;
+  var clockEl;
+  var navEl;
+  var profileEl;
+  var liveDot;
+  var tabbarEl;
+  var nextEl;
+  var currentCleanup = null;
+  var syncCloudCleanup = null;
+  var VIEWS = {};
+  var sheetHost = null;
+  var NAV = [
+    { sect: "Learn" },
+    { id: "home", ic: "home", label: "Home" },
+    { id: "learn", ic: "book", label: "Lessons", coach: "nav-learn" },
+    { sect: "Practice" },
+    { id: "market", ic: "monitor", label: "Practice", coach: "nav-practice" },
+    { id: "missions", ic: "compass", label: "Missions", coach: "nav-missions" },
+    { sect: "Review" },
+    { id: "journal", ic: "notebook", label: "Journal", coach: "nav-journal" },
+    { id: "progress", ic: "trophy", label: "Progress" },
+    { sect: "Labs" },
+    { id: "labs", ic: "layers", label: "Labs", sheet: "labs" },
+    { sect: "You" },
+    { id: "settings", ic: "gear", label: "Settings" },
+    { id: "legal", ic: "scale", label: "Disclosures" }
+  ];
+  var LABS = [
+    { id: "strategy", ic: "layers", label: "Builder" },
+    { id: "greeks", ic: "temple", label: "Greeks" },
+    { id: "vol", ic: "wave", label: "Volatility" },
+    { id: "risk", ic: "grid", label: "Risk Desk" }
+  ];
+  var LAB_IDS = new Set(LABS.map((l) => l.id));
+  var YOU_IDS = /* @__PURE__ */ new Set(["journal", "progress", "settings", "upgrade", "welcome", "legal", "start"]);
+  function navItems() {
+    return NAV;
+  }
+  function closeSheets() {
+    if (sheetHost) {
+      sheetHost.remove();
+      sheetHost = null;
+    }
+  }
+  var closeSheet = closeSheets;
+  function openSheet(title, items) {
+    closeSheet();
+    const list2 = el(
+      "div",
+      { class: "oa-sheet", role: "dialog", "aria-label": title },
+      el("div", { class: "oa-sheet-handle", "aria-hidden": "true" }),
+      el("div", { class: "eyebrow" }, title)
+    );
+    for (const it of items) {
+      const attrs = {
+        type: "button",
+        class: "oa-sheet-item",
+        onclick: () => {
+          closeSheet();
+          it.onClick();
+        }
+      };
+      if (it.coach) attrs["data-coach"] = it.coach;
+      list2.appendChild(el(
+        "button",
+        attrs,
+        it.ic ? icon(it.ic, { cls: "si" }) : el("span", { class: "si" }, it.icon || ""),
+        el("span", {}, it.label)
+      ));
+    }
+    sheetHost = el("div", { class: "oa-sheet-bg", onclick: (e) => {
+      if (e.target === sheetHost) closeSheet();
+    } }, list2);
+    document.body.appendChild(sheetHost);
+  }
+  function openLabsSheet() {
+    openSheet("Labs", LABS.map((l) => ({
+      ic: l.ic,
+      label: l.label,
+      onClick: () => {
+        location.hash = "#/" + l.id;
+      }
+    })));
+  }
+  function openPracticeSheet() {
+    openSheet("Practice", [
+      { ic: "monitor", label: "Practice", coach: "nav-practice", onClick: () => {
+        location.hash = "#/market";
+      } },
+      { ic: "compass", label: "Missions", coach: "nav-missions", onClick: () => {
+        location.hash = "#/missions";
+      } }
+    ]);
+  }
+  function openYouSheet() {
+    const items = [
+      { ic: "notebook", label: "Journal", coach: "nav-journal", onClick: () => {
+        location.hash = "#/journal";
+      } },
+      { ic: "trophy", label: "Progress", onClick: () => {
+        location.hash = "#/progress";
+      } },
+      { ic: "layers", label: "Labs", onClick: () => openLabsSheet() },
+      { ic: "gear", label: "Settings", onClick: () => {
+        location.hash = "#/settings";
+      } },
+      { ic: "user", label: "Switch profile", onClick: () => profilePicker() },
+      { ic: "contrast", label: "Toggle theme", onClick: () => toggleTheme() }
+    ];
+    if (!isFamilyBuild() && tier() === "free") {
+      items.push({ ic: "sparkle", icon: "\u2728", label: "Upgrade to Academy", onClick: () => {
+        location.hash = "#/upgrade";
+      } });
+    }
+    for (const it of youSheetAccountItems()) items.push(it);
+    openSheet("You", items);
+  }
+  function buildTabbar() {
+    const tabs = [
+      { id: "home", ic: "home", label: "Home", href: "#/home" },
+      { id: "learn", ic: "book", label: "Learn", href: "#/learn", coach: "nav-learn" },
+      { id: "practice", ic: "monitor", label: "Practice", onClick: openPracticeSheet, coach: "nav-practice" },
+      { id: "you", ic: "user", label: "You", onClick: openYouSheet }
+    ];
+    tabbarEl = el("nav", { class: "oa-tabbar", "aria-label": "Primary" });
+    for (const t of tabs) {
+      const attrs = { "data-tab": t.id };
+      if (t.coach) attrs["data-coach"] = t.coach;
+      if (t.href) {
+        tabbarEl.appendChild(el(
+          "a",
+          { ...attrs, href: t.href },
+          icon(t.ic, { cls: "ti" }),
+          el("span", {}, t.label)
+        ));
+      } else {
+        tabbarEl.appendChild(el(
+          "button",
+          { ...attrs, type: "button", onclick: t.onClick },
+          icon(t.ic, { cls: "ti" }),
+          el("span", {}, t.label)
+        ));
+      }
+    }
+    return tabbarEl;
+  }
+  function refreshTabActive(routeName) {
+    if (!tabbarEl) return;
+    tabbarEl.querySelectorAll("[data-tab]").forEach((a) => {
+      const id = a.getAttribute("data-tab");
+      let on = false;
+      if (id === "home") on = routeName === "home";
+      if (id === "learn") on = routeName === "learn";
+      if (id === "practice") on = routeName === "market" || routeName === "missions";
+      if (id === "you") on = YOU_IDS.has(routeName);
+      a.classList.toggle("active", on);
+    });
+  }
+  function build() {
+    const app = document.getElementById("oa-app");
+    app.innerHTML = "";
+    navEl = el("nav", { class: "oa-nav" });
+    for (const n of navItems()) {
+      if (n.sect) {
+        navEl.appendChild(el("div", { class: "oa-nav-sect" }, n.sect));
+        continue;
+      }
+      if (n.sheet === "labs") {
+        navEl.appendChild(el("button", {
+          type: "button",
+          class: "oa-nav-link",
+          "data-nav": "labs",
+          onclick: () => openLabsSheet()
+        }, icon(n.ic, { cls: "ni" }), el("span", { class: "lbl" }, n.label)));
+        continue;
+      }
+      const attrs = { href: "#/" + n.id, "data-nav": n.id };
+      if (n.coach) attrs["data-coach"] = n.coach;
+      navEl.appendChild(el(
+        "a",
+        attrs,
+        n.ic ? icon(n.ic, { cls: "ni" }) : null,
+        el("span", { class: "lbl" }, n.label)
+      ));
+    }
+    profileEl = el("div", {
+      class: "oa-profile",
+      tabindex: "0",
+      role: "button",
+      "aria-label": "Switch profile",
+      onclick: () => profilePicker(),
+      onkeydown: (e) => {
+        if (e.key === "Enter") profilePicker();
+      }
+    });
+    const rail = el(
+      "aside",
+      { class: "oa-rail" },
+      el(
+        "div",
+        { class: "oa-logo" },
+        el("div", { class: "oa-logo-mark" }, "\u0394"),
+        el(
+          "div",
+          {},
+          el("div", { class: "oa-logo-name" }, "Options Academy"),
+          el("div", { class: "oa-logo-sub" }, "Academy Exchange")
+        )
+      ),
+      navEl,
+      profileEl
+    );
+    tapeInner = el("div", { class: "oa-tape-inner" });
+    liveDot = el("span", { class: "oa-live-dot" });
+    clockEl = el("span", {}, "");
+    const themeBtn = el("button", { class: "theme-btn", title: "Toggle light/dark", "aria-label": "Toggle theme", onclick: toggleTheme }, icon("contrast"));
+    const tape = el(
+      "div",
+      { class: "oa-tape" },
+      tapeInner,
+      el("div", { class: "oa-tape-clock" }, liveDot, clockEl, themeBtn)
+    );
+    contentEl = el("div", { class: "oa-content" });
+    nextEl = el("div", { class: "oa-next", "data-coach": "next-step", role: "region", "aria-label": "Next step" });
+    const main = el("main", { class: "oa-main" }, tape, nextEl, contentEl);
+    app.appendChild(rail);
+    app.appendChild(main);
+    app.appendChild(buildTabbar());
+    renderTape();
+    refreshProfile();
+  }
+  function toggleTheme() {
+    const root = document.documentElement;
+    const cur = root.getAttribute("data-theme") || (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    root.setAttribute("data-theme", cur === "dark" ? "light" : "dark");
+    try {
+      localStorage.setItem("oa.theme", root.getAttribute("data-theme"));
+    } catch {
+    }
+  }
+  function renderTape() {
+    tapeInner.innerHTML = "";
+    for (const t of market.list()) {
+      const q = market.quote(t.sym);
+      const up = q.chg >= 0;
+      tapeInner.appendChild(el(
+        "span",
+        { class: "oa-tq", onclick: () => location.hash = "#/market/" + t.sym },
+        el("span", { class: "sym" }, t.sym),
+        el("span", { class: "px" }, F.usd(q.S)),
+        el("span", { class: "chg " + (up ? "up" : "down") }, (up ? "\u25B2" : "\u25BC") + F.pctSigned(q.chgPct))
+      ));
+    }
+    clockEl.textContent = market.clockLabel() + " \xB7 " + (market.running ? market.speed + "\xD7" : "paused");
+    liveDot.className = "oa-live-dot" + (market.running ? "" : " paused");
+  }
+  function refreshProfile() {
+    const p = active();
+    if (syncCloudCleanup) {
+      try {
+        syncCloudCleanup();
+      } catch {
+      }
+      syncCloudCleanup = null;
+    }
+    profileEl.innerHTML = "";
+    if (!p) {
+      profileEl.appendChild(el("div", { class: "pn" }, "Choose profile\u2026"));
+      return;
+    }
+    const lv = levelOf(p.xp);
+    profileEl.appendChild(avEl(p));
+    profileEl.appendChild(el(
+      "div",
+      { class: "pt" },
+      el("div", { class: "pn" }, p.name),
+      el("div", { class: "px num" }, `Lv ${lv.n} ${lv.name} \xB7 ${p.xp} XP`)
+    ));
+    syncCloudCleanup = mountSyncCloud(profileEl);
+  }
+  var EMOJIS = ["\u{1F981}", "\u{1F98A}", "\u{1F43C}", "\u{1F989}", "\u{1F42C}", "\u{1F984}", "\u{1F42F}", "\u{1F680}", "\u{1F31F}", "\u{1F3AF}", "\u{1F9E0}", "\u{1F3C4}"];
+  function avEl(p, cls = "av") {
+    if (isFamilyBuild()) return el("span", { class: cls }, p.emoji);
+    return el("span", { class: cls + " monogram" }, (p.name || "?").trim().charAt(0).toUpperCase());
+  }
+  function profilePicker(firstRun = false) {
+    const wrap = el("div", {});
+    wrap.appendChild(el("h2", {}, firstRun === true ? "Welcome to Options Academy" : "Select a trader profile"));
+    wrap.appendChild(el("p", { class: "sub" }, firstRun === true ? "A simulated trading floor: learn a concept, then apply it on a live simulated market. Each profile tracks its own progress, XP, and paper-money account." : "Switch profiles or add a new trader."));
+    const grid = el("div", { class: "profile-grid" });
+    for (const p of profiles()) {
+      const lv = levelOf(p.xp);
+      grid.appendChild(el(
+        "div",
+        {
+          class: "profile-tile" + (active()?.id === p.id ? " sel" : ""),
+          tabindex: "0",
+          role: "button",
+          onclick: () => {
+            setActive(p.id);
+            m.close();
+            refreshProfile();
+            route();
+          }
+        },
+        avEl(p),
+        el("div", { class: "pn", style: "font-weight:600" }, p.name),
+        el("div", { class: "small muted" }, "Trader"),
+        el("div", { class: "small num muted" }, `Lv ${lv.n} \xB7 ${p.xp} XP`)
+      ));
+    }
+    grid.appendChild(el(
+      "div",
+      { class: "profile-tile", tabindex: "0", role: "button", onclick: () => {
+        m.close();
+        addProfileModal();
+      } },
+      el("div", { class: "av" }, icon("plus")),
+      el("div", { style: "font-weight:600" }, "New profile")
+    ));
+    wrap.appendChild(grid);
+    const m = modal(wrap, { onClose: firstRun === true ? false : void 0 });
+    return m;
+  }
+  function addProfileModal(opts = {}) {
+    let emoji = EMOJIS[Math.floor(Math.random() * EMOJIS.length)];
+    const nameIn = el("input", { type: "text", placeholder: "Name", "aria-label": "Profile name", style: "padding:8px 10px;border:1px solid var(--hairline);border-radius:6px;width:100%;background:var(--card);" });
+    const emojiRow = el("div", { class: "btn-row", style: "margin:10px 0" });
+    const emBtns = EMOJIS.map((e2) => {
+      const b = el("button", { class: "btn sm" + (e2 === emoji ? " primary" : ""), onclick: () => {
+        emoji = e2;
+        emBtns.forEach((x) => x.classList.remove("primary"));
+        b.classList.add("primary");
+      } }, e2);
+      return b;
+    });
+    emBtns.forEach((b) => emojiRow.appendChild(b));
+    const needAck = !isFamilyBuild();
+    const ackBox = el("input", { type: "checkbox", id: "oa-ack", style: "margin-top:3px;flex:0 0 auto" });
+    const ackRow = needAck ? el(
+      "label",
+      { for: "oa-ack", class: "small", style: "display:flex;gap:8px;align-items:flex-start;margin-top:12px;max-width:46ch;cursor:pointer" },
+      ackBox,
+      el("span", { class: "muted" }, ACK_TEXT, " ", el("a", { href: "#/legal" }, "Disclosures"))
+    ) : null;
+    const wrap = el(
+      "div",
+      {},
+      el("h2", {}, "New profile"),
+      el("div", { class: "field mt2" }, el("label", {}, "Name"), nameIn),
+      isFamilyBuild() ? el("div", { class: "mt1" }, el("div", { class: "field" }, el("label", {}, "Avatar")), emojiRow) : null,
+      ackRow,
+      el(
+        "div",
+        { class: "btn-row mt2" },
+        el("button", { class: "btn primary", onclick: () => {
+          if (needAck && !ackBox.checked) {
+            toast("Please confirm the education-only acknowledgment to continue.", "loss");
+            return;
+          }
+          const name = nameIn.value.trim() || "Learner";
+          const p = addProfile(name, emoji);
+          m.close();
+          refreshProfile();
+          toast(`Welcome, ${name}! You start with ${F.usd(1e5, 0)} of paper money.`, "gain");
+          const dest = opts.then || "#/welcome";
+          start(p?.id || active()?.id);
+          if ((location.hash || "") === "#/start") location.replace(dest);
+          else location.hash = dest;
+          route();
+        } }, "Start learning")
+      )
+    );
+    const m = modal(wrap);
+    nameIn.focus();
+  }
+  function route() {
+    closeSheet();
+    const hash = location.hash || "#/home";
+    const parts = hash.replace(/^#\//, "").split("/");
+    let name = (parts[0] || "home").split("?")[0] || "home";
+    if (name === "kids") {
+      location.replace("#/learn");
+      return;
+    }
+    if (!profiles().length && name !== "start" && name !== "legal") {
+      location.replace("#/start");
+      return;
+    }
+    const landing = name === "start";
+    document.body.classList.toggle("oa-landing", landing);
+    const view16 = VIEWS[name] || VIEWS.home;
+    if (currentCleanup) {
+      try {
+        currentCleanup();
+      } catch {
+      }
+      currentCleanup = null;
+    }
+    navEl.querySelectorAll("[data-nav]").forEach((a) => {
+      const id = a.dataset.nav;
+      a.classList.toggle("active", id === "labs" ? LAB_IDS.has(name) : id === name);
+    });
+    refreshTabActive(name);
+    contentEl.innerHTML = "";
+    window.scrollTo(0, 0);
+    currentCleanup = view16.render(contentEl, parts.slice(1)) || null;
+    renderNext();
+  }
+  function renderNext() {
+    if (!nextEl) return;
+    const sess = session();
+    const hide = document.body.classList.contains("oa-landing") || sess && sess.status === "active";
+    if (hide) {
+      nextEl.hidden = true;
+      nextEl.replaceChildren();
+      return;
+    }
+    const step = nextStep(active(), curriculum, readDemos(), get());
+    nextEl.hidden = false;
+    nextEl.replaceChildren(
+      el("p", { class: "oa-next-text" }, step.text),
+      el("a", { class: "btn sm primary", href: step.href }, "Continue")
+    );
+  }
+  function boot(views) {
+    VIEWS = { welcome: view, upgrade: view2, settings: view3, start: view5, ...views, demo: demoView };
+    try {
+      const th = localStorage.getItem("oa.theme");
+      if (th) document.documentElement.setAttribute("data-theme", th);
+    } catch {
+    }
+    try {
+      const pl = localStorage.getItem("oa.pl");
+      if (pl) document.documentElement.setAttribute("data-pl", pl);
+    } catch {
+    }
+    build();
+    market.on("tick", renderTape);
+    market.on("state", renderTape);
+    bus.on("profile", () => {
+      refreshProfile();
+      renderNext();
+    });
+    bus.on("mission", renderNext);
+    bus.on("profile-picker", () => profilePicker());
+    bus.on("add-profile", (opts) => addProfileModal(opts && typeof opts === "object" ? opts : {}));
+    bus.on("tape", renderTape);
+    setInterval(() => saveMarketSnapshot(market.snapshot()), 15e3);
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) {
+        if (market.running) {
+          market.pause();
+          market._autoPaused = true;
+        }
+      } else if (market._autoPaused) {
+        market._autoPaused = false;
+        market.start();
+      }
+    });
+    market.start();
+    window.addEventListener("hashchange", route);
+    route();
+  }
+
   // src/state/journal.js
   function computeChecks(sym, legs) {
     const feed2 = getFeed();
@@ -7509,27 +8882,12 @@ This is why the simulator matters more than the formula sheet. Run the same path
   }
 
   // src/ui/views/home.js
-  var TIPS = [
-    "McMillan's first rule of spreads: know your maximum loss before you enter \u2014 the Strategy Lab prints it for every build.",
-    "Theta never sleeps, but it only collects on trading days. Speed the sim to 30\xD7 and literally watch an option melt.",
-    "Before earnings, implied vol inflates; after, it crushes. Watch a RCKT straddle through an earnings day and feel it.",
-    "Delta \u2248 the market's probability the option finishes in-the-money. A 20-delta put is a 1-in-5 shot \u2014 price it like one.",
-    "Long options: your worst case is the premium. Short options: your best case is the premium. Decide which side of that trade you are on.",
-    `The vol trader's question is never "will it go up?" \u2014 it is "will it move MORE or LESS than the options are charging for?"`,
-    "Buy the straddle when you expect realized > implied. The Volatility Lab lets you test that bet 60 paths at a time.",
-    "A covered call trades your upside above the strike for cash today. Great on stock you'd happily sell there anyway."
-  ];
-  var view6 = {
+  var view7 = {
     render(root) {
       const p = active();
       const hour = (/* @__PURE__ */ new Date()).getHours();
       const greet = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
       root.appendChild(viewHeader("Academy Exchange", p ? `${greet}, ${p.name}` : "Welcome to Options Academy"));
-      root.appendChild(el(
-        "p",
-        { class: "sub", style: "max-width:70ch" },
-        "Learn a concept, then apply it on a live simulated market \u2014 the way traders actually learn. Built on the desk library: McMillan's Options as a Strategic Investment and the Volcube volatility series."
-      ));
       if (p && incomplete()) {
         const n = Math.min(currentStep() + 1, TOTAL);
         root.appendChild(el("a", {
@@ -7538,139 +8896,51 @@ This is why the simulator matters more than the formula sheet. Run the same path
           style: "text-decoration:none"
         }, `Continue setup (step ${n}/${TOTAL})`));
       }
-      const row1 = el("div", { class: "row mt2" });
-      root.appendChild(row1);
-      const contCard = el("div", { class: "card w66" });
-      row1.appendChild(contCard);
-      let nextLesson = null, trackTitle = "";
-      if (curriculum?.tracks && p) {
-        outer: for (const t of curriculum.tracks) {
-          for (const m of t.modules) for (const l of m.lessons) {
-            if (!p.lessons[l.id]) {
-              nextLesson = l;
-              trackTitle = t.title;
-              break outer;
-            }
-          }
-        }
-      }
-      contCard.appendChild(el("h3", {}, "Continue learning"));
-      if (nextLesson) {
-        contCard.appendChild(el("div", { class: "small muted" }, trackTitle));
-        contCard.appendChild(el("h2", { class: "mt1" }, nextLesson.title));
-        contCard.appendChild(el("p", { class: "sub" }, nextLesson.objective));
-        contCard.appendChild(el(
+      const step = nextStep(p, curriculum, readDemos(), p ? get() : { step: 0, done: false });
+      const nextCard = el(
+        "div",
+        { class: "card mt2 home-next" },
+        el("div", { class: "eyebrow" }, "Next"),
+        el("h2", { style: "margin-top:4px" }, step.text),
+        el(
           "div",
-          { class: "btn-row" },
-          el("a", { class: "btn primary", href: "#/learn/lesson/" + nextLesson.id }, "Start lesson \u2192"),
-          el("a", { class: "btn", href: "#/learn" }, "Browse curriculum")
-        ));
-      } else if (p) {
-        contCard.appendChild(el(
-          "p",
-          { class: "sub" },
-          "All tracks complete \u2014 legend status. The market is still ticking, though."
-        ));
-        contCard.appendChild(el("a", { class: "btn primary", href: "#/market" }, "Live Market \u2192"));
-      } else {
-        contCard.appendChild(el("p", { class: "sub" }, "Create a profile to begin."));
-      }
-      const sideCol = el("div", { class: "w33", style: "display:flex;flex-direction:column;gap:16px" });
-      row1.appendChild(sideCol);
+          { class: "btn-row mt1" },
+          el("a", { class: "btn primary", href: step.href }, "Continue")
+        )
+      );
+      root.appendChild(nextCard);
       if (p) {
         const lv = levelOf(p.xp);
         const avg = avgScore(10);
         const sess = session();
-        sideCol.appendChild(el(
-          "div",
-          { class: "card" },
-          el("h3", {}, p.name),
-          el("div", { class: "small muted" }, `Level ${lv.n} \u2014 ${lv.name}`),
-          el(
-            "div",
-            { class: "stats mt1" },
-            el("div", { class: "stat" }, el("div", { class: "k" }, "XP"), el("div", { class: "v" }, String(p.xp))),
-            el("div", { class: "stat" }, el("div", { class: "k" }, "Equity"), el("div", { class: "v" }, F.usd(equity(), 0))),
-            el("div", { class: "stat" }, el("div", { class: "k" }, "Process Score"), el("div", { class: "v" }, avg == null ? "\u2014" : String(avg)))
-          ),
-          sess && sess.status === "active" ? el(
-            "a",
-            { class: "pill brass mt1", href: "#/missions/" + sess.def.id, style: "margin-top:10px;display:inline-flex;text-decoration:none" },
-            icon("compass"),
-            ` Resume: ${sess.def.title}`
-          ) : null,
-          el("a", { class: "btn sm mt1", href: "#/progress", style: "margin-top:10px;display:inline-flex" }, "View progress")
-        ));
-      }
-      sideCol.appendChild(el(
-        "div",
-        { class: "card" },
-        el("h3", {}, "Floor wisdom"),
-        el("p", { class: "sub", style: "margin-bottom:0" }, TIPS[Math.floor(Math.random() * TIPS.length)])
-      ));
-      if (realDataReady()) {
         root.appendChild(el(
-          "a",
-          {
-            class: "card mt2 real-data-card",
-            href: "#/market",
-            style: "text-decoration:none;color:inherit",
-            onclick: () => {
-              if (feedMode() !== "tradier") setFeedMode("tradier");
-            }
-          },
+          "div",
+          { class: "card mt2 home-account" },
           el(
             "div",
-            { class: "flex-between", style: "flex-wrap:wrap;gap:8px" },
+            { class: "flex-between", style: "gap:12px;flex-wrap:wrap" },
             el(
               "div",
               {},
-              el("h3", { style: "margin:0" }, "Real market (delayed)"),
-              el("p", { class: "sub", style: "margin:4px 0 0" }, "Watch Tradier sandbox quotes \xB7 analyze in Strategy Lab")
+              el("div", { style: "font-weight:700" }, p.name),
+              el("div", { class: "small muted" }, `Level ${lv.n} \u2014 ${lv.name}`)
             ),
-            el("span", { class: "pill real-delayed-badge" }, "REAL \xB7 DELAYED 15 MIN")
-          )
+            el("a", { class: "btn sm", href: "#/progress" }, "Progress")
+          ),
+          el(
+            "div",
+            { class: "stats mt1" },
+            el("div", { class: "stat" }, el("div", { class: "k" }, "XP"), el("div", { class: "v num" }, String(p.xp))),
+            el("div", { class: "stat" }, el("div", { class: "k" }, "Equity"), el("div", { class: "v num" }, F.usd(equity(), 0))),
+            el("div", { class: "stat" }, el("div", { class: "k" }, "Process Score"), el("div", { class: "v num" }, avg == null ? "\u2014" : String(avg)))
+          ),
+          sess && sess.status === "active" ? el("a", {
+            class: "pill brass mt1",
+            href: sess.purpose ? "#/demo/" + sess.def.id + "/" + sess.purpose : "#/missions/" + sess.def.id,
+            style: "margin-top:10px;display:inline-flex;text-decoration:none"
+          }, `Resume: ${sess.def.title}`) : null
         ));
       }
-      const mkCard = el("div", { class: "card mt2" });
-      root.appendChild(mkCard);
-      mkCard.appendChild(el(
-        "div",
-        { class: "flex-between" },
-        el("h3", {}, "Market snapshot \u2014 " + market.clockLabel()),
-        el("a", { class: "btn sm", href: "#/market" }, "Open Live Market")
-      ));
-      const snap = el("div", { class: "row mt1" });
-      mkCard.appendChild(snap);
-      function renderSnap() {
-        snap.innerHTML = "";
-        for (const t of market.list()) {
-          const q = market.quote(t.sym);
-          const up = q.chg >= 0;
-          snap.appendChild(el(
-            "a",
-            { class: "stat", style: "flex:1 1 130px;text-decoration:none;color:inherit", href: "#/market/" + t.sym },
-            el("div", { class: "k" }, t.sym),
-            el("div", { class: "v", style: "font-size:17px" }, F.usd(q.S)),
-            el("div", { class: "d " + (up ? "up" : "down") }, (up ? "\u25B2 " : "\u25BC ") + F.pctSigned(q.chgPct))
-          ));
-        }
-      }
-      renderSnap();
-      const unTick = market.on("tick", renderSnap);
-      const labs = el("div", { class: "grid3 mt2" });
-      root.appendChild(labs);
-      const lab = (href, slug, name, desc) => el(
-        "a",
-        { class: "card", href, style: "text-decoration:none;color:inherit" },
-        el("div", { class: "lab-ic" }, icon(slug, { size: 24 })),
-        el("h3", { class: "mt1" }, name),
-        el("p", { class: "sub", style: "margin:0" }, desc)
-      );
-      labs.appendChild(lab("#/strategy", "layers", "Strategy Lab", "Build spreads, see payoff curves and breakevens before you trade."));
-      labs.appendChild(lab("#/greeks", "temple", "Greeks Lab", "Sliders for delta, gamma, theta, vega \u2014 build the intuition."));
-      labs.appendChild(lab("#/vol", "wave", "Volatility Lab", "Gamma-scalp a straddle; learn the realized-vs-implied game."));
-      return () => unTick();
     }
   };
 
@@ -8054,7 +9324,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     });
   }
   function renderIndex(root) {
-    root.appendChild(viewHeader("Curriculum", "Learn the craft, then trade it"));
+    root.appendChild(viewHeader("Lessons", "Learn the craft, then trade it"));
     root.appendChild(el(
       "p",
       { class: "sub", style: "max-width:68ch" },
@@ -8096,7 +9366,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     const statuses = moduleStatus(tid);
     const statusById = Object.fromEntries(statuses.map((s2) => [s2.id, s2]));
     const overview = trackOverview(tid);
-    root.appendChild(el("div", { class: "crumb" }, el("a", { href: "#/learn" }, "\u2190 Curriculum")));
+    root.appendChild(el("div", { class: "crumb" }, el("a", { href: "#/learn" }, "\u2190 Lessons")));
     root.appendChild(el("div", { class: "eyebrow" }, t.audience));
     root.appendChild(el("h1", {}, t.title));
     root.appendChild(el("p", { class: "sub", style: "max-width:68ch" }, t.description || ""));
@@ -8202,7 +9472,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     root.appendChild(el(
       "div",
       { class: "crumb" },
-      el("a", { href: "#/learn" }, "Curriculum"),
+      el("a", { href: "#/learn" }, "Lessons"),
       " / ",
       el("a", { href: "#/learn/track/" + l.trackId }, l.trackTitle),
       " / ",
@@ -8212,19 +9482,22 @@ This is why the simulator matters more than the formula sheet. Run the same path
     const flatIds = (track2?.modules || []).flatMap((m) => m.lessons.map((x) => x.id));
     const lessonIdxInTrack = flatIds.indexOf(lid);
     if (lessonTierLocked(l.trackId, lessonIdxInTrack)) {
+      const freeDemos = DEMOS.filter((d) => d.lessonId === lid);
       root.appendChild(el(
         "div",
         { class: "card mt2", style: "max-width:68ch;text-align:center" },
-        el("div", { style: "font-size:36px" }, "\u{1F512}"),
+        el("div", { style: "font-size:36px" }, icon("lock", { size: 36 })),
         el("h1", {}, "Academy lesson"),
         el(
           "p",
           { class: "sub" },
           "Free practice includes the first lessons of the core track. Upgrade to unlock the full curriculum."
         ),
+        freeDemos.length ? el("p", { class: "sub" }, "The strategy demo is free \u2014 watch it before deciding.") : null,
         el(
           "div",
           { class: "btn-row mt1", style: "justify-content:center" },
+          ...freeDemos.map((d) => el("a", { class: "btn", href: "#/demo/" + d.id + "/watch" }, "Watch the free demo")),
           el("a", { class: "btn", href: "#/learn/track/" + l.trackId }, "Back to track"),
           el("a", { class: "btn primary", href: "#/upgrade" }, "Upgrade")
         )
@@ -8248,7 +9521,9 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
     root.appendChild(el("h1", {}, l.title));
     root.appendChild(el("p", { class: "sub", style: "max-width:68ch" }, l.objective));
-    if (l.source) root.appendChild(el("div", { class: "pill mt1" }, icon("bookOpen"), " " + l.source));
+    if (l.source && l.trackId !== "foundations" && l.trackId !== "core") {
+      root.appendChild(el("div", { class: "pill mt1" }, icon("bookOpen"), " " + l.source));
+    }
     const prose = el("div", { class: "lesson-prose mt2", html: md(l.body) });
     if (l.key_takeaways && l.key_takeaways.length) {
       prose.appendChild(el(
@@ -8259,19 +9534,27 @@ This is why the simulator matters more than the formula sheet. Run the same path
       ));
     }
     root.appendChild(prose);
-    if (l.sim && SIM_LINKS[l.sim]) {
-      const s2 = SIM_LINKS[l.sim];
+    const demosFor = DEMOS.filter((d) => d.lessonId === l.id);
+    const sim = l.sim && SIM_LINKS[l.sim];
+    if (sim || demosFor.length) {
+      const actions = el("div", { class: "btn-row" });
+      if (sim) actions.appendChild(el("a", { class: "btn primary", href: sim.href }, sim.label));
+      demosFor.forEach((d, n) => {
+        const tag = demosFor.length > 1 ? d.title.replace(/^The /, "").replace(/,.*$/, "") + " \u2014 " : "";
+        actions.appendChild(el("a", { class: "btn" + (sim || n > 0 ? "" : " primary"), href: "#/demo/" + d.id + "/watch" }, tag + "Watch the demo"));
+        actions.appendChild(el("a", { class: "btn", href: "#/demo/" + d.id + "/do" }, tag + "Do it guided"));
+      });
       root.appendChild(el(
         "div",
         { class: "apply-card", style: "max-width:68ch" },
-        iconFor(s2.icon, "book", { cls: "ic" }),
+        iconFor(sim ? sim.icon : "book", "book", { cls: "ic" }),
         el(
           "div",
           { style: "flex:1;min-width:220px" },
-          el("div", { style: "font-weight:700" }, "Apply it on the simulator"),
-          el("div", { class: "sub" }, l.sim_task || "Try what you just learned.")
+          el("div", { style: "font-weight:700" }, demosFor.length ? "Watch it, then try it" : "Apply it on the simulator"),
+          el("div", { class: "sub" }, l.sim_task || (demosFor.length ? demosFor[0].intro : "Try what you just learned."))
         ),
-        el("a", { class: "btn primary", href: s2.href }, s2.label)
+        actions
       ));
     }
     const quizBox = el("div", { class: "card mt2", style: "max-width:68ch" });
@@ -8303,10 +9586,10 @@ This is why the simulator matters more than the formula sheet. Run the same path
     refreshDoneBtn(already || !(l.quiz || []).length);
     root.appendChild(footer);
   }
-  var view7 = {
+  var view8 = {
     render(root, params) {
       if (!curriculum || !curriculum.tracks?.length) {
-        root.appendChild(el("p", { class: "sub" }, "Curriculum loading\u2026"));
+        root.appendChild(el("p", { class: "sub" }, "Lessons loading\u2026"));
         return;
       }
       if (params[0] === "track") return renderTrack(root, params[1]);
@@ -8428,16 +9711,16 @@ This is why the simulator matters more than the formula sheet. Run the same path
   }
 
   // src/ui/analyze-stash.js
-  var KEY3 = "oa.analyzeStash";
+  var KEY5 = "oa.analyzeStash";
   function writeAnalyzeStash(payload) {
     try {
-      sessionStorage.setItem(KEY3, JSON.stringify({ ...payload, at: Date.now() }));
+      sessionStorage.setItem(KEY5, JSON.stringify({ ...payload, at: Date.now() }));
     } catch {
     }
   }
   function readAnalyzeStash() {
     try {
-      const raw = sessionStorage.getItem(KEY3);
+      const raw = sessionStorage.getItem(KEY5);
       if (!raw) return null;
       const data = JSON.parse(raw);
       if (!data || !data.sym || !Array.isArray(data.legs)) return null;
@@ -8448,7 +9731,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
   }
   function clearAnalyzeStash() {
     try {
-      sessionStorage.removeItem(KEY3);
+      sessionStorage.removeItem(KEY5);
     } catch {
     }
   }
@@ -8460,7 +9743,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
 
   // src/ui/views/strategy.js
   var viewState = {};
-  var PRESETS = [
+  var PRESETS2 = [
     { id: "long-call", name: "Long Call", legs: () => [{ kind: "call", side: 1, qty: 1, k: 0 }] },
     { id: "long-put", name: "Long Put", legs: () => [{ kind: "put", side: 1, qty: 1, k: 0 }] },
     { id: "covered-call", name: "Covered Call", legs: () => [{ kind: "stock", side: 1, qty: 100 }, { kind: "call", side: -1, qty: 1, k: 1 }] },
@@ -8507,7 +9790,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       return null;
     }
   }
-  var view8 = {
+  var view9 = {
     render(root) {
       let sym = viewState.sym || "LMND";
       let expIdx = 1;
@@ -8662,9 +9945,9 @@ This is why the simulator matters more than the formula sheet. Run the same path
       });
       const presetSel = el("select", {});
       presetSel.appendChild(el("option", { value: "" }, "Choose a strategy\u2026"));
-      PRESETS.forEach((p) => presetSel.appendChild(el("option", { value: p.id }, p.name)));
+      PRESETS2.forEach((p) => presetSel.appendChild(el("option", { value: p.id }, p.name)));
       presetSel.addEventListener("change", () => {
-        const p = PRESETS.find((x) => x.id === presetSel.value);
+        const p = PRESETS2.find((x) => x.id === presetSel.value);
         if (p) applyPreset(p);
       });
       const legsBox = el("div", { class: "mt2" });
@@ -8692,7 +9975,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           toast("Switch to a sim symbol to paper-trade.", "loss");
           return;
         }
-        const label = presetSel.value ? PRESETS.find((p) => p.id === presetSel.value).name : "Custom strategy";
+        const label = presetSel.value ? PRESETS2.find((p) => p.id === presetSel.value).name : "Custom strategy";
         const fillLegs = legs.map((L) => {
           if (L.kind === "stock") return { ...L, entry: market.quote(sym).S };
           const q = market.optQuote(sym, L.strike, L.expDay, L.kind);
@@ -9003,7 +10286,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       tryIt: "Note how the 60-day curve towers over the 5-day curve: if you want to trade a volatility opinion, you trade time. If you want pure gamma, you trade the short end."
     }
   ];
-  var view9 = {
+  var view10 = {
     render(root) {
       let tab = "delta";
       const P2 = { K: 100, dte: 30, iv: 0.3 };
@@ -9177,7 +10460,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       cost: straddle0 * 100
     };
   }
-  var view10 = {
+  var view11 = {
     render(root) {
       root.appendChild(el("div", { class: "eyebrow" }, "Volatility Lab"));
       root.appendChild(el("h1", {}, "Trade movement itself"));
@@ -9442,11 +10725,11 @@ This is why the simulator matters more than the formula sheet. Run the same path
   }
 
   // src/ui/real-watch.js
-  var KEY4 = "oa.realwatch";
+  var KEY6 = "oa.realwatch";
   var DEFAULTS = ["SPY", "QQQ", "AAPL", "MSFT", "IWM"];
   function loadRealWatch() {
     try {
-      const raw = JSON.parse(localStorage.getItem(KEY4));
+      const raw = JSON.parse(localStorage.getItem(KEY6));
       if (Array.isArray(raw) && raw.length) {
         return raw.map((s2) => String(s2 || "").trim().toUpperCase()).filter(Boolean).slice(0, 24);
       }
@@ -9457,7 +10740,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
   function saveRealWatch(syms) {
     const clean = [...new Set(syms.map((s2) => String(s2 || "").trim().toUpperCase()).filter(Boolean))].slice(0, 24);
     try {
-      localStorage.setItem(KEY4, JSON.stringify(clean.length ? clean : DEFAULTS));
+      localStorage.setItem(KEY6, JSON.stringify(clean.length ? clean : DEFAULTS));
     } catch {
     }
     return clean.length ? clean : DEFAULTS.slice();
@@ -10016,12 +11299,21 @@ This is why the simulator matters more than the formula sheet. Run the same path
   function ticketNet(sym, ticket) {
     let cost = 0;
     const fillLegs = ticket.map((L) => {
+      if (L.kind === "stock") {
+        const entry2 = market.quote(sym).S;
+        cost += L.side * L.qty * entry2;
+        return { ...L, entry: entry2 };
+      }
       const q = market.optQuote(sym, L.strike, L.expDay, L.kind);
       const entry = L.side > 0 ? q.ask : q.bid;
       cost += L.side * L.qty * 100 * entry;
       return { ...L, entry };
     });
     return { cost, fillLegs };
+  }
+  function optionFees(ticket) {
+    const qty = ticket.filter((L) => L.kind !== "stock").reduce((s2, L) => s2 + L.qty, 0);
+    return 0.65 * qty;
   }
   function maxPlSummary(legs, Sref) {
     const ml = maxLossAtExpiry(legs, Sref);
@@ -10143,7 +11435,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     const m = modal(wrap, { onClose: false });
     lessonIn.focus();
   }
-  var view11 = {
+  var view12 = {
     render(root, params) {
       if (feedMode() === "tradier") {
         return renderRealMarket(root, params);
@@ -10160,7 +11452,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
       let sheetEl = null;
       let sheetBg = null;
       let coachEl = null;
-      const hdr = viewHeader("Live Market \u2014 Academy Exchange", "Paper-trade the tape");
+      const hdr = viewHeader("Practice", "Paper-trade the Live Market");
       const head = el("div", { class: "flex-between" });
       const clockBig = el("span", { class: "num muted" });
       const speedSeg = el("div", { class: "seg", role: "group", "aria-label": "Simulation speed" });
@@ -10184,16 +11476,21 @@ This is why the simulator matters more than the formula sheet. Run the same path
           sp === 0 ? !market.running : market.running && market.speed === sp
         ));
       }
-      const nextDayBtn = el("button", { class: "btn sm", onclick: () => {
-        market.advanceDay();
-        toast("\u23ED Jumped to the next trading day.");
-      } }, "\u23ED Next day");
+      const nextDayBtn = el("button", {
+        type: "button",
+        class: "btn sm",
+        "data-coach": "next-day",
+        onclick: () => {
+          market.advanceDay();
+          toast("\u23ED Jumped to the next trading day.");
+        }
+      }, "\u23ED Next day");
       head.appendChild(el("div", { class: "btn-row" }, clockBig, speedSeg, nextDayBtn));
       root.appendChild(head);
       root.appendChild(el(
         "p",
         { class: "sub", style: "max-width:72ch" },
-        "Every profile trades a $100,000 paper account on a simulated exchange \u2014 prices tick live, implied vol breathes, earnings land, options expire. Speed it up to feel theta; slow it down to think."
+        "Every profile trades a $100,000 paper account on a simulated Live Market \u2014 prices tick live, implied vol breathes, earnings land, options expire. Speed it up to feel theta; slow it down to think."
       ));
       root.appendChild(simDisclaimer());
       refreshSpeed();
@@ -10327,16 +11624,12 @@ This is why the simulator matters more than the formula sheet. Run the same path
         else priceChart.update(opts);
         stockBtns.innerHTML = "";
         for (const n2 of [10, 100]) {
-          stockBtns.appendChild(el("button", { class: "btn sm buy", onclick: () => {
-            const res = openPosition(sym, [{ kind: "stock", side: 1, qty: n2, entry: market.quote(sym).S }], `${n2} shares`);
-            if (res.err) gateToast(res.err);
-            else {
-              toast(`Bought ${n2} ${sym} @ ${F.usd(market.quote(sym).S)}`, "gain");
-              completeStep(2);
-            }
-            renderPositions();
-            renderAcct();
-          } }, `Buy ${n2} sh`));
+          stockBtns.appendChild(el("button", {
+            type: "button",
+            class: "btn sm buy",
+            "data-coach": n2 === 100 ? "buy-100" : void 0,
+            onclick: () => stageStock(n2)
+          }, `Buy ${n2} sh`));
         }
         stockBtns.appendChild(el(
           "span",
@@ -10373,6 +11666,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         const S2 = market.quote(sym).S;
         const strikes = market.strikes(sym);
         const atm = atmStrike2(strikes, S2);
+        const above = strikes[strikes.indexOf(atm) + 1] || null;
         if (isMobile3()) {
           const wrap = el("div", { class: "mobile-only" });
           const toolbar = el("div", { class: "ladder-toolbar" });
@@ -10410,6 +11704,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
                   type: "button",
                   class: "bid num",
                   title: "Sell call at bid",
+                  "data-coach": k === above ? "call-bid-above" : void 0,
                   onclick: () => addTicket("call", -1, k, exp.day)
                 }, F.usd(c.bid)),
                 el("button", {
@@ -10490,7 +11785,9 @@ This is why the simulator matters more than the formula sheet. Run the same path
             };
             tr.appendChild(cell(c.delta.toFixed(2)));
             tr.appendChild(cell(F.pct(c.iv, 0)));
-            tr.appendChild(cell(F.usd(c.bid), k < S2 ? "chain-itm" : "", () => addTicket("call", -1, k, exp.day), "Sell this call at the bid"));
+            const callBid = cell(F.usd(c.bid), k < S2 ? "chain-itm" : "", () => addTicket("call", -1, k, exp.day), "Sell this call at the bid");
+            if (k === above) callBid.setAttribute("data-coach", "call-bid-above");
+            tr.appendChild(callBid);
             tr.appendChild(cell(F.usd(c.ask), k < S2 ? "chain-itm" : "", () => addTicket("call", 1, k, exp.day), "Buy this call at the ask"));
             tr.appendChild(cell(F.usd(k, 2), "chain-strike", null));
             tr.appendChild(cell(F.usd(p.bid), k > S2 ? "chain-itm" : "", () => addTicket("put", -1, k, exp.day), "Sell this put at the bid"));
@@ -10536,6 +11833,28 @@ This is why the simulator matters more than the formula sheet. Run the same path
         chipEl = sheetBg = sheetEl = null;
         sheetOpen = false;
       }
+      function legDesc(L, withExpiry) {
+        if (L.kind === "stock") return `${sym} ${L.qty} shares @ ${F.usd(market.quote(sym).S)}`;
+        const q = market.optQuote(sym, L.strike, L.expDay, L.kind);
+        const px = L.side > 0 ? q.ask : q.bid;
+        return `${sym} ${F.usd(L.strike, 2)} ${L.kind.toUpperCase()}${withExpiry ? ` (Day ${L.expDay})` : ""} @ ${F.usd(px)}`;
+      }
+      function stageStock(n2) {
+        const existing = ticket.find((L) => L.kind === "stock" && L.side === 1);
+        if (existing) existing.qty += n2;
+        else ticket.push({ kind: "stock", side: 1, qty: n2 });
+        if (isMobile3()) sheetOpen = true;
+        renderTicket();
+        toast(`${n2} shares added to the order ticket.`, "gain");
+      }
+      function orderLabel(legs) {
+        if (legs.length === 1 && legs[0].kind === "stock") return `${legs[0].qty} shares`;
+        if (legs.length === 1) return `${legs[0].side > 0 ? "Long" : "Short"} ${legs[0].kind}`;
+        const stock = legs.some((l) => l.kind === "stock" && l.side > 0);
+        const shortCall = legs.some((l) => l.kind === "call" && l.side < 0);
+        if (stock && shortCall && legs.length === 2) return "Covered call";
+        return `${legs.length}-leg combo`;
+      }
       function addTicket(kind, side, strike, expDay) {
         const existing = ticket.find((L) => L.kind === kind && L.strike === strike && L.expDay === expDay && L.side === side);
         if (existing) existing.qty++;
@@ -10561,8 +11880,6 @@ This is why the simulator matters more than the formula sheet. Run the same path
         const pl = maxPlSummary(fillLegs, market.quote(sym).S);
         const list2 = el("div", {});
         ticket.forEach((L, i) => {
-          const q = market.optQuote(sym, L.strike, L.expDay, L.kind);
-          const px = L.side > 0 ? q.ask : q.bid;
           const qtyIn = el("input", { type: "number", min: 1, value: L.qty, style: "width:60px", "aria-label": "Quantity" });
           qtyIn.addEventListener("change", () => {
             L.qty = Math.max(1, +qtyIn.value || 1);
@@ -10581,7 +11898,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
               L.qty++;
               renderTicket();
             } }, "+"),
-            el("span", { class: "mono small" }, `${sym} ${F.usd(L.strike, 2)} ${L.kind.toUpperCase()} @ ${F.usd(px)}`),
+            el("span", { class: "mono small" }, legDesc(L, false)),
             el("button", { class: "btn sm", onclick: () => {
               ticket.splice(i, 1);
               renderTicket();
@@ -10594,7 +11911,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
           "div",
           { class: "pos-greeks mt1" },
           el("span", { class: "num", style: "font-weight:700" }, (cost >= 0 ? "Debit " : "Credit ") + F.usd(Math.abs(cost))),
-          el("span", { class: "small muted" }, `+ ${F.usd(0.65 * ticket.reduce((s2, L) => s2 + L.qty, 0))} fees`),
+          el("span", { class: "small muted" }, `+ ${F.usd(optionFees(ticket))} fees`),
           el(
             "span",
             { class: "num" },
@@ -10609,7 +11926,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
         into.appendChild(el(
           "div",
           { class: "btn-row mt1" },
-          el("button", { class: "btn primary", onclick: placeOrder }, "Place order"),
+          el("button", { type: "button", class: "btn primary", "data-coach": "place-order", onclick: placeOrder }, "Place order"),
           el("button", { class: "btn", onclick: () => {
             ticket = [];
             sheetOpen = false;
@@ -10631,8 +11948,6 @@ This is why the simulator matters more than the formula sheet. Run the same path
         const { cost, fillLegs } = ticketNet(sym, ticket);
         const pl = maxPlSummary(fillLegs, market.quote(sym).S);
         ticket.forEach((L, i) => {
-          const q = market.optQuote(sym, L.strike, L.expDay, L.kind);
-          const px = L.side > 0 ? q.ask : q.bid;
           const qtyIn = el("input", { type: "number", min: 1, value: L.qty, style: "width:60px" });
           qtyIn.addEventListener("change", () => {
             L.qty = Math.max(1, +qtyIn.value || 1);
@@ -10643,7 +11958,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
             { class: "btn-row", style: "margin:4px 0" },
             el("span", { class: "pill " + (L.side > 0 ? "gain" : "loss") }, L.side > 0 ? "BUY" : "SELL"),
             qtyIn,
-            el("span", { class: "mono small" }, `${sym} ${F.usd(L.strike, 2)} ${L.kind.toUpperCase()} (Day ${L.expDay}) @ ${F.usd(px)}`),
+            el("span", { class: "mono small" }, legDesc(L, true)),
             el("button", { class: "btn sm", onclick: () => {
               ticket.splice(i, 1);
               renderTicket();
@@ -10654,13 +11969,13 @@ This is why the simulator matters more than the formula sheet. Run the same path
           "div",
           { class: "btn-row mt1" },
           el("span", { class: "num", style: "font-weight:700" }, (cost >= 0 ? "Debit " : "Credit ") + F.usd(Math.abs(cost))),
-          el("span", { class: "small muted" }, `+ ${F.usd(0.65 * ticket.reduce((s2, L) => s2 + L.qty, 0))} fees`),
+          el("span", { class: "small muted" }, `+ ${F.usd(optionFees(ticket))} fees`),
           el(
             "span",
             { class: "num small" },
             pl.maxLoss != null ? `Max loss ${F.usd(Math.abs(pl.maxLoss), 0)}` : "Max loss unbounded"
           ),
-          el("button", { class: "btn primary", onclick: placeOrder }, "Place order"),
+          el("button", { type: "button", class: "btn primary", "data-coach": "place-order", onclick: placeOrder }, "Place order"),
           el("button", { class: "btn", onclick: () => {
             ticket = [];
             renderTicket();
@@ -10700,10 +12015,11 @@ This is why the simulator matters more than the formula sheet. Run the same path
       }
       function placeOrder() {
         const legs = ticket.map((L) => {
+          if (L.kind === "stock") return { ...L, entry: market.quote(sym).S };
           const q = market.optQuote(sym, L.strike, L.expDay, L.kind);
           return { ...L, entry: L.side > 0 ? q.ask : q.bid };
         });
-        const label = legs.length === 1 ? `${legs[0].side > 0 ? "Long" : "Short"} ${legs[0].kind}` : `${legs.length}-leg combo`;
+        const label = orderLabel(legs);
         openThesisModal({
           sym,
           legs,
@@ -11040,7 +12356,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     const tint = 0.06 + a * 0.22;
     return v > 0 ? `background:color-mix(in srgb, var(--gain-mark) ${Math.round(tint * 100)}%, transparent)` : `background:color-mix(in srgb, var(--loss) ${Math.round(tint * 100)}%, transparent)`;
   }
-  var view12 = {
+  var view13 = {
     render(root) {
       root.appendChild(el("div", { class: "eyebrow" }, "Risk Desk"));
       root.appendChild(el("h1", {}, "Portfolio stress test"));
@@ -11222,7 +12538,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
   };
 
   // src/ui/views/progress.js
-  var view13 = {
+  var view14 = {
     render(root) {
       const p = active();
       if (!p) {
@@ -11347,7 +12663,7 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
     return wrap;
   }
-  var view14 = {
+  var view15 = {
     render(root) {
       root.appendChild(viewHeader("Trade Journal", "Process Score"));
       if (!isFamilyBuild() && tier() === "free") {
@@ -11500,423 +12816,9 @@ This is why the simulator matters more than the formula sheet. Run the same path
     }
   };
 
-  // src/ui/views/missions.js
-  var PRESETS2 = [
-    { id: "long-call", name: "Long Call", legs: () => [{ kind: "call", side: 1, qty: 1, k: 0 }] },
-    { id: "long-put", name: "Long Put", legs: () => [{ kind: "put", side: 1, qty: 1, k: 0 }] },
-    { id: "covered-call", name: "Covered Call", legs: () => [{ kind: "stock", side: 1, qty: 100 }, { kind: "call", side: -1, qty: 1, k: 1 }] },
-    { id: "protective-put", name: "Protective Put", legs: () => [{ kind: "stock", side: 1, qty: 100 }, { kind: "put", side: 1, qty: 1, k: -1 }] },
-    { id: "csp", name: "Cash-Secured Put", legs: () => [{ kind: "put", side: -1, qty: 1, k: -1 }] },
-    { id: "bull-call", name: "Bull Call Spread", legs: () => [{ kind: "call", side: 1, qty: 1, k: 0 }, { kind: "call", side: -1, qty: 1, k: 2 }] },
-    { id: "bear-put", name: "Bear Put Spread", legs: () => [{ kind: "put", side: 1, qty: 1, k: 0 }, { kind: "put", side: -1, qty: 1, k: -2 }] },
-    { id: "straddle", name: "Long Straddle", legs: () => [{ kind: "call", side: 1, qty: 1, k: 0 }, { kind: "put", side: 1, qty: 1, k: 0 }] }
-  ];
-  function briefFirstLine(brief) {
-    const line2 = String(brief || "").split(/\n/)[0] || "";
-    return line2.replace(/\*\*/g, "").slice(0, 140);
-  }
-  function renderHub(root) {
-    root.appendChild(viewHeader("Missions", "Guided trading drills"));
-    root.appendChild(el(
-      "p",
-      { class: "sub", style: "max-width:68ch" },
-      "Sandboxed markets with clear objectives. Defined-risk only \u2014 practice the playbook before you freestyle on the Live Market."
-    ));
-    root.appendChild(simDisclaimer());
-    const free = !isFamilyBuild() && tier() === "free";
-    const all = list();
-    const week1 = all.filter((m) => !String(m.id).startsWith("w2-")).slice(0, 10);
-    const week2 = all.filter((m) => String(m.id).startsWith("w2-"));
-    const rest = all.filter((m) => !week1.includes(m) && !week2.includes(m));
-    function missionCard(m) {
-      const locked = free && !FREE_LIMITS.missions.includes(m.id);
-      const statusPill = m.done ? el("span", { class: "pill gain" }, "\u2713 Done") : locked ? el("a", { class: "pill brass lock-chip", href: "#/upgrade", style: "text-decoration:none" }, icon("lock"), " Upgrade") : el("span", { class: "pill brass" }, m.skill || "mission");
-      return el(
-        "div",
-        { class: "card mission-card" },
-        el(
-          "div",
-          { class: "flex-between" },
-          iconFor(m.icon, "compass", { cls: "mi" }),
-          statusPill
-        ),
-        el("h3", { style: "margin:0" }, m.title),
-        el("p", { class: "sub", style: "margin:0" }, briefFirstLine(m.brief)),
-        el(
-          "div",
-          { class: "btn-row mt1" },
-          el("button", { class: "btn primary", onclick: () => {
-            const res = start2(m.id);
-            if (res.err) {
-              gateToast(res.err);
-              return;
-            }
-            location.hash = "#/missions/" + m.id;
-          } }, m.done ? "Replay \u2192" : locked ? "Preview \u2192" : "Start \u2192")
-        )
-      );
-    }
-    function section(title, list2) {
-      if (!list2.length) return;
-      root.appendChild(el("h3", { class: "mission-week-head mt2" }, title));
-      const grid = el("div", { class: "grid2 mt1" });
-      for (const m of list2) grid.appendChild(missionCard(m));
-      root.appendChild(grid);
-    }
-    section("Week 1", week1);
-    section("Week 2", week2);
-    section("More missions", rest);
-  }
-  function confirmLeave(onYes) {
-    const wrap = el(
-      "div",
-      {},
-      el("h2", {}, "Leave mission?"),
-      el("p", { class: "sub" }, "Leaving abandons the current session. Progress on this run is not saved."),
-      el(
-        "div",
-        { class: "btn-row mt2" },
-        el("button", { class: "btn", onclick: () => m.close() }, "Stay"),
-        el("button", { class: "btn primary", onclick: () => {
-          m.close();
-          onYes();
-        } }, "Abandon")
-      )
-    );
-    const m = modal(wrap);
-  }
-  function renderRunner(root, id) {
-    let S2 = session();
-    if (!S2 || S2.def.id !== id) {
-      const res = start2(id);
-      if (res.err) {
-        gateToast(res.err);
-        root.appendChild(el("p", {}, res.err.includes("upgrade") || res.err.includes("Academy") ? "This mission is locked on the free tier." : "Mission not found."));
-        root.appendChild(el(
-          "div",
-          { class: "btn-row mt1" },
-          el("a", { class: "btn", href: "#/missions" }, "\u2190 Back to missions"),
-          !isFamilyBuild() ? el("a", { class: "btn primary", href: "#/upgrade" }, "Upgrade") : null
-        ));
-        return;
-      }
-      S2 = res.session;
-    }
-    let priceChart = null, eqChart = null;
-    let sym = S2.market.list()[0]?.sym || "BRGR";
-    let expIdx = 0;
-    let presetId = "";
-    let legsSpec = [];
-    let abandoned = false;
-    const shell = el("div", { class: "mission-runner" });
-    root.appendChild(shell);
-    function leave() {
-      confirmLeave(() => {
-        abandoned = true;
-        abandon();
-        location.hash = "#/missions";
-      });
-    }
-    function atmStrike2(mkt, s2) {
-      const q = mkt.quote(s2);
-      const strikes = mkt.strikes(s2);
-      return strikes.reduce((a, b) => Math.abs(b - q.S) < Math.abs(a - q.S) ? b : a);
-    }
-    function strikeAt(mkt, s2, off) {
-      const strikes = mkt.strikes(s2);
-      const atm = atmStrike2(mkt, s2);
-      const i = strikes.indexOf(atm);
-      return strikes[Math.max(0, Math.min(strikes.length - 1, i + off))];
-    }
-    function applyPreset(p) {
-      const mkt = S2.market;
-      const exps = mkt.expiries(sym);
-      const exp = exps[Math.min(expIdx, exps.length - 1)];
-      legsSpec = p.legs().map((L) => {
-        if (L.kind === "stock") return { kind: "stock", side: Math.sign(L.side), qty: Math.abs(L.qty) };
-        const strike = strikeAt(mkt, sym, L.k);
-        return {
-          kind: L.kind,
-          side: Math.sign(L.side),
-          qty: Math.abs(L.side) * (L.qty ?? 1),
-          strike,
-          expDay: exp.day
-        };
-      });
-    }
-    function previewCost() {
-      if (!legsSpec.length) return 0;
-      return legsSpec.reduce((s2, L) => {
-        if (L.kind === "stock") return s2 + L.side * L.qty * S2.market.quote(sym).S;
-        const q = S2.market.optQuote(sym, L.strike, L.expDay, L.kind);
-        const px = L.side > 0 ? q.ask : q.bid;
-        return s2 + L.side * L.qty * 100 * px;
-      }, 0);
-    }
-    function paint() {
-      S2 = session();
-      if (!S2) return;
-      shell.innerHTML = "";
-      priceChart = null;
-      eqChart = null;
-      if (S2.status === "passed" || S2.status === "failed") {
-        const pass2 = S2.status === "passed";
-        if (pass2 && S2.def.id === "first-covered-call") completeStep(4);
-        if (pass2) maybeBackupNudge();
-        shell.appendChild(el(
-          "div",
-          { class: "mission-banner" + (pass2 ? "" : " fail") },
-          el("div", {}, icon(pass2 ? "trophy" : "burst", { size: 34 })),
-          el("h2", { style: "margin:8px 0 4px" }, pass2 ? "Mission passed" : "Mission failed"),
-          pass2 ? el("p", { class: "sub", html: md(S2.def.debriefPass || "") }) : el(
-            "div",
-            {},
-            el("p", { class: "sub" }, S2.failReason || ""),
-            el("div", { class: "mt1", html: md(S2.def.debriefFail || "") })
-          ),
-          pass2 ? el("p", { class: "small muted num" }, "+75 XP") : null,
-          el(
-            "div",
-            { class: "btn-row mt2", style: "justify-content:center" },
-            el("a", { class: "btn", href: "#/missions", onclick: () => {
-              abandoned = true;
-              abandon();
-            } }, "Back to missions"),
-            pass2 && S2.def.id === "first-covered-call" ? el("a", { class: "btn primary", href: "#/welcome" }, "Continue setup \u2192") : null,
-            !pass2 ? el("button", { class: "btn primary", onclick: () => {
-              abandoned = true;
-              start2(id);
-              abandoned = false;
-              paint();
-            } }, "Retry") : null
-          )
-        ));
-        return;
-      }
-      const head = el("div", { class: "flex-between" });
-      head.appendChild(el(
-        "div",
-        {},
-        el(
-          "div",
-          { class: "crumb" },
-          el("a", { href: "#/missions", onclick: (e) => {
-            e.preventDefault();
-            leave();
-          } }, "\u2190 Missions")
-        ),
-        el("div", { class: "eyebrow" }, "Mission"),
-        el("h1", {}, S2.def.title)
-      ));
-      head.appendChild(el("button", { class: "btn sm", onclick: leave }, "Abandon"));
-      shell.appendChild(head);
-      const top = el("div", { class: "row mt2" });
-      const briefCard = el("div", { class: "card w50" });
-      const mktCard = el("div", { class: "card w50" });
-      top.appendChild(briefCard);
-      top.appendChild(mktCard);
-      shell.appendChild(top);
-      briefCard.appendChild(el("h3", {}, "Brief"));
-      briefCard.appendChild(el("div", { class: "lesson-prose", html: md(S2.def.brief) }));
-      if (S2.def.hints?.length) {
-        const hintsBox = el(
-          "details",
-          { class: "mt1" },
-          el("summary", { style: "cursor:pointer;font-weight:600;font-size:13px" }, "Hints"),
-          el("ul", {}, ...S2.def.hints.map((h) => el("li", { class: "small" }, h)))
-        );
-        briefCard.appendChild(hintsBox);
-      }
-      briefCard.appendChild(el("h3", { class: "mt2" }, "Objectives"));
-      const ol = el("ul", { class: "mission-objectives" });
-      for (const o of S2.objectives) {
-        ol.appendChild(el(
-          "li",
-          {},
-          el("span", { class: "num", style: "flex:0 0 1.2em" }, o.met ? "\u2713" : "\u25CB"),
-          el("span", {}, o.label || o.type)
-        ));
-      }
-      briefCard.appendChild(ol);
-      const mainSym = S2.def.objectives.find((o) => o.sym)?.sym || sym;
-      if (S2.market.tickers[mainSym]) sym = mainSym;
-      const t = S2.market.tickers[sym];
-      const q = S2.market.quote(sym);
-      mktCard.appendChild(el(
-        "div",
-        { class: "flex-between" },
-        el("h3", {}, sym),
-        el("span", { class: "pill brass num" }, `Day ${S2.market.day} / ${S2.def.endDay}`)
-      ));
-      mktCard.appendChild(el(
-        "div",
-        { class: "pos-greeks mb1" },
-        el("span", { class: "num" }, F.usd(q.S)),
-        el("span", { class: "num" }, F.usd(equity2(), 0) + " equity")
-      ));
-      const priceBox = el("div", {});
-      mktCard.appendChild(priceBox);
-      const closes = (t?.closes || []).map((c) => ({ x: c.day, y: c.p }));
-      const intra = (t?.intraday || []).map((p) => ({ x: S2.market.day + p.m / 390, y: p.p }));
-      const pts = closes.concat(intra.length ? [{ x: S2.market.day, y: t.S }] : []);
-      if (pts.length >= 2) {
-        priceChart = line(priceBox, {
-          height: 160,
-          series: [{ name: sym, color: "--s1", points: pts, width: 2, area: true }],
-          fmtX: (d) => "D" + Math.round(d),
-          fmtY: (y) => F.usd(y, 0),
-          tipLabel: ""
-        });
-      }
-      const eqBox = el("div", { class: "mt1" });
-      mktCard.appendChild(el("div", { class: "chart-title mt1" }, "Equity"));
-      mktCard.appendChild(eqBox);
-      if (S2.marks.length >= 2) {
-        eqChart = line(eqBox, {
-          height: 90,
-          series: [{ name: "Eq", color: "--s2", points: S2.marks.map((m) => ({ x: m.day, y: m.eq })), area: true }],
-          fmtX: (d) => "D" + Math.round(d),
-          fmtY: (y) => F.usd(y / 1e3, 0) + "k",
-          tipLabel: ""
-        });
-      } else {
-        eqBox.appendChild(el("div", { class: "small muted num" }, F.usd(equity2(), 0)));
-      }
-      mktCard.appendChild(el(
-        "div",
-        { class: "btn-row mt1" },
-        el("button", { class: "btn primary", onclick: () => advanceDay() }, "\u23ED Next day")
-      ));
-      const bot = el("div", { class: "row mt2" });
-      const tradeCard = el("div", { class: "card w50" });
-      const posCard = el("div", { class: "card w50" });
-      bot.appendChild(tradeCard);
-      bot.appendChild(posCard);
-      shell.appendChild(bot);
-      tradeCard.appendChild(el("h3", {}, "Trade"));
-      const symSel = el("select", {});
-      for (const tk of S2.market.list()) {
-        symSel.appendChild(el("option", { value: tk.sym, selected: tk.sym === sym }, tk.sym));
-      }
-      symSel.addEventListener("change", () => {
-        sym = symSel.value;
-        legsSpec = [];
-        presetId = "";
-        paint();
-      });
-      const expSel = el("select", {});
-      S2.market.expiries(sym).forEach((e, i) => {
-        expSel.appendChild(el("option", { value: i, selected: i === expIdx }, e.label));
-      });
-      expSel.addEventListener("change", () => {
-        expIdx = +expSel.value;
-        if (presetId) {
-          const p = PRESETS2.find((x) => x.id === presetId);
-          if (p) applyPreset(p);
-        }
-        paint();
-      });
-      const presetSel = el("select", {});
-      presetSel.appendChild(el("option", { value: "" }, "Choose a strategy\u2026"));
-      PRESETS2.forEach((p) => presetSel.appendChild(el("option", { value: p.id, selected: p.id === presetId }, p.name)));
-      presetSel.addEventListener("change", () => {
-        presetId = presetSel.value;
-        const p = PRESETS2.find((x) => x.id === presetId);
-        if (p) applyPreset(p);
-        else legsSpec = [];
-        paint();
-      });
-      tradeCard.appendChild(el(
-        "div",
-        { class: "row" },
-        el("div", { class: "field", style: "flex:1" }, el("label", {}, "Symbol"), symSel),
-        el("div", { class: "field", style: "flex:1" }, el("label", {}, "Expiry"), expSel),
-        el("div", { class: "field", style: "flex:1" }, el("label", {}, "Strategy"), presetSel)
-      ));
-      if (legsSpec.length) {
-        const cost = previewCost();
-        tradeCard.appendChild(el(
-          "div",
-          { class: "small muted mt1" },
-          legsSpec.map((L) => {
-            if (L.kind === "stock") return `${L.side > 0 ? "+" : "\u2212"}${L.qty} sh`;
-            return `${L.side > 0 ? "+" : "\u2212"}${L.qty} ${F.usd(L.strike, 0)}${L.kind === "call" ? "C" : "P"}`;
-          }).join(" \xB7 ")
-        ));
-        tradeCard.appendChild(el(
-          "div",
-          { class: "btn-row mt1" },
-          el(
-            "span",
-            { class: "num", style: "font-weight:700" },
-            (cost >= 0 ? "Debit " : "Credit ") + F.usd(Math.abs(cost))
-          ),
-          el("button", { class: "btn primary", onclick: () => {
-            const label = PRESETS2.find((p) => p.id === presetId)?.name || "Mission trade";
-            const res = trade(sym, legsSpec, label);
-            if (res.err) gateToast(res.err);
-            else toast(`${label} opened`, "gain");
-          } }, "Trade")
-        ));
-      } else {
-        tradeCard.appendChild(el("p", { class: "small muted mt1" }, "Pick a preset to preview cost and trade."));
-      }
-      posCard.appendChild(el("h3", {}, "Positions"));
-      if (!S2.positions.length) {
-        posCard.appendChild(el("p", { class: "small muted" }, "No open positions."));
-      } else {
-        for (const pos of S2.positions) {
-          const val = positionValue(pos);
-          posCard.appendChild(el(
-            "div",
-            { class: "flex-between mb1" },
-            el(
-              "div",
-              {},
-              el("div", { style: "font-weight:600" }, `${pos.sym} \xB7 ${pos.label}`),
-              el("div", { class: "small num muted" }, F.usd(val, 0))
-            ),
-            el("button", { class: "btn sm", onclick: () => {
-              const res = closePos(pos.id);
-              if (res?.err) toast(res.err, "loss");
-            } }, "Close")
-          ));
-        }
-      }
-      posCard.appendChild(el("h3", { class: "mt2" }, "Mission log"));
-      const feed2 = el("div", { class: "event-feed" });
-      for (const row of S2.log.slice(0, 16)) {
-        feed2.appendChild(el(
-          "div",
-          { class: "event-item" },
-          el("span", { class: "et" }, `Day ${row.day}`),
-          el("span", { class: "ev-row" }, iconFor(row.icon, "news", { cls: "ev-ic" }), " " + row.text)
-        ));
-      }
-      posCard.appendChild(feed2);
-    }
-    paint();
-    const unMission = bus.on("mission", () => paint());
-    return () => {
-      unMission();
-      priceChart && priceChart.destroy();
-      eqChart && eqChart.destroy();
-      if (!abandoned) {
-        const cur = session();
-        if (cur && cur.status === "active") abandon();
-      }
-    };
-  }
-  var view15 = {
-    render(root, params) {
-      if (params[0]) return renderRunner(root, params[0]);
-      renderHub(root);
-    }
-  };
-
   // src/main.js
   function start4() {
-    boot({ home: view6, learn: view7, strategy: view8, greeks: view9, vol: view10, market: view11, risk: view12, progress: view13, journal: view14, missions: view15, legal: view4 });
+    boot({ home: view7, learn: view8, strategy: view9, greeks: view10, vol: view11, market: view12, risk: view13, progress: view14, journal: view15, missions: view6, legal: view4 });
     start3();
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       navigator.serviceWorker.register("./sw.js").catch(() => {
