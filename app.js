@@ -5573,6 +5573,177 @@
         }
       ],
       outro: "The honest downside: buying a straddle before big news means paying peak prices for two melting contracts at once. Watching this trade lose in paper money is the cheapest tuition in options\u2014it saves you from paying double fees right before a post-news price crush."
+    },
+    {
+      id: "long-put",
+      title: "Buying a put, step by step",
+      lessonId: "c-calls-puts-defined",
+      symbol: "PWRS",
+      seed: 20107,
+      scenarioId: "crash-week",
+      startCash: 25e3,
+      intro: "Maria does not own PowerSun Energy ($95), but she is convinced trouble is coming. Instead of borrowing shares to bet against it, she pays a small capped fee for one put option \u2014 the right to sell at today's level even after a crash.",
+      steps: [
+        {
+          id: "buy-put",
+          anchor: "demo-trade",
+          say: "Maria buys 1 put near today's price with a far deadline. Her worst case is fixed: she can only lose the fee she pays right now.",
+          watch: { type: "trade", legs: [{ kind: "put", side: 1, qty: 1, strikeAbove: 0, expiry: "far" }], label: "Long put" },
+          expect: { classify: "long-put" }
+        },
+        {
+          id: "crash",
+          anchor: "demo-day",
+          say: "Two days later the selloff hits. PowerSun drops hard \u2014 and Maria's put gains value as the stock falls.",
+          watch: { type: "advanceDays", n: 2 },
+          expect: { advancedTo: 3 }
+        },
+        {
+          id: "aftershock",
+          anchor: "demo-day",
+          say: "The market chops as it falls, and Maria's gain breathes with it. What never moves is her floor: the most she can ever lose is the fee she paid.",
+          watch: { type: "advanceDays", n: 2 },
+          expect: { advancedTo: 5 }
+        },
+        {
+          id: "cash-out",
+          anchor: "demo-positions",
+          say: "In plain words: Maria was bearish, risked a small known fee, and the fall paid her. She sells the put to lock the gain.",
+          watch: { type: "close" },
+          expect: { flat: true }
+        }
+      ],
+      outro: "The honest downside: if PowerSun had drifted up or sideways instead, the put would have melted toward zero and Maria would have lost the entire fee \u2014 being right about direction AND timing is the whole price of admission."
+    },
+    {
+      id: "put-vertical",
+      title: "The put spread, step by step",
+      lessonId: "c-vertical-spreads",
+      missionId: "w2-crash-put-vertical",
+      symbol: "FAM500",
+      seed: 20108,
+      scenarioId: "crash-week",
+      startCash: 25e3,
+      intro: "Sam expects the whole market to fall this week, but single puts on the Academy 500 Index ($500) are expensive. He buys a put near today's level and sells a lower-strike put against it \u2014 cutting his cost in exchange for capping his win.",
+      steps: [
+        {
+          id: "open-spread",
+          anchor: "demo-trade",
+          say: "Sam buys 1 put near $500 and sells 1 put two strikes lower in the same expiration. The cash from the lower put pays part of his bill.",
+          watch: { type: "trade", legs: [
+            { kind: "put", side: 1, qty: 1, strikeAbove: 0, expiry: "far" },
+            { kind: "put", side: -1, qty: 1, strikeBelow: 2, expiry: "far" }
+          ], label: "Put vertical" },
+          expect: { classify: "put-vertical" }
+        },
+        {
+          id: "selloff",
+          anchor: "demo-day",
+          say: "The index gaps down and keeps sliding. The spread gains as the market falls toward Sam's lower strike.",
+          watch: { type: "advanceDays", n: 3 },
+          expect: { advancedTo: 4 }
+        },
+        {
+          id: "take-profit",
+          anchor: "demo-positions",
+          say: "In plain words: Sam paid less to be bearish, and the drop handed back his whole fee plus a profit bigger than the fee itself. He closes rather than being greedy for the last dollar.",
+          watch: { type: "close" },
+          expect: { flat: true }
+        }
+      ],
+      outro: "The honest downside: the sold put caps the win \u2014 in a true collapse Sam makes no more than the distance between his strikes. And if the market rises instead, the whole net fee he paid is gone."
+    },
+    {
+      id: "long-strangle",
+      title: "The strangle, step by step",
+      lessonId: "c-straddles-strangles",
+      missionId: "w2-strangle-shock-catcher",
+      symbol: "FAM500",
+      seed: 20109,
+      scenarioId: "crash-week",
+      startCash: 25e3,
+      intro: "Maria believes the Academy 500 Index ($500) is about to move BIG \u2014 she just does not know which way. A straddle is pricey, so she buys a cheaper pair: a call above the market and a put below it. Either violent move can pay; a quiet week cannot.",
+      steps: [
+        {
+          id: "buy-strangle",
+          anchor: "demo-trade",
+          say: "Maria buys 1 call two strikes above and 1 put two strikes below today's price. Both are cheaper than at-the-money options \u2014 that is the budget part.",
+          watch: { type: "trade", legs: [
+            { kind: "call", side: 1, qty: 1, strikeAbove: 2, expiry: "far" },
+            { kind: "put", side: 1, qty: 1, strikeBelow: 2, expiry: "far" }
+          ], label: "Long strangle" },
+          expect: { classify: "long-strangle" }
+        },
+        {
+          id: "shock",
+          anchor: "demo-day",
+          say: "The crash arrives. The call side dies, but the put side surges past it \u2014 one violent move is all a strangle needs.",
+          watch: { type: "advanceDays", n: 3 },
+          expect: { advancedTo: 4 }
+        },
+        {
+          id: "ride",
+          anchor: "demo-day",
+          say: "The slide extends another day. Panic also pumps up option prices across the board, adding fuel to Maria's put.",
+          watch: { type: "advanceDays", n: 1 },
+          expect: { advancedTo: 5 }
+        },
+        {
+          id: "close-win",
+          anchor: "demo-positions",
+          say: "In plain words: Maria did not need to predict the direction \u2014 only that SOMETHING big would happen. It did, and she closes both legs to bank it.",
+          watch: { type: "close" },
+          expect: { flat: true }
+        }
+      ],
+      outro: "The honest downside: in a quiet week BOTH cheap options melt and the strangle loses its whole cost \u2014 and because the strikes sit away from the market, it needs an even bigger move than a straddle before it pays at expiry."
+    },
+    {
+      id: "iron-condor",
+      title: "The iron condor, step by step",
+      lessonId: "c-vertical-spreads",
+      missionId: "w2-condor-range-harvest",
+      symbol: "FAM500",
+      seed: 20110,
+      scenarioId: null,
+      startCash: 25e3,
+      intro: "Sam thinks the Academy 500 Index ($500) is going NOWHERE for a while. He gets paid cash today by selling a put spread below the market and a call spread above it \u2014 four legs that profit if the index simply stays inside the range.",
+      steps: [
+        {
+          id: "open-condor",
+          anchor: "demo-trade",
+          say: "Sam sells a put two strikes below and a call two strikes above, then buys a further put and call as wings. The wings fix his worst case in dollars before he starts.",
+          watch: { type: "trade", legs: [
+            { kind: "put", side: -1, qty: 1, strikeBelow: 2, expiry: "far" },
+            { kind: "put", side: 1, qty: 1, strikeBelow: 4, expiry: "far" },
+            { kind: "call", side: -1, qty: 1, strikeAbove: 2, expiry: "far" },
+            { kind: "call", side: 1, qty: 1, strikeAbove: 4, expiry: "far" }
+          ], label: "Iron condor" },
+          expect: { classify: "iron-condor" }
+        },
+        {
+          id: "quiet-week",
+          anchor: "demo-day",
+          say: "Five quiet days pass with the index drifting inside Sam's range. All four options shed time value \u2014 and he sold more than he bought, so the decay works FOR him.",
+          watch: { type: "advanceDays", n: 5 },
+          expect: { advancedTo: 6 }
+        },
+        {
+          id: "more-quiet",
+          anchor: "demo-day",
+          say: "Another five days of nothing much. Boredom is literally the win condition for this trade.",
+          watch: { type: "advanceDays", n: 5 },
+          expect: { advancedTo: 11 }
+        },
+        {
+          id: "harvest",
+          anchor: "demo-positions",
+          say: "In plain words: Sam was paid for promising the market would stay in a range, his worst case was capped by the wings on day one, and the calendar did the work.",
+          watch: { type: "close" },
+          expect: { flat: true }
+        }
+      ],
+      outro: "The honest downside: the condor's profit is small and capped, while a single violent week can cost the full wing width minus the credit. Selling calm is a real business \u2014 but storms happen, and position size is the only thing that keeps them survivable."
     }
   ];
   var demoById = (id) => DEMOS.find((d) => d.id === id) || null;
