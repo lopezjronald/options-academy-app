@@ -8093,6 +8093,639 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     ]
   };
 
+  // src/content/playbook-vol-greeks.js
+  var greeksModule = {
+    "id": "vg-greeks",
+    "program": "vol-pricing",
+    "title": "The Greeks",
+    "audience": "What a $1 move, a day, and a vol point each do",
+    "description": "Delta, gamma, theta, and vega on the $100 model stock, and the tradeoff in a book of bought options.",
+    "modules": [
+      {
+        "id": "vgm-risk",
+        "title": "The Risk Measures",
+        "lessons": [
+          {
+            "id": "vg-delta",
+            "title": "Delta: What a $1 Stock Move Does",
+            "objective": "Read delta on the $100 model stock as the price change per $1, the share exposure of one contract, and only a rough gauge of finishing in the money.",
+            "body": "You have split a $10 dinner bill and watched your own card get charged only $5. Traders call an option's share of a $1 stock move **delta** \u2014 0.53 for the $100 strike with 30 days left. That reading means the call gains $0.53 a share when the $100 stock rises by $1. In plain words: delta is the option's price change, in dollars, for each $1 the stock moves.\n\nOne contract covers 100 shares, so Maria's 0.53 call moves like 53 shares \u2014 adding about $53 on a $1 stock rise. Drag the strike deep below the stock and delta climbs toward 1.00, moving dollar for dollar like 100 full shares. Drag the strike far above the stock and delta fades toward 0.00, barely budging when the stock ticks up. In plain words: delta sits near 0.53 at the strike, climbs to 1.00 deep in the money, and drops to 0.00 far out of the money.\n\nA dinner bill splits in the same fixed ratio all evening, but an option's delta shifts as the stock moves. Rally the stock far above the $100 strike and that 0.53 call climbs toward one full share. Because it keeps shifting, a delta near 0.50 is only a rough gauge of finishing in the money \u2014 about one in two, never an exact probability. In plain words: treat delta as today's speed and a rough in-the-money gauge, never a fixed promise.\n\nMaria buys the 30-day $100 call for $359, so a $1 rise adds $53 for her while costing Sam, the seller, $53. If the stock stays at or below $100 through expiry, Maria loses the full $359 she paid and no more. If the stock surges far above $100, Sam owes the full distance above the strike \u2014 losses that can dwarf the $359 he collected. In plain words: Maria's call acts like 53 shares today with risk capped at $359, while Sam takes the open-ended loss.",
+            "example": "The $100 model stock, Strike K at $100, 30 days, Implied vol at 30%:\n\u2022 Call price: $3.59 a share, or $359 for one contract.\n\u2022 Delta tile: 0.53, so a $1 rise adds $0.53 a share ($53 on one 100-share contract).\n\u2022 Strike K at $70 (deep in the money by $30): delta reads 1.00, acting like 100 shares.\n\u2022 Strike K at $130 (far out of the money by $30): delta reads 0.00.\n\u2022 If the stock jumps to $110 before expiry, delta climbs to 0.88; at $120 on expiry day, the call pays $2,000.\n\u2022 A delta near 0.50 is a rough gauge of finishing in the money (about 1 in 2), never an exact probability.",
+            "key_takeaways": [
+              "Delta is the option's price change per $1 stock move: $0.53 a share when the Delta tile reads 0.53.",
+              "One contract multiplies delta by 100 shares, so a 0.53 call acts like 53 shares and gains $53 on a $1 rise.",
+              "Delta sits near 0.53 at the $100 strike, rises to 1.00 deep in the money at the $70 strike, and falls to 0.00 far out of the money at $130.",
+              "A delta near 0.50 is a rough gauge of finishing in the money \u2014 about 1 in 2 \u2014 never an exact probability."
+            ],
+            "sim": "greeks",
+            "sim_task": "1) Open the Greeks Lab on the $100 model stock and click the \u0394 Delta tab. 2) Set Strike K to $100, Days to expiry to 30, and Implied vol to 30%. Read the Delta tile, about 0.53. 3) Drag Strike K to $70 and watch the Delta tile rise to about 1.00 as the call-delta curve shifts. 4) Drag Strike K to $130 and watch the Delta tile fall to about 0.00. 5) Set Strike K back to $100 and drag Days to expiry from 60 down to 2. Watch the call-delta curve turn into a cliff at the $100 strike.",
+            "quiz": [
+              {
+                "q": "On the $100 model stock, with Strike K at $100, 30 days, and Implied vol at 30%, a delta of 0.53 means:",
+                "choices": [
+                  "The call is guaranteed to finish in the money 53% of the time",
+                  "The stock must rise by $53 today",
+                  "The call gains about $0.53 a share when the stock rises $1",
+                  "The call loses $0.53 every day"
+                ],
+                "answer": 2,
+                "explain": "Delta is the price change per $1 stock move \u2014 $0.53 a share here \u2014 not a guaranteed probability."
+              },
+              {
+                "q": "Maria's call has a delta of 0.53 and one contract covers 100 shares. How large is her share exposure?",
+                "choices": [
+                  "About 53 shares, or $53 gained on a $1 stock rise",
+                  "Exactly 100 shares, because every call controls 100",
+                  "Five shares",
+                  "530 shares"
+                ],
+                "answer": 0,
+                "explain": "Multiply 0.53 by 100 shares to get 53 shares of exposure, which gain about $53 when the stock rises $1."
+              },
+              {
+                "q": "Maria drags Strike K from $100 down to $70 while the model stock stays at $100. Where does delta go?",
+                "choices": [
+                  "It stays at 0.53",
+                  "It falls to 0.00",
+                  "It becomes -1.00",
+                  "It rises to 1.00, deep in the money by $30"
+                ],
+                "answer": 3,
+                "explain": "The $70 call sits $30 in the money, so the Delta tile climbs to 1.00 and moves like 100 shares."
+              },
+              {
+                "q": "Sam reads a delta of 0.53 as an exact chance of finishing in the money. What is the honest reading?",
+                "choices": [
+                  "Delta is always twice the true chance",
+                  "A delta near 0.50 is only a rough gauge \u2014 about one in two \u2014 never an exact probability",
+                  "A 0.53 reading means the call cannot finish in the money",
+                  "The chance stays locked at 53% until expiry"
+                ],
+                "answer": 1,
+                "explain": "Delta is a rough in-the-money gauge that shifts whenever the stock price, days left, or implied volatility change."
+              }
+            ],
+            "tier": "core"
+          },
+          {
+            "id": "vg-gamma",
+            "title": "Gamma: How Fast Delta Changes",
+            "objective": "See gamma as the change in delta per $1, largest at the $100 strike in the final days, and know that options you buy are long gamma.",
+            "body": "You have turned a shower knob and felt the water jump from warm to scalding in the last small twist. Traders call the speed of that jump **gamma**: how much delta changes when the stock moves $1. On the 30-day $100 call, a gamma of 0.05 lifts Maria's delta from 0.53 to 0.58 on a $1 rise. In plain words: delta is your speed on a $1 move, and gamma is how fast that speed picks up.\n\nGamma sits quiet when expiry is a month away and wakes up in the final days. With two days left at the $100 strike, gamma jumps nearly fourfold, so a single $1 rally pushes delta up by 0.18 instead of 0.05. A calm market makes that final-week jump even sharper as the whole delta change squeezes into a narrow price band. In plain words: gamma is four times stronger in the final two days than with a month left.\n\nA shower knob can scald at the hot end of its turn, but gamma peaks right at the $100 strike and drops to zero once the stock moves $10 away. Deep in the money delta is already 1.00, and far out of the money it is already 0.00, so neither has room to change. That leaves all the action concentrated right at the strike as expiry approaches. In plain words: delta changes fastest right at the strike in the final days, and barely changes far away.\n\nMaria pays $359 for the 30-day $100 call, making her long gamma: rallies give her more shares on the way up, and drops shed shares on the way down. Sam sold that call for $359, leaving him short gamma \u2014 every $1 rally adds five more shares of exposure working against him. Maria's worst loss is still capped at the $359 she paid if the stock finishes at $100 or below. In plain words: options you buy are long gamma with risk capped at what you paid, while sellers face accelerating risk.",
+            "example": "Strike K at $100 on the $100 model stock, Implied vol at 30%:\n\u2022 30 days left: Gamma tile reads 0.046 (roughly 0.05), moving delta from 0.53 to 0.58 on a $1 rise.\n\u2022 2 days left: Gamma jumps to 0.18 \u2014 four times the 30-day reading \u2014 moving delta from 0.51 to 0.68 on a $1 rise.\n\u2022 $10 away from the strike (near $90 or $110): the 2-day gamma curve drops to 0.00.\n\u2022 Lower Implied vol to 15% with 2 days left: the Gamma tile doubles to 0.36 at the $100 strike.\n\u2022 Maria pays $359 and is long gamma; her maximum loss remains $359.",
+            "key_takeaways": [
+              "Gamma measures how much delta changes per $1 stock move: 0.046 at the $100 strike with 30 days left.",
+              "With 2 days left at the $100 strike, gamma jumps to 0.18 \u2014 roughly four times the 30-day reading.",
+              "Gamma peaks right at the strike in the final days and drops to 0.00 once the stock sits $10 away.",
+              "Options you buy are long gamma; Maria's call gains exposure on rallies, and her worst loss is still the $359 she paid."
+            ],
+            "sim": "greeks",
+            "sim_task": "1) Open the Greeks Lab and click the \u0393 Gamma tab. 2) Set Strike K to $100 and Implied vol to 30%. The chart draws 30-day, 10-day, and 2-day gamma, tallest at the $100 spot on the 2-day curve. 3) Set Days to expiry to 30 and read the Gamma tile, about 0.046. 4) Drag Days to expiry to 2 and watch the Gamma tile rise to about 0.18. Those three curves stay on the chart; the tile follows your Days slider. 5) Set Implied vol to 40%, then drag it down to 15% and watch the 2-day curve spike higher at the $100 strike. With 2 days left the Gamma tile finishes near 0.36.",
+            "quiz": [
+              {
+                "q": "What does gamma measure on the $100 model stock?",
+                "choices": [
+                  "The dollars the call loses each day",
+                  "How much delta changes when the stock moves $1",
+                  "The exact chance of finishing in the money",
+                  "The $359 premium Maria pays up front"
+                ],
+                "answer": 1,
+                "explain": "Gamma is the change in delta for a $1 stock move \u2014 0.046 at the $100 strike with 30 days left."
+              },
+              {
+                "q": "Strike K is $100 and Implied vol is 30%. As Days to expiry drop from 30 down to 2, what happens to gamma at the $100 stock price?",
+                "choices": [
+                  "It falls from 0.18 to 0.046",
+                  "It stays flat at 0.046",
+                  "It drops to 0.00 because expiry is close",
+                  "It jumps nearly fourfold, from 0.046 to 0.18"
+                ],
+                "answer": 3,
+                "explain": "Gamma is largest in the final days right at the strike, jumping from 0.046 at 30 days to 0.18 at 2 days."
+              },
+              {
+                "q": "Maria buys the 30-day $100 call for $359. Which gamma reading fits her position?",
+                "choices": [
+                  "She is long gamma, so a $1 rally lifts her delta by roughly 0.05",
+                  "She is short gamma, so a rally lowers her delta",
+                  "Buying the call sets her gamma to 0.00",
+                  "Gamma refunds her $359 if the stock finishes at $100"
+                ],
+                "answer": 0,
+                "explain": "Bought options are long gamma: a $1 stock rise lifts her delta from 0.53 to 0.58."
+              },
+              {
+                "q": "With two days left and Implied vol at 30%, where does gamma sit on the chart?",
+                "choices": [
+                  "Highest at a stock price of $90",
+                  "Highest at a stock price of $130",
+                  "Peaking near 0.18 at the $100 strike, and dropping to 0.00 at $90",
+                  "Flat at 0.18 across every stock price"
+                ],
+                "answer": 2,
+                "explain": "The two-day gamma curve spikes at the $100 strike and falls to 0.00 once the stock sits $10 away."
+              }
+            ],
+            "tier": "core"
+          },
+          {
+            "id": "vg-vega",
+            "title": "Vega: Dollars per Volatility Point",
+            "objective": "Read vega as the dollars per 1-point implied-vol change, largest for longer-dated options at the $100 strike, and watch Implied vol lift the Call price.",
+            "body": "You have watched a winter coat's price tag rise $20 when the shop raised its cold rating by one notch. Traders call an option's version of that step **vega**: the dollars gained or lost when implied volatility moves by one percentage point. On the 30-day $100 call, the Vega tile reads $0.11 a share, or $11 on one 100-share contract. In plain words: vega tells you the dollar price change for each one-point move in implied volatility.\n\nVega grows with time because a longer window gives a bigger expected swing more room to play out. At the $100 strike, a 60-day call carries roughly three times the vega of a five-day call. With only five days left, even a sharp jump in expected volatility barely moves the price because time is almost gone. In plain words: longer-dated options carry far more vega at the strike than short-dated ones.\n\nA coat's price tag waits for a clerk to reprint it, but vega reprices an option the instant implied volatility moves. Drag implied volatility up by 20 points on the 30-day $100 call and the contract gains more than $200, even though the $100 stock never budged. That lift also spreads into the wings, pulling out-of-the-money strikes into play as the expected range widens. In plain words: turning up implied volatility lifts option prices immediately without a single cent of stock movement.\n\nMaria buys the 30-day $100 call for $359 and is long vega, gaining $11 for each point implied volatility rises. Sam sold her that call, so he is short vega: a ten-point volatility jump costs him about $114 even if the stock sits still. If volatility crushes instead, Maria's call loses value fast, though her worst loss never exceeds the $359 she paid. In plain words: option buyers gain when volatility rises and lose when it falls, with risk capped at the price paid.",
+            "example": "$100 model stock, Strike K at $100:\n\u2022 30 days, Implied vol 30%: Call price is $3.59 ($359 per contract); Vega tile reads $0.11 ($11 per contract per point).\n\u2022 60-day curve at $100: vega is $0.16 a share ($16 a contract).\n\u2022 5-day curve at $100: vega is $0.05 a share ($5 a contract) \u2014 roughly one-third of the 60-day reading.\n\u2022 Drag Implied vol from 20% to 40% on the 30-day call: Call price rises from $2.45 to $4.73 (a $2.28 gain per share, or $228 per contract).\n\u2022 On the 60-day curve near $80, vega lifts from 0.00 at 20% implied vol to $0.06 at 40%.",
+            "key_takeaways": [
+              "Vega is the dollars an option gains or loses per 1-point change in implied volatility: $0.11 a share ($11 a contract) on the 30-day $100 call.",
+              "Vega is largest at the strike on longer-dated options: $0.16 at 60 days versus $0.05 at 5 days.",
+              "Raising Implied vol from 20% to 40% lifts the 30-day $100 call from $2.45 to $4.73 while the stock stays at $100.",
+              "Option buyers are long vega ($11 gained per point here) with loss capped at the $359 paid; sellers are short vega."
+            ],
+            "sim": "greeks",
+            "sim_task": "1) Open the Greeks Lab and click the \u03BD Vega tab. 2) Set Strike K to $100, Days to expiry to 30, and Implied vol to 30%. 3) Compare the curves at the $100 spot: the 60-day curve is about $0.16 and the 5-day curve is about $0.05. The Vega tile, which uses your 30 days, reads about $0.11. 4) Drag Implied vol from 20% up to 40% and watch the Call price rise from about $2.45 to about $4.73. The Vega tile stays near $0.11. 5) Watch the 60-day curve near $80 lift from about $0.00 toward about $0.06, while the center near $100 stays around $0.16.",
+            "quiz": [
+              {
+                "q": "What does the Vega tile measure?",
+                "choices": [
+                  "How many days remain until expiry",
+                  "The exact chance of a 1% stock move",
+                  "How much delta changes per $1",
+                  "The dollars gained or lost per 1-point change in implied volatility"
+                ],
+                "answer": 3,
+                "explain": "Vega is the price change for each 1-point move in implied volatility \u2014 $0.11 a share ($11 a contract) on the 30-day $100 call."
+              },
+              {
+                "q": "With Implied vol at 30% on the $100 model stock, which option carries more vega?",
+                "choices": [
+                  "The 5-day call at the $100 strike ($0.05)",
+                  "The 60-day call at the $100 strike ($0.16)",
+                  "The 60-day call with the stock at $80 ($0.03)",
+                  "The 5-day and 60-day calls at $100 carry the same vega"
+                ],
+                "answer": 1,
+                "explain": "Vega is largest at the strike on longer-dated options: $0.16 at 60 days versus $0.05 at 5 days."
+              },
+              {
+                "q": "Maria sets 30 days and Strike K to $100, then drags Implied vol from 20% to 40%. What happens to the Call price?",
+                "choices": [
+                  "It falls from $4.73 to $2.45",
+                  "It stays at $3.59 because the stock is still $100",
+                  "It rises from $2.45 to $4.73",
+                  "It drops to $0.00"
+                ],
+                "answer": 2,
+                "explain": "Higher implied volatility lifts the 30-day call from $2.45 to $4.73 even though the $100 stock never moved."
+              },
+              {
+                "q": "Sam sold the 30-day $100 call. Implied vol rises by one point while the stock stays at $100. What happens to his position?",
+                "choices": [
+                  "He loses about $11 on that one contract",
+                  "He gains $114",
+                  "His loss is capped at $1",
+                  "Nothing changes until expiry"
+                ],
+                "answer": 0,
+                "explain": "Sam is short vega, so a one-point rise in implied volatility costs him $11 per contract ($0.11 \xD7 100 shares)."
+              }
+            ],
+            "tier": "core"
+          },
+          {
+            "id": "vg-greeks-dashboard",
+            "title": "Four Numbers on One Dashboard",
+            "objective": "Read delta, gamma, theta, and vega together on one $359 call: bought options are long gamma and long vega, and they pay theta every day.",
+            "body": "You have glanced at a roast's thermometer, the kitchen timer, and the grocery receipt before judging one dinner. Traders call that combined reading a **dashboard**: four numbers on one $359 call that show every force at work. Those four are delta, gamma, theta, and vega on the 30-day $100 call. In plain words: the dashboard shows how one option reacts to a $1 stock move, a passing day, and a volatility point.\n\nEach tile answers one question in dollars for Maria's contract. Delta adds $53 on the first $1 stock rise, while gamma quietly boosts her delta as the rally continues. Theta drains $9 on a quiet day, and vega adds $11 for each point implied volatility climbs. In plain words: a $1 stock move, a quiet day, and a volatility point each have a clear dollar price on the screen.\n\nA kitchen timer never changes the grocery receipt, but on Maria's dashboard gamma and vega are paid for by daily theta. Because she bought the call, she is long gamma and long vega \u2014 big swings and volatility spikes both work in her favor. The rent she pays for both edges is that $9 daily theta bleed whenever the stock sits still. In plain words: a book of bought options is long gamma and long vega, and it pays theta every day.\n\nSam sold Maria that call for $359, taking the exact opposite side of all four numbers. He collects $9 of theta on a quiet day, while Maria's worst loss is capped at the $359 she paid. Yet if the stock jumps $10 to $110, delta and gamma drive the call up by about $730 \u2014 more than double the $359 Sam collected. In plain words: sellers collect small daily theta, while buyers pay theta for capped risk and uncapped upside.",
+            "example": "One bought call on the $100 model stock: Strike K at $100, 30 days, Implied vol at 30%:\n\u2022 Call price: $3.59 a share, or $359 for one contract (Maria's maximum possible loss).\n\u2022 Delta: 0.53 (53 shares of exposure, or $53 per $1 move; a rough ~1-in-2 gauge of finishing in the money, never an exact probability).\n\u2022 Gamma: 0.046 (how fast delta grows per $1 move).\n\u2022 Theta: -$0.09 a share, or -$9 per contract each market day.\n\u2022 Vega: $0.11 a share, or $11 per contract per 1-point change in implied vol.\n\u2022 A $10 stock jump from $100 to $110 adds about $730 to the contract \u2014 more than the $359 Sam collected.",
+            "key_takeaways": [
+              "The dashboard reads delta, gamma, theta, and vega together on a single option position.",
+              "On the 30-day $100 call ($359), delta is 0.53 ($53 per $1), gamma is 0.046, theta is -$9 a day, and vega is $11 per vol point.",
+              "A book of bought options is long gamma and long vega, and it pays theta each day ($9 on this contract).",
+              "Delta near 0.53 is a rough in-the-money gauge, never an exact probability; a jump to $110 adds about $730, dwarfing the $9 daily theta and the $359 premium."
+            ],
+            "sim": "greeks",
+            "sim_task": "1) Open the Greeks Lab. Set Strike K to $100, Days to expiry to 30, and Implied vol to 30%. 2) Read the tiles together: Call price about $3.59, Delta about 0.53, Gamma about 0.046, Theta about -$0.09, Vega about $0.11. 3) Click the \u0394 Delta tab and note the call-delta curve near 0.53 at the $100 spot. Then click the \u0393 Gamma tab and see the curves peak at the $100 strike. 4) Click the \u03BD Vega tab and drag Implied vol from 20% to 40%. Watch the Call price rise from about $2.45 to about $4.73 and the sides of the 60-day curve lift. 5) Set Implied vol back to 30%, click the \u0398 Theta tab, and drag Days to expiry from 30 to 20. The Call price tile falls from about $3.59 to about $2.91.",
+            "quiz": [
+              {
+                "q": "Maria buys the 30-day $100 call at 30% implied vol for $359. Which dashboard reading fits her position?",
+                "choices": [
+                  "Long gamma and long vega, while paying about $9 a day in theta",
+                  "Short gamma and short vega, while collecting $9 a day",
+                  "Zero gamma and zero vega, because the stock sits at $100",
+                  "Theta pays her $9 a day for holding the call"
+                ],
+                "answer": 0,
+                "explain": "Bought options are long gamma and long vega, and a Theta tile of -$0.09 means she pays about $9 a day in time decay."
+              },
+              {
+                "q": "On that $359 call, delta reads 0.53. What does a $1 stock rise do to one contract?",
+                "choices": [
+                  "It adds $9",
+                  "It adds $11",
+                  "It adds about $53, acting like 53 shares",
+                  "It locks in a guaranteed 53% chance of profit"
+                ],
+                "answer": 2,
+                "explain": "A delta of 0.53 across 100 shares adds $53 on a $1 stock rise; 0.53 is a rough in-the-money gauge, never a guaranteed probability."
+              },
+              {
+                "q": "Implied vol rises one point while the stock stays at $100. How much does Maria's contract gain from vega?",
+                "choices": [
+                  "About $53",
+                  "About $11",
+                  "About $730",
+                  "$0, because the stock did not move"
+                ],
+                "answer": 1,
+                "explain": "A Vega tile of $0.11 a share adds about $11 on one 100-share contract when implied volatility rises one point."
+              },
+              {
+                "q": "Sam sold that call for $359, and the stock jumps from $100 to $110. What happens to the option?",
+                "choices": [
+                  "He keeps the full $359 no matter how high the stock goes",
+                  "He loses only that day's $9 of theta",
+                  "The call price falls by $730",
+                  "The call rises by about $730, more than double the $359 he collected"
+                ],
+                "answer": 3,
+                "explain": "A jump to $110 adds about $730 to the 30-day $100 call, showing how quickly a large move overwhelms the $9 daily theta and the $359 premium."
+              }
+            ],
+            "tier": "core"
+          }
+        ]
+      }
+    ]
+  };
+
+  // src/content/playbook-vol-skew.js
+  var skewModule = {
+    "id": "vs-skew",
+    "program": "vol-pricing",
+    "title": "Skew & the Smile",
+    "audience": "Why crash protection costs more than lottery tickets",
+    "description": "How fear, big tail moves, and calendar events bend implied volatility across strikes and expirations \u2014 and how traders price that shape.",
+    "modules": [
+      {
+        "id": "vsm-shape",
+        "title": "The Shape of Volatility",
+        "lessons": [
+          {
+            "id": "vs-why-puts-cost-more",
+            "title": "Why Downside Puts Cost More",
+            "objective": "Explain why downside puts often trade at a higher implied volatility than equally distant upside calls on the same $100 stock, and read that tilt as put skew.",
+            "body": "You have noticed that flood insurance for a basement costs more than a policy for the attic, because water rushes downhill. In the stock market, crashes often drop faster than rallies climb, and nervous shareholders buy downside puts for protection. On a $100 stock, downside puts often carry higher implied volatility than upside calls; traders call that tilt **put skew**. In plain words: downside insurance often carries a higher volatility mark than an equally distant upside bet.\n\nPicture a $100 stock whose at-the-money options sit at 22% implied volatility, with 30 trading days left. Maria checks the $90 put at 28% implied volatility, priced at $0.64 per share, then the $110 call at 19%, priced at $0.22. These rounded model prices assume zero interest and dividends, before fees and spreads. In plain words: both strikes sit $10 away, yet the downside put costs more and carries higher implied volatility.\n\nWhy can that nine-point gap persist? Sam already owns the $100 stock, so a sudden drop hurts him while a rally helps; his demand for protection supports put prices. A basement policy covers one fixed house, whereas a stock's put price shifts as crowd fear rises or fades. In plain words: demand for crash protection can keep downside puts richer, but the tilt can change or reverse.\n\nSam always checks this tilt before he trades out-of-the-money options on a $100 stock. Maria's $90 put can lose value if implied volatility falls, even without a stock move. Selling that put brings Sam $64 per contract, but a fall to $0 could cost him $8,936 after the premium, before fees. In plain words: put skew makes downside protection expensive to buy and tempting \u2014 but risky \u2014 to sell.",
+            "example": "A $100 stock with 30 trading days to expiry and 22% at-the-money implied volatility. Rounded Black-Scholes prices assume zero rates and dividends, before fees and spreads.\n\u2022 $90 put ($10 below the stock) at 28% IV \u2192 $0.64 per share.\n\u2022 $110 call ($10 above the stock) at 19% IV \u2192 $0.22 per share.\n\u2022 The 9-percentage-point gap (28% vs. 19%) is put skew.\n\u2022 The same $90 put at 22% IV would cost $0.27: the higher IV adds $0.37, not the entire put\u2013call price difference.",
+            "key_takeaways": [
+              "Put skew is the tilt where downside puts trade at higher implied volatility than equally distant upside calls.",
+              "On a $100 stock with 22% ATM vol, a $90 put might price at 28% IV ($0.64) while a $110 call prices at 19% IV ($0.22).",
+              "Demand for crash protection and the risk of sharp falls help explain put skew; its size and direction can change.",
+              "Buying downside puts means paying a fear surcharge; selling them collects that surcharge in exchange for crash risk."
+            ],
+            "sim": "vol",
+            "sim_task": "1) Open the Volatility Lab and find The volatility smile card. 2) Set ATM vol to 22% and Smile (tails) to 0% so the center of the curve starts clean. 3) Drag the Skew (fear) slider up from 0% toward its top end and watch the left side of the curve (low-strike puts) climb near 28% while the right side (high-strike calls) tilts lower. 4) Drag Skew (fear) back down to 0% and watch the left-side surcharge flatten out.",
+            "quiz": [
+              {
+                "q": "On a $100 stock, why does a $90 put usually trade at a higher implied volatility than a $110 call?",
+                "choices": [
+                  "Shareholders buy downside puts for crash protection, and markets often fall faster than they rise",
+                  "Puts always have more days until expiration than calls",
+                  "Brokers charge higher commissions on call options",
+                  "A $90 strike is closer to $100 than a $110 strike"
+                ],
+                "answer": 0,
+                "explain": "Sharp crashes and demand for protection help push downside put IV above upside call IV; this pattern is common, not guaranteed."
+              },
+              {
+                "q": "The $90 put on a $100 stock trades at 28% IV, and the $110 call trades at 19% IV. What is this nine-point IV tilt called?",
+                "choices": [
+                  "Intrinsic value",
+                  "Daily theta",
+                  "Put skew",
+                  "Share dividend"
+                ],
+                "answer": 2,
+                "explain": "Put skew is the implied-volatility tilt between downside puts (28%) and equally distant upside calls (19%)."
+              },
+              {
+                "q": "In The volatility smile card, what happens to the curve when Maria raises the Skew (fear) slider?",
+                "choices": [
+                  "Every strike moves down to 0% implied volatility",
+                  "Only the center strike moves while the wings stay locked",
+                  "The right side rises while the left side drops to zero",
+                  "The left wing (low-strike puts) tilts higher than the right wing (high-strike calls)"
+                ],
+                "answer": 3,
+                "explain": "Raising Skew (fear) lifts implied volatility on low-strike downside puts relative to high-strike upside calls."
+              },
+              {
+                "q": "Sam sells the 28% IV $90 put for $0.64 to collect the rich skew premium. What risk is he taking?",
+                "choices": [
+                  "No risk at all because skew guarantees a win",
+                  "A fast market drop below $90 can force him to buy shares or pay out far more than $0.64",
+                  "The stock rising above $110 will trigger his put",
+                  "His $0.64 premium turns into a call option automatically"
+                ],
+                "answer": 1,
+                "explain": "The skew premium is high precisely because sharp crashes happen, leaving a put seller on the hook below $90."
+              }
+            ],
+            "tier": "core"
+          },
+          {
+            "id": "vs-the-smile",
+            "title": "The Volatility Smile and the Smirk",
+            "objective": "Read a plot of implied volatility across strikes to tell a two-sided volatility smile from a one-sided smirk, and see why big tail moves lift both wings.",
+            "body": "You have sat on a park hammock that sags in the middle and curves up at both posts. On a $100 stock, a U-shaped plot of implied volatility across strikes is a **volatility smile**. In plain words: options far from the current stock price can carry higher implied volatility than options right at the money.\n\nSuppose a $100 stock awaits a major court ruling that could send shares crashing to $80 or surging to $120. Maria sees the $100 options at 22% implied volatility and both far wings at 30%, all with the same expiration. Such a smile can reflect concern about large moves in either direction, though a pending event does not guarantee this shape. In plain words: both wings can carry a volatility surcharge without having equal dollar premiums.\n\nSam sees a different pattern when the $85 put carries 31% implied volatility and the $115 call carries 25%; traders call this uneven shape a **smirk**. Equity options often show this downside tilt, and the curve need not rise at the right wing. A canvas hammock hangs from two fixed trees, but the market's volatility curve bends as fear and tail bets shift. In plain words: a clean U-shape is a smile, while a downside tilt is a common stock-market smirk.\n\nMaria and Sam read the whole curve before picking a strike on a $100 stock. Buying a far-out $120 call at 30% implied volatility means paying an eight-point mark-up over the 22% center. Sam weighs the call's premium and possible payoff before deciding whether the price makes sense. In plain words: the smile shows which strikes carry higher volatility marks, not which trades will make money.",
+            "example": "A $100 stock with 22% implied volatility at the $100 center strike:\n\u2022 Symmetric smile (both tails bid up): $85 put at 28% IV, $100 strike at 22% IV, $115 call at 28% IV.\n\u2022 Lopsided smirk (crash fear + tail curvature): $85 put at 31% IV, $100 strike at 22% IV, $115 call at 25% IV.\n\u2022 Flat line (no smile, no skew): every strike from $85 to $115 sits at 22% IV.",
+            "key_takeaways": [
+              "The volatility smile is the U-shaped curve formed when both low-strike and high-strike options trade at higher IV than at-the-money options.",
+              "Higher wing IV can reflect the risk of large jumps and demand for protection; a scheduled event does not guarantee a symmetric smile.",
+              "When downside fear also tilts the left wing higher than the right (say 31% vs. 25%, with 22% in the center), the smile becomes a smirk.",
+              "Checking the smile before you trade reveals whether a far-out strike is priced at 22% or carrying a 30% tail surcharge."
+            ],
+            "sim": "vol",
+            "sim_task": "1) Open the Volatility Lab and look at The volatility smile card. 2) Set ATM vol to 22% and Skew (fear) to 0%. 3) Drag the Smile (tails) slider up from 0% and watch both the left and right wings curve symmetrically upward like a U while the center stays anchored at 22%. 4) Now raise Skew (fear) alongside Smile (tails) to turn that even smile into a lopsided smirk with a higher left wing.",
+            "quiz": [
+              {
+                "q": "What does the volatility smile show when you plot implied volatility across strikes on a $100 stock?",
+                "choices": [
+                  "Implied volatility is 0% at the $100 strike and 100% everywhere else",
+                  "Implied volatility is lowest near the $100 center strike and curves higher at both far wings",
+                  "Stock prices always go up after expiration",
+                  "Every strike trades at the exact same dollar price"
+                ],
+                "answer": 1,
+                "explain": "A volatility smile is lowest near at-the-money ($100) and curves upward toward both deep-downside and far-upside strikes."
+              },
+              {
+                "q": "What can explain the $80 put and $120 call carrying 30% IV when the $100 strike sits at 22% IV?",
+                "choices": [
+                  "Because the stock can never move more than $1",
+                  "Because at-the-money options are illegal to buy before news",
+                  "Because real markets produce sudden big jumps in either direction more often than a tame average suggests",
+                  "Because brokers refund the premium on $80 and $120 strikes"
+                ],
+                "answer": 2,
+                "explain": "Big tail moves happen often enough that buyers bid up far-out strikes on both sides and sellers demand higher IV to cover the jump risk."
+              },
+              {
+                "q": "In The volatility smile card, which slider bends BOTH wings upward into a symmetric U-shape when Skew (fear) is at 0%?",
+                "choices": [
+                  "Smile (tails)",
+                  "ATM vol",
+                  "Skew (fear)",
+                  "Hedge every"
+                ],
+                "answer": 0,
+                "explain": "The Smile (tails) slider adds curvature to both ends of the strike range while keeping the center anchored at ATM vol."
+              },
+              {
+                "q": "On a $100 stock, the $85 put is at 31% IV, the $100 strike is at 22% IV, and the $115 call is at 25% IV. How do traders describe this shape?",
+                "choices": [
+                  "A flat line",
+                  "An inverted V",
+                  "A zero-volatility curve",
+                  "A volatility smirk \u2014 both wings curve up from 22%, with the downside wing lifted highest"
+                ],
+                "answer": 3,
+                "explain": "When both wings sit above the 22% center but downside fear lifts the left wing to 31% vs. 25% on the right, the curve is a smirk."
+              }
+            ],
+            "tier": "core"
+          },
+          {
+            "id": "vs-term-structure",
+            "title": "Volatility Across the Calendar: Term Structure",
+            "objective": "Compare implied volatility across different expiration dates on the same $100 stock, and explain why an upcoming event can lift front-month IV above back-month IV.",
+            "body": "You have checked hotel rates and noticed a concert night costs $350, while a long stay averages $180 a night. Options on the same $100 stock also price the calendar, assigning a different implied volatility to each expiration. Traders call that lineup of implied volatilities on the $100 strike the **term structure**. In plain words: implied volatility changes not only across strikes, but also across the calendar.\n\nIn a quiet market, near-term options on a $100 stock often trade at lower implied volatility than longer-dated ones. The seven-day $100 call might sit at 20% implied volatility, while the 60-day call sits at 24%. That upward slope reflects expectations of less-calm conditions later; extra time alone does not require higher annualized volatility. In plain words: later months can carry a higher volatility mark, but the calendar does not guarantee it.\n\nNow put a major earnings report one trading day away on that same $100 stock. A seven-day $100 option might carry 45% implied volatility, while the 60-day option carries 26%, because the event occupies less of its longer life. A hotel's concert surcharge ends at checkout, but an option's event premium can persist if fresh uncertainty replaces the news. In plain words: a near event can concentrate high annualized volatility into the shortest expiration.\n\nMaria buys that seven-day $100 call for $2.99; after the report, the stock rises to $101, IV falls to 20%, and six trading days remain. Her call is now worth $1.80: a $119 loss per contract, using zero-rate, zero-dividend model prices before fees. Sam compares the 60-day call, whose IV may fall less after the news, but whose larger premium still puts more dollars at risk. In plain words: checking the term structure helps you weigh an event premium against the risk that it fades.",
+            "example": "A $100 stock reports earnings in 1 trading day. All durations are trading days; rounded Black-Scholes call prices assume zero rates and dividends, before fees and spreads.\n\u2022 Quiet baseline: 7-day $100 call at 20% IV ($1.33); 60-day $100 call at 24% IV ($4.67).\n\u2022 Before earnings: 7-day call at 45% IV ($2.99); 60-day call at 26% IV ($5.06).\n\u2022 After earnings in this scenario: stock $101, strike $100, 6 days left, IV 20% \u2192 call $1.80.\n\u2022 Maria loses $2.99 \u2212 $1.80 = $1.19 per share, or $119 per contract, despite the $1 stock gain.",
+            "key_takeaways": [
+              "Term structure is how implied volatility on the same stock and strike varies across different expiration dates.",
+              "In calm markets, longer-dated options usually sit at slightly higher IV than near-term options (say 24% at 60 days vs. 20% at 7 days).",
+              "When a big event is days away, front-month IV can spike to 45% while 60-day IV sits at 26%, because the jump is packed into a short window.",
+              "After the event, front-week IV may fall sharply (45% to 20% in this example), reducing option value even if the stock moves favorably."
+            ],
+            "sim": "vol",
+            "sim_task": "1) Open the Volatility Lab and find The volatility smile card. 2) Set ATM vol to 24% to represent the calm 60-day expiration curve across strikes. 3) Now drag ATM vol up to 45% to see where the 7-day expiration curve sits right before a major announcement \u2014 the entire curve floats 21 points higher. 4) Drag ATM vol down from 45% to 20% to see the entire front-week curve drop the morning after the announcement passes.",
+            "quiz": [
+              {
+                "q": "What does volatility term structure compare?",
+                "choices": [
+                  "The stock prices of four different companies",
+                  "Brokerage fees between morning and afternoon trades",
+                  "Implied volatility on the same stock across different expiration dates",
+                  "Dividend payouts over a ten-year period"
+                ],
+                "answer": 2,
+                "explain": "Term structure is the lineup of implied volatilities across near and far expiration dates on the same underlying stock."
+              },
+              {
+                "q": "A $100 stock reports earnings in one trading day. Why does the seven-day $100 option trade at 45% IV while the 60-day $100 option trades at only 26% IV?",
+                "choices": [
+                  "The seven-day option packs the entire one-day earnings jump into a short period, while the 60-day option spreads it over more time",
+                  "The 60-day option is not allowed to move on earnings day",
+                  "Longer-dated options always have 0% implied volatility",
+                  "The strike price on the 60-day option is secretly $200"
+                ],
+                "answer": 0,
+                "explain": "Implied volatility is an annualized rate, so a big one-day move concentrated into seven trading days pushes the annualized percentage much higher than over 60 days."
+              },
+              {
+                "q": "Maria pays $2.99 for the seven-day $100 call at 45% IV. Next morning, the stock is $101, IV is 20%, and six trading days remain. What happens with zero rates and dividends?",
+                "choices": [
+                  "It doubles to $5.98 automatically",
+                  "Its model price falls to $1.80 despite the $1 stock gain",
+                  "It stays locked at $2.99 until expiration",
+                  "It converts into 60-day shares"
+                ],
+                "answer": 1,
+                "explain": "With six trading days left, the call is worth $1.80: $119 less per contract than Maria paid, before fees."
+              },
+              {
+                "q": "In a quiet market with no major news on the calendar, how does a 60-day option's IV typically compare to a seven-day option's IV?",
+                "choices": [
+                  "The 60-day IV is negative",
+                  "The seven-day IV is always 80% higher",
+                  "Both are locked at 0%",
+                  "The 60-day IV often sits slightly higher (say 24% vs. 20%), reflecting expectations of less-calm conditions later"
+                ],
+                "answer": 3,
+                "explain": "An upward slope is common when near-term conditions are quiet; more time alone does not require higher annualized volatility."
+              }
+            ],
+            "tier": "core"
+          },
+          {
+            "id": "vs-trading-the-skew",
+            "title": "Trading the Tilt: The Risk Reversal",
+            "objective": "Construct a risk reversal on a $100 stock by selling an expensive downside put to fund a cheaper upside call, and state both its skew advantage and its downside risk.",
+            "body": "You have sold a winter coat at a consignment shop and used the cash to help buy a rain jacket. When put skew makes a downside put richer than an upside call, traders can make a similar swap across strikes. On a $100 stock, selling a downside put and buying an upside call with the same expiration creates a bullish **risk reversal**. In plain words: the put premium helps pay for the call, while leaving you responsible for downside losses.\n\nMaria prices this trade on a $100 stock with 30 trading days left and strong put skew. She sells the $90 put at 28% implied volatility for $0.64 and buys the $110 call at 19% for $0.22 per share. She collects $0.42 per share, or $42 per spread, using rounded model prices with zero rates and dividends, before fees. In plain words: the put pays for the call here, but different strikes or prices could leave a debit.\n\nThat $42 credit carries real directional danger. A coat sale ends at the shop, but Maria's short put leaves her owing money if the stock falls below $90 at expiry. The sim settles in cash; physically settled puts can require buying 100 shares at $90, with a worst-case loss of $8,958 after this credit. In plain words: a risk reversal acts like a bullish stock bet funded by taking on crash risk below the put strike.\n\nSam considers this two-leg trade only when he can afford the downside and believes the put is expensive relative to the call. Between $90 and $110 at expiry, both options finish at $0 and he keeps the credit before fees. Above $110 the call gains dollar for dollar; below $90 the put's losses grow dollar for dollar, initially offset by the credit. In plain words: a risk reversal trades the volatility tilt, but its outcome also depends heavily on stock direction.",
+            "example": "A $100 stock with 30 trading days to expiry and a steep volatility smirk. Rounded Black-Scholes prices assume zero rates and dividends; all results exclude fees and spreads.\n\u2022 Sell 1 $90 put at 28% IV \u2192 collect $0.64 per share ($64).\n\u2022 Buy 1 $110 call at 19% IV \u2192 pay $0.22 per share ($22).\n\u2022 Net upfront cash: $0.64 \u2212 $0.22 = $0.42 net credit ($42 per spread).\n\u2022 At expiry: keep $42 between $90 and $110; at $116, profit is $642; at $80, loss is $958.\n\u2022 Breakeven: $89.58. Worst case at $0: $9,000 \u2212 $42 = $8,958 lost per spread.",
+            "key_takeaways": [
+              "A bullish risk reversal sells an out-of-the-money downside put and buys an out-of-the-money upside call in the same expiration.",
+              "Here the $90 put at 28% IV ($0.64) funds the $110 call at 19% IV ($0.22), leaving a $0.42 credit; a credit is not guaranteed.",
+              "It is a bullish position: you profit if the stock rallies above the $110 call strike or stays calm between $90 and $110.",
+              "Below $90, put losses grow dollar for dollar, offset by the credit. Maximum loss is $8,958 per spread at $0, before fees; the sim settles in cash."
+            ],
+            "sim": "vol",
+            "sim_task": "1) Open the Volatility Lab and find The volatility smile card. 2) Set ATM vol to 22% and Smile (tails) to 2%. 3) Drag Skew (fear) up so the left wing ($90 put area) sits near 28% IV while the right wing ($110 call area) sits near 19% IV \u2014 that 9-point vertical gap between the two wings is what a risk reversal sells on the left and buys on the right. 4) Drag Skew (fear) back to 0% to see both wings level out, removing the skew advantage.",
+            "quiz": [
+              {
+                "q": "How does Maria set up a bullish risk reversal on a $100 stock?",
+                "choices": [
+                  "She buys both the $90 put and the $110 call",
+                  "She sells the $90 put (high IV) and buys the $110 call (lower IV) in the same expiration",
+                  "She sells 100 shares of stock and buys two $100 puts",
+                  "She buys a seven-day call and sells a 60-day call at the same $100 strike"
+                ],
+                "answer": 1,
+                "explain": "A bullish risk reversal sells an out-of-the-money put at rich skew IV to fund buying an out-of-the-money call at lower IV."
+              },
+              {
+                "q": "Maria sells the $90 put for $0.64 and buys the $110 call for $0.22. What is her upfront cash flow before fees?",
+                "choices": [
+                  "She collects a $0.42 net credit per share ($42 per spread)",
+                  "She pays a $0.86 net debit per share",
+                  "She pays $90.00 upfront",
+                  "She collects $28.00 per share"
+                ],
+                "answer": 0,
+                "explain": "Collecting $0.64 for the put and paying $0.22 for the call leaves a $0.42 net credit per share, or $42 per spread."
+              },
+              {
+                "q": "With that same risk reversal ($0.42 credit, short $90 put, long $110 call), what happens if the stock sits at $102 at expiration?",
+                "choices": [
+                  "Both options expire in the money for a $20 loss",
+                  "She is forced to buy 100 shares at $110",
+                  "She loses $102 per share",
+                  "Both options expire worthless, and she keeps the $0.42 credit per share ($42 per spread) before fees"
+                ],
+                "answer": 3,
+                "explain": "At $102, neither the $90 put nor the $110 call is in the money, so both expire at $0 and she keeps the $0.42 upfront credit."
+              },
+              {
+                "q": "What is the main risk when Sam sells the $90 put to fund the $110 call for a $0.42 credit?",
+                "choices": [
+                  "There is no downside risk because he collected a credit",
+                  "He loses money if the stock rallies above $120",
+                  "If the stock crashes below $90, the short put loses dollar for dollar (for example, a $9.58/share net loss at $80)",
+                  "The call option expires before the put option"
+                ],
+                "answer": 2,
+                "explain": "The short $90 put obligates Sam below $90; at $80 the put costs $10.00, leaving a $9.58 per-share loss after the $0.42 credit."
+              }
+            ],
+            "tier": "core"
+          }
+        ]
+      }
+    ]
+  };
+
+  // src/content/playbook-vol-hedge.js
+  var hedgeModule = {
+    id: "vd-hedge",
+    program: "vol-pricing",
+    title: "Dynamic Hedging & the Vol Trade",
+    audience: "For learners ready to separate movement from direction",
+    description: "Use share hedges, option prices, and realized movement to understand the volatility trade and its risks.",
+    modules: [{
+      id: "vdm-hedge",
+      title: "Trading Volatility",
+      lessons: [
+        {
+          id: "vd-delta-hedging",
+          title: "Delta Hedging: Cancel the Direction",
+          objective: "See how Maria uses a share sale to cancel a call's directional exposure, and why that sale has to be updated as the stock moves.",
+          body: "You have shifted groceries between two bags so neither arm carries all the weight. Traders call that balance **delta hedging**: Maria sells shares against a call so a small move doesn't push the whole trade one way. Grocery bags keep a steady weight, while the call's share exposure changes as soon as the stock moves. In plain words: match the call with an opposing share sale, then look again after the price moves.\n\nMaria pays Sam $300 for one call on 100 shares, and Sam owes her the call's payoff. At delta 0.50 the call acts like 50 shares, so she sells 50 shares, and a $1 rise gives the call $50 while the shares lose $50. A delta near 0.50 is only a rough gauge of finishing in the money, never an exact chance. In plain words: the share sale cancels the direction of that first $1 move.\n\nWhen the stock rises, the call starts acting like more shares, so Maria sells more to catch up. When Sam holds options that act like a short stock position, he buys shares until the two sides cancel. Checking every five days leaves the hedge unmatched for longer than checking every day. In plain words: buy or sell enough shares to bring today's directional exposure back near zero.\n\nMaria can lose the entire $300 she paid, and the share trades can add further losses and costs. Until she adjusts, the balance is only as good as her last check, so the position isn't risk-free. The lab buys a call and a put together and adjusts the shares, so she can watch movement once direction is reduced. In plain words: judge the combined Total, because a gain on the shares alone proves nothing.",
+          example: "Hypothetical 1-call hedge, before costs and other price changes:\n\u2022 Maria pays $3 \xD7 100 shares = $300 for the call. Sam receives the $300 and owes the payoff.\n\u2022 Delta 0.50 \xD7 100 shares = 50 shares of exposure; she sells 50 shares.\n\u2022 A small $1 rise: the call gains $50 and the shares lose $50.\n\u2022 At delta 0.60 the target is 60 sold shares, so she sells 10 more.\n\u2022 Options acting like minus 40 shares need 40 shares bought.\nIn plain words: the first balance offsets that $1 move, and it is not a promise the balance will hold.",
+          key_takeaways: [
+            "A call with delta 0.50 on 100 shares needs 50 shares sold to offset its direction right now.",
+            "Options that act like minus 40 shares need 40 shares bought.",
+            "Moving from delta 0.50 to 0.60 means selling 10 more shares on that 1 call.",
+            "The $300 paid for the call can be lost in full, and the share hedge can add further losses and costs."
+          ],
+          tier: "core",
+          sim: "vol",
+          sim_task: "1) Open the Gamma scalping simulator. 2) Set IV you pay to 25% and Realized vol to 25%. 3) Set Hedge every to 1 day. Read Option P&L, Hedging P&L, and Total. 4) Click Run another path and watch the stock and combined profit curves redraw. 5) Set Hedge every to 5 days and click Run 60 trials. Record the displayed average, then repeat at 1 day. Each run draws new paths, so differences also reflect randomness. In plain words: compare the combined result across 60 paths, not just 1 hedge gain.",
+          quiz: [
+            { q: "Maria owns one call with delta 0.50 and a 100-share multiplier. Which share position offsets its current direction?", choices: ["Buy 50 shares", "Sell 100 shares", "Sell 50 shares", "Buy 100 shares"], answer: 2, explain: "The call acts like 50 purchased shares, so selling 50 shares offsets that exposure." },
+            { q: "Her call delta rises from 0.50 to 0.60 while she has 50 shares sold. What adjustment restores the hedge?", choices: ["Sell 10 more shares", "Buy 10 shares", "Sell 60 additional shares", "Keep the original 50-share hedge"], answer: 0, explain: "The new target is 60 shares sold, which is 10 more than the 50 already sold." },
+            { q: "Sam owns options that act like minus 40 shares. Which share position brings the directional exposure near zero?", choices: ["Sell 40 shares", "Buy 100 shares", "Sell 100 shares", "Buy 40 shares"], answer: 3, explain: "Buying 40 shares cancels options that act like minus 40 shares." },
+            { q: "What does a near-zero directional exposure guarantee over the next five days?", choices: ["No loss on the combined trade", "Only an approximate balance now, with no guaranteed future result", "An exact 50% chance of finishing in the money", "No need for another hedge"], answer: 1, explain: "Exposure can change during those five days, and the option still carries a time cost." }
+          ]
+        },
+        {
+          id: "vd-gamma-scalping",
+          title: "Gamma Scalping: Trade the Swings",
+          objective: "Follow one sale of 10 shares and the buyback, then subtract the time cost before you judge the result.",
+          body: "You have paid $10 to rent a tool on a day you never picked it up. Traders call Maria's version **gamma scalping**: she adjusts shares against an option she owns, selling into a rise and buying after a dip. Tool rent is a fixed charge, while the option's time cost changes from day to day. In plain words: the swings have to cover that time cost before she is ahead.\n\nOwning the option leaves Maria long gamma, so when a rally lifts her exposure she sells shares into it. She sells 10 shares at $102, then buys them back at $100 when the exposure eases. That round trip earns $20 before costs, even while the option's value keeps changing. In plain words: long gamma sells into rallies and buys the dips.\n\nSuppose the option loses $30 over that same stretch while the share trades earn the $20. Sam adds the $20 gain to the $30 loss and gets a $10 loss before trading costs. On a quiet day the time cost, theta, can still take money even when the stock barely moves. In plain words: $20 from the shares doesn't cover a $30 loss on the option.\n\nIn the lab, Maria reads Option P&L, Hedging P&L, and Total after each path. Checking every day gives her more chances to adjust than checking every five days, though trading costs can swallow a small gain. Run 60 trials shows a sample of paths, not the next real result, and it leaves out some real costs. In plain words: read all three tiles, and count what the adjustments cost.",
+          example: "Hypothetical completed adjustment, separate from the rest of the hedge:\n\u2022 Sell 10 shares at $102: receive $1,020.\n\u2022 Buy those 10 shares back at $100: pay $1,000.\n\u2022 Difference: $1,020 minus $1,000 = $20 before costs.\n\u2022 If the shares earn $20 and the option loses $30, Total is minus $10.\n\u2022 Separate quiet-day case: theta of minus $0.10 a share costs $10 on 1 contract, other inputs fixed.\nIn plain words: count the option loss beside the cash from the finished share trades.",
+          key_takeaways: [
+            "Selling 10 shares at $102 and buying them back at $100 captures $20 before costs.",
+            "When exposure rises from 50 shares to 60, a long-gamma hedge sells the extra 10, then buys them back as exposure falls.",
+            "A $20 hedge gain against a $30 option loss leaves a $10 combined loss.",
+            "Hedging every 1 day instead of every 5 days changes the timing; 60 simulated trials still cannot promise a result."
+          ],
+          tier: "core",
+          sim: "vol",
+          sim_task: "1) Open the Gamma scalping simulator. 2) Set IV you pay to 20%, Realized vol to 35%, and Hedge every to 1 day. Watch the curves redraw. 3) Read Option P&L, Hedging P&L, and Total, then click Run 60 trials and record the average. 4) Set Hedge every to 5 days and click Run 60 trials again. 5) Restore 1 day, set IV you pay to 35% and Realized vol to 20%, then repeat. The tiles describe 1 path; the trial summary describes 60 new paths. In plain words: compare the whole trade, including what the options cost.",
+          quiz: [
+            { q: "Maria sells 10 shares at $102 and buys them back at $100. What does that round trip earn before costs?", choices: ["$20", "$200", "Minus $20", "$1,020"], answer: 0, explain: "Ten shares times the $2 price difference earns $20 before costs." },
+            { q: "Option P&L is minus $30 and Hedging P&L is plus $20. What is Total?", choices: ["Plus $50", "Plus $10", "Minus $10", "Minus $30"], answer: 2, explain: "The $20 hedge gain doesn't cover the $30 option loss, so Total is a $10 loss." },
+            { q: "A rally increases Maria's option exposure from 50 shares to 60. What does her long-gamma hedge require?", choices: ["Buy 10 more shares", "Sell 10 more shares", "Buy back all 50 sold shares", "Leave the hedge unchanged"], answer: 1, explain: "She sells 10 more shares so the hedge catches the rise from 50 shares of exposure to 60." },
+            { q: "What does Run 60 trials provide?", choices: ["The next 60 actual market prices", "A guarantee that daily hedging earns money", "A total including every real trading cost", "A sample of 60 simulated outcomes at the chosen settings"], answer: 3, explain: "The button summarizes 60 new simulated paths rather than predicting an actual trading result." }
+          ]
+        },
+        {
+          id: "vd-cheap-vs-rich-vol",
+          title: "Cheap or Rich: Price Versus Movement",
+          objective: "Compare movement priced at 20% with movement that arrives at 35%, then reverse the comparison without treating the past as a promise.",
+          body: "You have bought a $20 day pass and later found you used $35 of rides. Traders call the same comparison a **volatility trade**: the movement priced into the option against the movement the stock delivers while you hold it. A day pass charges a posted price, while an option's result still depends on when the stock moves and how the hedge is adjusted. In plain words: compare the movement you receive with the movement you paid for.\n\nWhen Maria buys at 20% implied and the stock later realizes 35%, the hedged trade got the movement cheap. Flip the two readings, and buying at 35% implied is rich if only 20% arrives. One hypothetical result is only $60 before costs, and the gap in the readings isn't a pile of dollars. In plain words: a cheap reading is a reason to consider buying, and you still have to add up the dollars.\n\nSam may sell when implied sits at 35% and he expects only 20% realized later. He keeps the premium only if that forecast is right, and he still owes the payoff if it's wrong. A sold call with nothing bought against it has no fixed dollar cap, and a jump can get past a hedge he hasn't updated. In plain words: selling rich movement means taking on an obligation that can cost more than the cash collected.\n\nYesterday's realized reading doesn't lock in the next stretch, so Maria has to estimate the movement over the days she will hold. A $60 advantage before costs turns into a $10 loss if costs reach $70. The lab lets her choose a future Realized vol she wouldn't know in advance, and the lab only buys options. In plain words: buying cheap or selling rich rests on a forecast, not on one number from the past.",
+          example: "Hypothetical comparisons over the same holding period:\n\u2022 Buy at 20% implied and later see 35% realized: movement was cheap relative to what arrived.\n\u2022 Buy at 35% implied and later see 20% realized: movement was rich relative to what arrived.\n\u2022 The 15-point gap (35 minus 20) is not itself a dollar profit. In one hedged book, Option P&L of minus $200 plus Hedging P&L of $260 gives Total of $60.\n\u2022 Subtract $70 of costs and that $60 becomes a $10 loss.\n\u2022 A seller who receives $300 and later owes a $900 payoff is down $600. An uncovered short call has no fixed dollar cap.\nIn plain words: the comparison suggests a side; dollars and costs decide what happened.",
+          key_takeaways: [
+            "Buying movement at 20% implied is cheap relative to 35% realized during the holding period.",
+            "Selling at 35% implied against an expectation of 20% realized accepts the risk that the forecast is wrong.",
+            "A $300 premium received cannot cap the seller's loss; a $900 payoff already exceeds it by $600.",
+            "A $60 advantage before $70 of costs becomes a $10 loss."
+          ],
+          tier: "core",
+          sim: "vol",
+          sim_task: "1) Open the Gamma scalping simulator and set Hedge every to 1 day. 2) Set IV you pay to 20% and Realized vol to 35%. Click Run 60 trials and record the average. 3) Reverse the settings to IV you pay 35% and Realized vol 20%. Watch the curve redraw and repeat Run 60 trials. 4) Click Run another path and add Option P&L to Hedging P&L to check Total. This simulator buys options; it has no sell switch. In plain words: compare 2 purchase prices for movement without reading the buyer's tiles as seller results.",
+          quiz: [
+            { q: "Maria buys at 20% implied and the stock later delivers 35% realized over her holding period. How was movement priced?", choices: ["Rich relative to delivered movement", "Exactly equal to delivered movement", "Cheap, guaranteeing a $15 profit", "Cheap relative to delivered movement"], answer: 3, explain: "The 20% implied price was below the 35% realized movement, without guaranteeing any particular dollar result." },
+            { q: "Sam expects 20% future realized volatility while options price 35% implied. Which interpretation fits?", choices: ["The options are cheap to buy by that comparison", "Selling expresses a rich-volatility view, with loss risk", "Selling guarantees he keeps every dollar received", "The stock must rise 15%"], answer: 1, explain: "Selling the 35% price expresses his lower 20% movement forecast, which can be wrong." },
+            { q: "A trade makes $60 before $70 of costs. What remains?", choices: ["A $10 loss", "A $10 gain", "A $130 gain", "A $60 gain"], answer: 0, explain: "Subtracting $70 from $60 leaves minus $10." },
+            { q: "What is true of a past 20% realized-volatility reading for the next holding period?", choices: ["Future realized volatility must be 20%", "Every option above 20% is safe to sell", "It supplies history, not a known future input", "Future option profits equal 20%"], answer: 2, explain: "The next period can deliver movement unlike the past 20%, so the trade still requires a forecast." }
+          ]
+        },
+        {
+          id: "vd-the-vix",
+          title: "The VIX: Read the Fear Gauge",
+          objective: "Read a VIX of 20 as an annualized expectation for the next 30 calendar days, and not as a forecast of direction.",
+          body: "You have checked a thermometer before choosing a coat. The **VIX** is a reading of expected S&P 500 volatility over the next 30 calendar days, taken from the prices of that index's options. A thermometer reports the air right now, while a VIX of 20 states expected movement at a 20% annualized rate, not a direction. In plain words: VIX reports priced uncertainty for the broad market, and it doesn't tell you whether stocks will rise or fall.\n\nMaria sets a VIX of 15 beside a VIX of 30 and sees more uncertainty priced into the broad market. Traders call the VIX a fear gauge, because demand for protection often rises with the reading. On a separate $100 model stock, lifting implied volatility from 15% to 30% makes the options cost more when nothing else changes. In plain words: when priced uncertainty rises, comparable options get more expensive.\n\nA high reading tends to come with pricier options across the market, and it still doesn't set any one option's price. At a VIX of 30, Sam's own stock can carry implied volatility of 20% or 50%. Maria reads that quote before she pays $300 for the option. In plain words: one broad-market reading can't stand in for the price of your own option.\n\nA VIX of 20 doesn't mean the market will fall 20%, and it doesn't mean a 20% move inside 30 days. Sam also can't call a $300 option cheap just because the VIX dropped from 30 to 20. The lab has no VIX feed, so its ATM vol slider only shows a higher or lower model curve. In plain words: use the 30-day reading as context, then look at the specific trade.",
+          example: "Maria compares hypothetical readings, not live market data:\n\u2022 VIX 20 means expected S&P 500 volatility of 20% annualized over the next 30 calendar days.\n\u2022 It does not mean a 20% fall, and it does not mean a 20% move within those 30 days.\n\u2022 VIX 30 prices more uncertainty than VIX 15. A single stock can still show 20% or 50% implied volatility.\n\u2022 A $300 option can gain or lose at either reading. The lab's $100 model stock does not calculate VIX.\nIn plain words: read the gauge for context, then check the individual option.",
+          key_takeaways: [
+            "VIX describes S&P 500 expected volatility over 30 calendar days, quoted at an annualized rate.",
+            "VIX 30 signals more broad-market priced uncertainty than VIX 15, without naming a direction.",
+            "At VIX 30, a particular stock can have 20% or 50% implied volatility; individual prices still matter.",
+            "A $300 option can lose value at either VIX 20 or VIX 30; the reading is context, not a trade guarantee."
+          ],
+          tier: "core",
+          sim: "vol",
+          sim_task: "1) Open The volatility smile card in the Volatility Lab. 2) Set ATM vol to 20% and note the curve at the $100 strike. 3) Leave Skew (fear) and Smile (tails) unchanged, then raise ATM vol to 30%. Watch the whole curve lift. 4) Return ATM vol to 20% and watch it fall. These are model volatility settings, not VIX readings or option-price tiles. In plain words: the 10-point increase illustrates pricier implied movement, not a forecast of direction.",
+          quiz: [
+            { q: "Which period does VIX describe?", choices: ["The previous 30 trading days", "The next 30 calendar days", "Only the next trading day", "The previous calendar year"], answer: 1, explain: "VIX measures expected S&P 500 volatility over the next 30 calendar days." },
+            { q: "What does VIX 20 mean?", choices: ["A guaranteed 20% market decline", "A 20% move within exactly 30 days", "Expected volatility quoted at a 20% annualized rate", "Every option costs $20"], answer: 2, explain: "The 20 is an annualized volatility reading, not a 30-day return or a prediction of direction." },
+            { q: "At VIX 30, must every stock have implied volatility of 30%?", choices: ["No; a particular stock could have 20% or 50%", "Yes; VIX fixes all option prices", "Yes; but only for calls", "No; every stock must be below 30%"], answer: 0, explain: "VIX measures broad-index uncertainty, while individual stocks have their own option prices and risks." },
+            { q: "What does raising ATM vol from 20% to 30% in The volatility smile card demonstrate?", choices: ["The next actual VIX reading", "A guaranteed $10 stock rise", "A guaranteed gain on a $300 option", "A higher model implied-volatility curve with its shape settings held fixed"], answer: 3, explain: "The slider raises model implied volatility by 10 percentage points without calculating VIX or predicting direction." }
+          ]
+        }
+      ]
+    }]
+  };
+
   // src/content/curriculum.js
   var curriculum = {
     "tracks": [
@@ -10092,6 +10725,9 @@ Reading these two parts tells Maria what she is really buying before she clicks.
   curriculum.tracks.push(definedRiskSpreads);
   curriculum.tracks.push(protectionSynthetics);
   curriculum.tracks.push(optionPricing);
+  curriculum.tracks.push(greeksModule);
+  curriculum.tracks.push(skewModule);
+  curriculum.tracks.push(hedgeModule);
 
   // src/ui/shell.js
   var contentEl;
