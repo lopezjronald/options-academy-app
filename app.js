@@ -7345,6 +7345,421 @@
   };
   premiumIncome.modules.push(coveredCallMgmt);
 
+  // src/content/playbook-protection.js
+  var protectionSynthetics = {
+    "id": "sp-protection",
+    "program": "strategy-playbook",
+    "title": "Protection & Synthetics",
+    "audience": "Floors, ceilings, and stock substitutes",
+    "description": "Put a floor under shares you own, cap a range, or stand in for stock for a fraction of the cost.",
+    "modules": [
+      {
+        "id": "psm-collars",
+        "title": "Collars & Floors",
+        "lessons": [
+          {
+            "id": "sp-protective-put",
+            "title": "The Protective Put",
+            "objective": "Buy a protective put on shares you own to cap a sharp drop, and state its floor, breakeven, and cost in dollars before you place it.",
+            "body": "You own your car outright, yet you still pay for collision coverage so one bad wreck cannot wipe you out. A **protective put** does the same job for stock you already own. Maria holds 100 shares of Burgess ($67), and she buys a $63 put for $2 a share \u2014 $200 \u2014 to put a hard floor under them.\n\nHere is the trade in dollars: Burgess sits at $67, and Maria's $63 put cost her $200 ($2 \xD7 100 shares). If the stock keeps climbing, she rides it up and loses only the $200 she spent on the put. If Burgess crashes to $50, her put still sells at $63, so her worst case is a $600 loss \u2014 $400 on the shares plus the $200 put. In plain words: she caps how bad a drop can get for a known, up-front price.\n\nThe catch is that the $200 is spent whether or not she ever needs it. If Burgess just drifts sideways at $67, the put expires useless and she is out the full $200. Where the collision policy and the protective put part ways: an insurer can hike your rate after a claim, but Maria's cost is locked at $200. So she only pays for this floor when a drop would genuinely hurt.\n\nMaria reaches for a protective put when she wants to stay invested but cannot stomach a sharp fall \u2014 before earnings, say. She still needs the stock to rise about $2 past her cost to come out ahead, so breakeven sits at $69 ($67 share cost + $2 put). Her upside stays wide open: the shares can run as high as they like, minus the $2 she spent. In plain words: a protective put keeps all your upside while you pay a known price for a floor under a stock you own.",
+            "example": "Maria owns 100 shares of Burgess at $67 and buys one $63 put for $2 ($200).\n\u2022 Burgess rises to $80 \u2192 she keeps the gain, minus the $200 put cost.\n\u2022 Burgess falls to $50 \u2192 her put lets her sell at $63, so the shares cannot drop below that floor.\n\u2022 Worst case = $400 lost on the shares ($67 \u2192 $63) + $200 put = $600.\nBreakeven = share cost + put = $67 + $2 = $69.",
+            "key_takeaways": [
+              "A protective put is owning 100 shares and buying a put on them, so a fall below the strike can only cost you so much.",
+              "Maria's floor caps the worst case at $600 \u2014 $400 as the shares fall from $67 to $63, plus the $200 the put cost.",
+              "Breakeven is your share cost plus the put price ($67 + $2 = $69), and the upside stays unlimited minus that $2.",
+              "You pay the $200 whether or not you ever need it, so buy a protective put only when a sharp drop would really hurt."
+            ],
+            "sim_task": "Open the Strategy Lab and choose BRGR under Underlying. Choose Protective Put under Preset strategy. Read the Net cost, Breakeven, and Max loss tiles to see the floor in dollars. Move the put's Strike a step below today's price and pick the nearest expiry, then watch the Max loss shrink as the floor climbs closer to your shares.",
+            "quiz": [
+              {
+                "q": "Maria owns 100 shares of Burgess ($67) and buys a $63 put for $200. Burgess climbs to $80. What happens?",
+                "choices": [
+                  "The put forces her to sell at $63",
+                  "She rides the shares up to $80 and is out only the $200 she paid for the put",
+                  "She loses the full $600",
+                  "The put cancels her shares"
+                ],
+                "answer": 1,
+                "explain": "Above the $63 strike the put is just unused insurance, so Maria keeps the gain and loses only the $200 put cost."
+              },
+              {
+                "q": "Same trade, but Burgess crashes to $50. What is the most Maria can lose?",
+                "choices": [
+                  "$1,700",
+                  "$600",
+                  "$200",
+                  "Nothing at all"
+                ],
+                "answer": 1,
+                "explain": "Her put lets her sell at $63, so the worst case is $400 lost on the shares plus the $200 put cost, or $600."
+              },
+              {
+                "q": "What is the breakeven on Maria's protective put?",
+                "choices": [
+                  "$63",
+                  "$65",
+                  "$69",
+                  "$67"
+                ],
+                "answer": 2,
+                "explain": "Breakeven is her share cost plus the put price, $67 + $2 = $69."
+              },
+              {
+                "q": "When does a protective put make the most sense?",
+                "choices": [
+                  "When you want to sell your shares right away",
+                  "When you own a stock and want to cap a sharp drop while keeping the upside",
+                  "When you expect the stock to never move",
+                  "When you own no shares at all"
+                ],
+                "answer": 1,
+                "explain": "A protective put pairs shares you own with a bought put, capping the downside for a known cost while leaving the upside open."
+              }
+            ],
+            "tier": "core",
+            "sim": "strategy",
+            "diagram": {
+              "legs": [
+                {
+                  "kind": "stock",
+                  "side": 1,
+                  "qty": 100,
+                  "entry": 67
+                },
+                {
+                  "kind": "put",
+                  "side": 1,
+                  "qty": 1,
+                  "strike": 63,
+                  "entry": 2
+                }
+              ],
+              "S": 67,
+              "title": "Protective put \u2014 payoff at the deadline",
+              "caption": "A $63 floor under your shares for a $200 cost: worst case $600, breakeven $69, upside wide open."
+            }
+          },
+          {
+            "id": "sp-collar",
+            "title": "The Collar",
+            "objective": "Build a collar on shares you own to cap both the downside and the upside, and state its floor, ceiling, breakeven, and worst case in dollars before you place it.",
+            "body": "You have stood in a room where the floor holds you up no matter what and the ceiling stops you no matter how high you reach. A **collar** wraps that same floor and ceiling around a stock you already own. Maria owns 100 shares of Burgess ($67); she buys a $63 put to set a floor and sells a $72 call to help pay for it. The put costs $2 and the call brings in $1, so her net cost is just $1 a share ($100).\n\nHere is the trade in dollars. If Burgess sinks to $55, the $63 put still sells her shares at $63, capping her loss at $400 plus the $100 net cost \u2014 about $500. If Burgess leaps to $80, the $72 call sells her shares at $72, capping her gain at the $500 rise minus the $100 net cost \u2014 about $400. Between those edges she just owns the stock, needing $68 to cover her $1 net cost \u2014 her breakeven. In plain words: the floor caps her loss, the ceiling caps her gain, and $68 is where she breaks even.\n\nWhere the room and the collar part ways: a room's ceiling only stops you, but a collar's ceiling costs you money. Burgess can rocket to $90 and Maria still sells at $72, waving goodbye to every dollar above it. Her $63 floor also sits below today's $67, so she can still lose up to $500 before the put catches her. A collar trades away the home-run upside to make a scary drop small and known.\n\nA collar fits when Maria wants to keep her shares but sleep through a rough stretch. She gives up any gain above $72 in exchange for knowing $500 is the most she can lose. Sam reaches for one after a stock he owns has already run up, when he wants to lock in most of the gain cheaply. In plain words: a collar boxes a stock you own between a floor you buy and a ceiling you sell, trading the big upside for a small, known downside.",
+            "example": "Maria owns 100 shares of Burgess ($67). She buys a $63 put for $2 and sells a $72 call for $1 \u2014 a net cost of $1 a share ($100).\n\u2022 Burgess drops to $55 \u2192 the put sells her shares at $63; max loss is $400 on the shares + $100 net cost = $500.\n\u2022 Burgess jumps to $80 \u2192 the call sells her shares at $72; max profit is the $500 share gain \u2212 $100 net cost = $400.\n\u2022 Burgess sits at $67 \u2192 she just holds, $100 lighter.\nBreakeven = share price + net cost = $67 + $1 = $68.",
+            "key_takeaways": [
+              "A collar is owning shares, buying a put for a floor, and selling a call for a ceiling \u2014 the call premium helps pay for the put.",
+              "The floor is your put strike and the ceiling is your call strike; here Maria's shares are boxed between $63 and $72.",
+              "Worst case is about $500 (the drop to the $63 floor plus the $100 net cost); best case is about $400 (the rise to $72 minus the $100 net cost); breakeven is $68.",
+              "A collar is for holding a stock through a rough patch \u2014 you trade the big upside for a small, known downside, not a guaranteed profit."
+            ],
+            "sim_task": "Open the Strategy Lab and choose BRGR under Underlying. Choose Collar under Preset strategy. Read the Net cost, Breakeven, Max loss, and Max profit tiles. Set the put leg's Strike a step below today's price for your floor, then set the call leg's Strike a step above for your ceiling. Watch the Max loss and Max profit boxes tighten as you pull the two strikes closer together.",
+            "quiz": [
+              {
+                "q": "What does a collar do to a stock you own?",
+                "choices": [
+                  "Removes all risk and guarantees a profit",
+                  "Sets a floor under the price and a ceiling over it, capping both loss and gain",
+                  "Doubles the number of shares you hold",
+                  "Pays you income with no downside at all"
+                ],
+                "answer": 1,
+                "explain": "A collar buys a put for a floor and sells a call for a ceiling, so both your loss and your gain are capped."
+              },
+              {
+                "q": "Maria owns 100 Burgess shares ($67), buys a $63 put for $2, and sells a $72 call for $1. Burgess falls to $55 by the deadline. What is her result?",
+                "choices": [
+                  "She loses about $1,200",
+                  "Her loss is capped at about $500",
+                  "She loses nothing at all",
+                  "She still makes about $400"
+                ],
+                "answer": 1,
+                "explain": "The $63 put floor caps her loss at $400 on the shares plus the $100 net cost \u2014 about $500 no matter how far Burgess falls."
+              },
+              {
+                "q": "Same collar, but Burgess climbs to $80. What happens?",
+                "choices": [
+                  "She keeps all the gains up to $80",
+                  "Her shares are called away at $72, so her profit is capped at about $400",
+                  "She loses money because of the call",
+                  "She is forced to buy more shares at $72"
+                ],
+                "answer": 1,
+                "explain": "The $72 call hands her shares away at $72, so her gain is the $500 share rise minus the $100 net cost \u2014 about $400 and no more."
+              },
+              {
+                "q": "What is Maria's breakeven on this collar?",
+                "choices": [
+                  "$63",
+                  "$68",
+                  "$72",
+                  "$67"
+                ],
+                "answer": 1,
+                "explain": "Breakeven is the $67 share price plus the $1 net cost, so Burgess must reach $68 for Maria to get even."
+              }
+            ],
+            "tier": "core",
+            "sim": "strategy",
+            "diagram": {
+              "legs": [
+                {
+                  "kind": "stock",
+                  "side": 1,
+                  "qty": 100,
+                  "entry": 67
+                },
+                {
+                  "kind": "put",
+                  "side": 1,
+                  "qty": 1,
+                  "strike": 63,
+                  "entry": 2
+                },
+                {
+                  "kind": "call",
+                  "side": -1,
+                  "qty": 1,
+                  "strike": 72,
+                  "entry": 1
+                }
+              ],
+              "S": 67,
+              "title": "Collar \u2014 payoff at the deadline",
+              "caption": "Floor at $63, ceiling at $72: a capped, protected range for $100 net; worst case $500, breakeven $68."
+            }
+          }
+        ]
+      },
+      {
+        "id": "psm-synth",
+        "title": "Synthetics & Leverage",
+        "lessons": [
+          {
+            "id": "sp-synthetic-long-stock",
+            "title": "Synthetic Long Stock",
+            "objective": "Build synthetic long stock from a bought call and a sold put to copy 100 shares for about $0, and state its breakeven and worst case in dollars before you place it.",
+            "body": "You have sat in a theater when the lead was out sick and an understudy stepped in \u2014 same lines, same gestures, the show looked identical. Two options can stand in for a stock the same way, and that pairing is called **synthetic long stock**. On Burgess ($67), Sam buys the $67 call for $3 and sells the $67 put for $3, so his net cost is about $0. That pair then moves dollar-for-dollar with Burgess, like 100 real shares.\n\nHere is the trade in dollars. Sam paid about $0 to build it, so his breakeven sits right at $67, exactly where Burgess trades now. If Burgess rises to $77 the pair gains about $1,000 \u2014 the same $10 a share 100 real shares would make \u2014 and that upside keeps climbing with no ceiling. If Burgess falls to $57 he is down about $1,000, and the worst case is near -$6,700 should Burgess ever reach $0, the same loss as owning the shares. In plain words: the pair gains and loses almost exactly like 100 real shares.\n\nThe catch is that a $0 cost can feel like a free position, yet the risk is the full size of the stock. Where the understudy and the pair part ways: an understudy only carries one evening. Sam's sold put keeps him on the hook for the entire drop \u2014 near -$6,700 if Burgess ever hits $0. He never put up $6,700, but he can still lose it, so the pair is no safer than owning 100 shares outright.\n\nSam reaches for this when he wants full stock-sized exposure but would rather not tie up $6,700 in shares today. The pair gives him the same dollar-for-dollar ride for about $0 up front, freeing that cash while it lasts. He only leans on it with a Burgess he would be glad to own outright, because the downside is identical. In plain words: synthetic long stock copies 100 shares for almost no cost up front, with the same unlimited upside and the same full downside.",
+            "example": "On Burgess ($67), Sam buys the $67 call for $3 and sells the $67 put for $3.\n\u2022 Net cost = $3 paid \u2212 $3 collected = about $0.\n\u2022 Burgess rises to $77 \u2192 the pair gains about $1,000, like 100 shares (+$10 \xD7 100).\n\u2022 Burgess falls to $57 \u2192 the pair loses about $1,000, like 100 shares (\u2212$10 \xD7 100).\n\u2022 Burgess goes to $0 \u2192 worst case near \u2212$6,700, the same as owning the shares.\nBreakeven = $67 (the price you built it at).",
+            "key_takeaways": [
+              "Synthetic long stock pairs a bought call and a sold put at the same strike to copy 100 shares \u2014 on Burgess, buy the $67 call for $3 and sell the $67 put for $3 for about $0.",
+              "The pair moves dollar-for-dollar with the stock: up $10 a share is about +$1,000, down $10 is about \u2212$1,000, just like 100 real shares.",
+              "Breakeven is the price you built it at ($67), the upside is unlimited, and the worst case is near \u2212$6,700 if the stock falls to $0.",
+              "The $0 cost is not free safety \u2014 the downside equals owning the shares, so only use it on a stock you would gladly own outright."
+            ],
+            "sim_task": "Open the Strategy Lab and choose BRGR under Underlying. Choose Build the two legs by hand under Preset strategy. Add the at-the-money call as a buy and the at-the-money put as a sell at the same strike for the nearest expiry. Read the Net cost, Breakeven, and Max loss tiles \u2014 the cost sits near zero and the breakeven lands at today's price. Drag today's price up and down and watch the profit track the stock dollar-for-dollar.",
+            "quiz": [
+              {
+                "q": "On Burgess ($67), which two options make up synthetic long stock?",
+                "choices": [
+                  "Buy the $67 call and sell the $67 put",
+                  "Buy the $67 call and buy the $67 put",
+                  "Sell the $67 call and buy the $67 put",
+                  "Sell the $67 call and sell the $67 put"
+                ],
+                "answer": 0,
+                "explain": "You buy the $67 call for $3 and sell the $67 put for $3, so the prices cancel to about $0 and the pair copies 100 shares."
+              },
+              {
+                "q": "Sam buys the $67 call for $3 and sells the $67 put for $3. What is his net cost and breakeven?",
+                "choices": [
+                  "Net cost $6, breakeven $73",
+                  "Net cost about $0, breakeven $67",
+                  "Net cost $3, breakeven $70",
+                  "Net cost about $0, breakeven $64"
+                ],
+                "answer": 1,
+                "explain": "The $3 paid for the call is offset by the $3 collected on the put, so the net cost is about $0 and the breakeven sits at the $67 strike."
+              },
+              {
+                "q": "Burgess rises from $67 to $77. Roughly what does Sam's synthetic pair do?",
+                "choices": [
+                  "It gains about $1,000, like 100 shares",
+                  "It gains about $300",
+                  "It stays flat because it cost $0",
+                  "It loses about $1,000"
+                ],
+                "answer": 0,
+                "explain": "A $10-a-share rise on 100 shares is about $1,000, and the pair tracks the stock dollar-for-dollar, so it gains roughly the same."
+              },
+              {
+                "q": "What is the main risk of synthetic long stock?",
+                "choices": [
+                  "The upside is capped at the premium collected",
+                  "It can only lose the $0 paid to build it",
+                  "The downside is the full size of the stock, near \u2212$6,700 if it falls to $0",
+                  "The broker can close it at any time"
+                ],
+                "answer": 2,
+                "explain": "The $0 cost is not free safety \u2014 the sold put leaves Sam with the same full downside as owning 100 shares, near \u2212$6,700 if Burgess falls to $0."
+              }
+            ],
+            "tier": "core",
+            "sim": "strategy",
+            "diagram": {
+              "legs": [
+                {
+                  "kind": "call",
+                  "side": 1,
+                  "qty": 1,
+                  "strike": 67,
+                  "entry": 3
+                },
+                {
+                  "kind": "put",
+                  "side": -1,
+                  "qty": 1,
+                  "strike": 67,
+                  "entry": 3
+                }
+              ],
+              "S": 67,
+              "title": "Synthetic long stock \u2014 payoff at the deadline",
+              "caption": "A call plus a short put at $67 track the shares almost exactly: unlimited upside, stock-like downside, about $0 to set up."
+            }
+          },
+          {
+            "id": "sp-poor-mans-covered-call",
+            "title": "The Poor Man's Covered Call",
+            "objective": "Build a poor man's covered call to control 100 shares for a fraction of their price, and state in dollars what it costs, what it caps, and the most you can lose.",
+            "body": "You have rented a house, then sublet the spare room and pocketed rent without ever buying the place. A **poor man's covered call**, also called a diagonal spread, works the same way on a stock. Rather than pay $6,700 for 100 shares of Burgess ($67), Maria buys one longer-dated $55 call for $1,400 to stand in for the shares. Then she sells a near-term $72 call for $100 against it \u2014 a covered call at a fraction of the cost.\n\nHere is the trade in dollars. Buying 100 shares outright would cost $6,700, but Maria's $55 call costs just $14 a share, or $1,400, and it tracks the stock nearly dollar-for-dollar. Against that stand-in she sells the $72 call and collects $1 a share, or $100, today. If Burgess climbs toward $72, that short call caps her gains right around there, exactly like a covered call. In plain words: she controls 100 shares for about $1,400 instead of $6,700, and charges $100 to cap the top.\n\nThe risk is real but capped. If Burgess tumbles, Maria's $55 call loses value, but the most she can lose is what she put in \u2014 about $1,300 after the $100 credit. Where the sublet and the spread part ways: a room rents on one steady monthly clock, but Maria's two calls come due on different dates. Those different dates mean no single end-of-day payoff picture captures the whole trade, so she manages it along the way.\n\nSam reaches for this when he expects a pricey stock to rise but will not lock up $6,700 per lot. He buys a cheap stand-in call for $1,400, rents out the upside for $100 at a time, and keeps his risk boxed to what he paid. He skips it when he wants the real shares for dividends or the long haul, since the call pays none and eventually expires. In plain words: a poor man's covered call copies a covered call for a fraction of the cash, and you pay for that discount with capped upside and a stand-in that expires.",
+            "example": "Burgess trades at $67. Buying 100 shares would cost $6,700.\n\u2022 Maria buys one longer-dated $55 call for $14 \u2192 $1,400, her stand-in for the shares.\n\u2022 She sells one near-term $72 call for $1 \u2192 +$100 collected today.\n\u2022 Net outlay \u2248 $1,300, and that is the most she can lose.\n\u2022 Burgess rises toward $72 \u2192 the short call caps her gains near $72, like a covered call.\n\u2022 The two calls expire on different dates, so there is no single at-expiry max-profit number.\nBreakeven (rough) = long strike + long cost \u2212 short credit = $55 + $14 \u2212 $1 = $68.",
+            "key_takeaways": [
+              "A poor man's covered call buys a longer-dated $55 call, struck well below the price, as a cheap stand-in for 100 shares, then sells a near-term $72 call against it \u2014 a covered call at a fraction of the cost.",
+              "Maria controls the shares for about $1,400 instead of $6,700, and the short $72 call adds $100 while capping her upside near $72.",
+              "Her risk is limited to what she paid for the long call \u2014 about $1,300 after the $100 credit \u2014 not the full price of the stock.",
+              "Because the two calls expire on different dates, there is no single at-expiry max-profit number, so she manages it along the way."
+            ],
+            "sim_task": "Open the Strategy Lab and choose BRGR under Underlying. Choose Build it by hand (buy a deep in-the-money longer-dated call, sell a near-term higher call) under Preset strategy. For the long leg, set the Strike well below today's price and the Expiry to a later date \u2014 your cheap stand-in for 100 shares. For the short leg, set the Strike a step or two above today's price and the Expiry to the nearest date. Read the Net debit and Max loss tiles, and watch the Max loss stay boxed to what you paid as you slide the short strike up or down.",
+            "quiz": [
+              {
+                "q": "Instead of paying $6,700 for 100 shares of Burgess, Maria buys a longer-dated $55 call for $1,400 to stand in for them. Roughly what has she done?",
+                "choices": [
+                  "Paid the full $6,700 for the shares anyway",
+                  "Controlled the shares for about $1,400 instead of $6,700",
+                  "Bought a put for downside protection",
+                  "Sold her shares short"
+                ],
+                "answer": 1,
+                "explain": "The longer-dated $55 call stands in for 100 shares, so she controls them for about $1,400 rather than the $6,700 the shares would cost."
+              },
+              {
+                "q": "Maria sells a near-term $72 call for $100 against her long call. What does that short call do?",
+                "choices": [
+                  "Removes all of her risk",
+                  "Adds $100 now and caps her upside near $72",
+                  "Guarantees her a profit",
+                  "Forces her to buy 100 shares"
+                ],
+                "answer": 1,
+                "explain": "The short $72 call brings in $100 today and caps her gains near $72, just like the call leg of a covered call."
+              },
+              {
+                "q": "Burgess falls hard right after Maria opens the trade. What is the most she can lose?",
+                "choices": [
+                  "The full $6,700 the shares would cost",
+                  "An unlimited amount",
+                  "About what she paid for the long call \u2014 roughly $1,300 after the $100 credit",
+                  "Nothing, because the trade is risk-free"
+                ],
+                "answer": 2,
+                "explain": "Her loss is limited to the cost of the long $55 call, about $1,300 after the $100 she collected \u2014 far less than the $6,700 the shares would risk."
+              },
+              {
+                "q": "Why can't we point to one exact max-profit number at expiration for this trade?",
+                "choices": [
+                  "Because options can never make money",
+                  "Because the two calls expire on different dates, so no single at-expiry picture applies",
+                  "Because Maria actually owns the 100 shares",
+                  "Because the broker sets the profit in advance"
+                ],
+                "answer": 1,
+                "explain": "The long and short calls come due on different dates, so a single end-of-day payoff picture does not capture the whole position."
+              }
+            ],
+            "tier": "core",
+            "sim": "strategy"
+          },
+          {
+            "id": "sp-leaps",
+            "title": "LEAPS as a Stock Substitute",
+            "objective": "Buy a long-dated LEAPS call as a low-cost stand-in for 100 shares, and state its breakeven and worst case in dollars before you place it.",
+            "body": "You have put a few thousand down to lock in a house, and its whole value rises even though you staked only a slice of the price. A **LEAPS** call works like that on a stock \u2014 it is simply a call option with a year or more until its deadline. Burgess trades at $67, and Sam wants the upside of 100 shares without paying $6,700 to own them outright.\n\nHere is the trade in dollars. Sam buys one $55 LEAPS call on Burgess for $14 a share, so $1,400 leaves his account today ($14 \xD7 100 shares). That single contract controls 100 shares \u2014 far less than the $6,700 those shares cost outright. Because the $55 strike sits well below the $67 price, the call tracks Burgess almost dollar-for-dollar. A jump to $80 hands Sam about $13 a share, close to the stock's own $13 move, with his outlay still just $1,400. In plain words: a small stake rides the full move of 100 shares.\n\nThat cheap control comes with a deadline. If Burgess drifts sideways or sinks, Sam can lose the whole $1,400 he paid, because a LEAPS expires while real shares never do. His call only pulls ahead above the $69 breakeven \u2014 the $55 strike plus his $14 \u2014 so a flat year quietly bleeds the premium away. Where the down payment and the LEAPS part ways: a house can sit untouched for decades, but this contract runs out on its deadline and then pays nothing. So Sam buys a LEAPS only when he expects Burgess to rise before that clock runs out.\n\nMaria reaches for a LEAPS when she expects a solid company to climb but does not want to lock $6,700 into one stock. She pays the smaller premium, keeps the rest of her cash free, and still catches most of the rise if she is right. The tradeoff is honest: no dividend while she waits, a ticking deadline, and the whole premium at risk if the stock stalls. In plain words: a LEAPS controls 100 shares of a stock you believe in for a fraction of the cash, as long as it climbs before the deadline.",
+            "example": "Burgess trades at $67. Sam buys one $55 LEAPS call for $14 ($1,400) instead of paying $6,700 for the shares.\n\u2022 Burgess climbs to $80 \u2192 the call gains about $13 a share, roughly $1,300, on a $1,400 stake.\n\u2022 Burgess collapses toward $40 \u2192 the call can expire worthless and Sam loses the $1,400 premium, the most he can lose.\nBreakeven = strike + premium = $55 + $14 = $69.",
+            "key_takeaways": [
+              "A LEAPS is just a call option with a year or more left \u2014 long enough to stand in for owning 100 shares.",
+              "Sam controls 100 shares of Burgess for a $1,400 premium instead of the $6,700 the shares cost outright.",
+              "Because the $55 strike sits well below the price, the call gains nearly dollar-for-dollar with the stock above the strike.",
+              "Breakeven is the strike plus the premium ($69); the worst case is losing the whole $1,400 if Burgess sinks."
+            ],
+            "sim_task": "Open the Strategy Lab and choose BRGR under Underlying. Choose Long Call under Preset strategy. Read the Net debit, Breakeven, and Max loss tiles. Set the leg's Strike a few steps below today's price and pick the farthest-out expiry to act like a LEAPS, then watch the debit climb while the breakeven settles just above today's price.",
+            "quiz": [
+              {
+                "q": "What is a LEAPS?",
+                "choices": [
+                  "A call option with a year or more until expiry",
+                  "A promise to sell shares you already own",
+                  "A stock that pays no dividend",
+                  "A savings account held at the broker"
+                ],
+                "answer": 0,
+                "explain": "A LEAPS is simply a long-dated call option \u2014 a year or more until its deadline \u2014 used to stand in for owning the shares."
+              },
+              {
+                "q": "Sam buys the $55 LEAPS call for $14 ($1,400). What does that control, and what would the shares cost instead?",
+                "choices": [
+                  "10 shares, versus $670 to buy them",
+                  "Nothing until the deadline arrives",
+                  "100 shares, versus $6,700 to buy them outright",
+                  "100 shares, versus $1,400 to buy them"
+                ],
+                "answer": 2,
+                "explain": "The one contract controls 100 shares for a $1,400 premium, far less than the $6,700 those shares would cost outright."
+              },
+              {
+                "q": "What are Sam's breakeven and worst case on this trade?",
+                "choices": [
+                  "Breakeven $55; worst case unlimited loss",
+                  "Breakeven $69; worst case losing the $1,400 premium",
+                  "Breakeven $41; worst case losing $6,700",
+                  "Breakeven $14; no risk at all"
+                ],
+                "answer": 1,
+                "explain": "Breakeven is the $55 strike plus the $14 paid ($69), and the most Sam can lose is the $1,400 premium if Burgess collapses."
+              },
+              {
+                "q": "When is a LEAPS a good fit?",
+                "choices": [
+                  "When you never want the stock to move",
+                  "When you expect the stock to crash",
+                  "When you want a guaranteed dividend",
+                  "When you expect a stock to climb but want to stake less than the full share cost"
+                ],
+                "answer": 3,
+                "explain": "A LEAPS suits a trader who is confident a stock will rise and wants most of the upside for a fraction of the cash, before the deadline."
+              }
+            ],
+            "tier": "core",
+            "sim": "strategy",
+            "diagram": {
+              "legs": [
+                {
+                  "kind": "call",
+                  "side": 1,
+                  "qty": 1,
+                  "strike": 55,
+                  "entry": 14
+                }
+              ],
+              "S": 67,
+              "title": "Deep-in-the-money LEAPS call \u2014 payoff at the deadline",
+              "caption": "Controls 100 shares for $1,400 instead of $6,700: max loss the premium, breakeven $69, upside rises with the stock."
+            }
+          }
+        ]
+      }
+    ]
+  };
+
   // src/content/curriculum.js
   var curriculum = {
     "tracks": [
@@ -9342,6 +9757,7 @@
   };
   curriculum.tracks.push(premiumIncome);
   curriculum.tracks.push(definedRiskSpreads);
+  curriculum.tracks.push(protectionSynthetics);
 
   // src/ui/shell.js
   var contentEl;
