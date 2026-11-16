@@ -6222,16 +6222,16 @@
         )
       );
     }
-    function section(title, list2) {
+    function section2(title, list2) {
       if (!list2.length) return;
       root.appendChild(el("h3", { class: "mission-week-head mt2" }, title));
       const grid = el("div", { class: "grid2 mt1" });
       for (const m of list2) grid.appendChild(missionCard(m));
       root.appendChild(grid);
     }
-    section("Week 1", week1);
-    section("Week 2", week2);
-    section("More missions", rest);
+    section2("Week 1", week1);
+    section2("Week 2", week2);
+    section2("More missions", rest);
   }
   function confirmLeave(onYes) {
     const wrap = el(
@@ -8743,7 +8743,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "f-what-is-probability",
                 "title": "What a 25% Chance Really Means",
                 "objective": "Read a percentage chance as how often something happens over many tries, and see why losing streaks happen even when the odds are fair.",
-                "body": "You have flipped a coin at a kitchen table to settle who buys dinner. Even on a fair 50% coin, or 1 in 2, tails can land four times in a row before heads shows up. In markets, that starting how-often number is called a **base rate**, such as a 25% chance, or 1 in 4, that Lumend Brands ($42) finishes above $45. The coin analogy stops there: a coin never changes its shape, while a company's business shifts every quarter.\n\nSuppose Maria pays $50 for a trade on Lumend Brands ($42) that wins 25% of the time, or about 1 in 4 tries. Across a tiny **sample size** of just 4 trades, Maria can easily lose all 4 and be down $200 without the odds being broken. Only across 100 separate tries do her wins settle near 25 out of 100. In plain words: a 25% chance describes what happens across 100 tries, never what happens on Friday.\n\nLosing 4 times in a row tempts Sam into a costly mistake. After losing $50 four times for $200 total on Burgess Restaurant Group ($67), Sam assumes a win is due and bets $500 on trade five. The market does not remember Sam's past $200 loss, so trade five still carries the exact same 25% chance, or 1 in 4. Betting bigger to chase a streak is how a normal rough patch empties an account.\n\nThe flip side is quitting too soon. If Maria risks $40 per trade on a setup that wins 60% of the time, or 3 in 5, she will still hit three losses in a row for $120. She keeps each bet at $40 so a normal losing streak never knocks her out. In plain words: size every trade small enough that an unlucky week never ends your ability to keep playing.",
+                "body": "You have flipped a coin at a kitchen table to settle who buys dinner. Even on a fair 50% coin, or 1 in 2, tails can land four times in a row before heads shows up. In markets, that starting how-often number is called a **base rate**, such as a 25% chance, or 1 in 4, that Lumend Brands ($42) finishes above $45. A coin never reshapes itself between flips; a company's business shifts every quarter.\n\nSuppose Maria pays $50 for a trade on Lumend Brands ($42) that wins 25% of the time, or about 1 in 4 tries. Across a tiny **sample size** of just 4 trades, Maria can easily lose all 4 and be down $200 without the odds being broken. Only across 100 separate tries do her wins settle near 25 out of 100. In plain words: a 25% chance describes what happens across 100 tries, never what happens on Friday.\n\nLosing 4 times in a row tempts Sam into a costly mistake. After losing $50 four times for $200 total on Burgess Restaurant Group ($67), Sam assumes a win is due and bets $500 on trade five. The market does not remember Sam's past $200 loss, so trade five still carries the exact same 25% chance, or 1 in 4. Betting bigger to chase a streak is how a normal rough patch empties an account.\n\nThe flip side is quitting too soon. If Maria risks $40 per trade on a setup that wins 60% of the time, or 3 in 5, she will still hit three losses in a row for $120. She keeps each bet at $40 so a normal losing streak never knocks her out. In plain words: size every trade small enough that an unlucky week never ends your ability to keep playing.",
                 "key_takeaways": [
                   "A 25% chance, or 1 in 4, tells you how often a setup wins across 100 tries, never what happens next.",
                   "Over 4 or 5 trades, lucky and unlucky streaks are completely normal.",
@@ -8792,7 +8792,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "f-expected-value",
                 "title": "How to Tell if a Bet Is Worth Taking",
                 "objective": "Weigh a trade's payout against its price and odds to see if it makes or loses money on average over time.",
-                "body": "You have probably bought a $10 charity raffle ticket for a chance at a $500 grill. If 100 tickets are sold, your 1% chance, or 1 in 100, makes that ticket worth $5 on average ($500 \xD7 1% is $5), which is its **expected value**. Paying $10 for $5 of average value means you lose $5 per ticket over the long run. The raffle analogy stops there: raffle prizes are fixed in advance, while market prices change every second as people trade.\n\nNow apply that same math to Burgess Restaurant Group ($67). Sam pays $200 for a trade with a 20% chance, or 1 in 5, of paying $750 and an 80% chance, or 4 in 5, of paying $0. The average payout is $150 ($750 \xD7 20% is $150), so paying $200 leaves Sam $50 behind per trade. When the average payout beats the cost\u2014say Maria pays only $110 for that same $150 average payout\u2014that +$40 gap is her **edge**. In plain words: multiply what you can win by how often you win, then subtract what you paid.\n\nWhy do people keep buying Sam's $200 trade if it loses $50 on average? Because 1 time in 5 it still pays $750, and a $550 profit feels like genius in the moment. Over 100 repeats, though, paying $200 for $150 of value drains about $5,000 from Sam's account ($50 \xD7 100 trades is $5,000). A single loud winner never proves a trade was priced fairly.\n\nEven Maria's +$40 trade still loses 80% of the time, or 4 times in 5. Five losses in a row at $110 each will cost her $550 before the next winner lands. If Maria bets half her cash on every try, a normal losing week will wipe her out before her +$40 average shows up. In plain words: judge a trade by its average math before you enter, not by whether the last try won or lost.",
+                "body": "You have probably bought a $10 charity raffle ticket for a chance at a $500 grill. If 100 tickets are sold, your 1% chance, or 1 in 100, makes that ticket worth $5 on average ($500 \xD7 1% is $5), which is its **expected value**. Paying $10 for $5 of average value means you lose $5 per ticket over the long run. Raffle prizes stay fixed in advance; market prices change every second as people trade.\n\nNow apply that same math to Burgess Restaurant Group ($67). Sam pays $200 for a trade with a 20% chance, or 1 in 5, of paying $750 and an 80% chance, or 4 in 5, of paying $0. The average payout is $150 ($750 \xD7 20% is $150), so paying $200 leaves Sam $50 behind per trade. When the average payout beats the cost\u2014say Maria pays only $110 for that same $150 average payout\u2014that +$40 gap is her **edge**. In plain words: multiply what you can win by how often you win, then subtract what you paid.\n\nWhy do people keep buying Sam's $200 trade if it loses $50 on average? Because 1 time in 5 it still pays $750, and a $550 profit feels like genius in the moment. Over 100 repeats, though, paying $200 for $150 of value drains about $5,000 from Sam's account ($50 \xD7 100 trades is $5,000). A single loud winner never proves a trade was priced fairly.\n\nEven Maria's +$40 trade still loses 80% of the time, or 4 times in 5. Five losses in a row at $110 each will cost her $550 before the next winner lands. If Maria bets half her cash on every try, a normal losing week will wipe her out before her +$40 average shows up. In plain words: judge a trade by its average math before you enter, not by whether the last try won or lost.",
                 "key_takeaways": [
                   "Expected value is the average payout per try: multiply the prize by the odds, then subtract your entry cost.",
                   "Paying $200 for a 20% chance, or 1 in 5, at $750 ($150 average) loses $50 per trade over time.",
@@ -8841,7 +8841,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "f-risk-vs-reward",
                 "title": "Surviving the Worst Case Comes First",
                 "objective": "Ask what the worst-case dollar loss is before chasing a profit, and see why a 90% win rate can still lose money.",
-                "body": "You would never drive a 15-ton truck across a wooden bridge rated for 10 tons just because it holds up 9 times out of 10. In trading, the drop from your account peak to its bottom during a losing stretch is called a **drawdown**, such as a $10,000 account dropping $2,000 to $8,000. Before Maria looks at what she might make on Rocket Robotics ($182), she asks whether her account can survive the worst-case dollar loss. The bridge analogy stops there: a collapsed bridge ends the trip forever, while a small cash loss can be recovered if you protect your core savings.\n\nBeginners often brag about their **win rate**, which is the share of trades that make money, such as winning 90 out of 100 tries (90%, or 9 in 10). Suppose Sam collects $100 on 90 trades (+$9,000 total) by making promises on PowerSun Energy ($95), but loses $2,000 on the other 10 trades (\u2212$20,000 total). Despite winning 9 times out of 10, Sam finishes down $11,000 across those 100 trades ($9,000 minus $20,000 is \u2212$11,000). In plain words: winning often means nothing if one bad day wipes out two years of small wins.\n\nEven a good average payout is not the whole story if you need cash on a deadline. Suppose Maria has $10,000 and needs $500 for tuition next month, and a safe government bill pays a sure $500. Shares of Lumend Brands ($42) instead have a 50% chance, or 1 in 2, of gaining $1,250 and a 50% chance of gaining $0. The shares average $625 ($1,250 \xD7 50% is $625), but Maria picks the sure $500 because a $0 month means missing tuition.\n\nHigher potential returns exist in markets because someone has to stomach the bumpy ride. When a stranger online promises Maria an 8% monthly return ($800 a month on $10,000) with zero chance of losing money, she walks away. That pitch is either lying or hiding a rare $5,000 crash that has not hit yet. In plain words: always check the worst-case dollar loss first, and make sure you can afford it on your worst day.",
+                "body": "You would never drive a 15-ton truck across a wooden bridge rated for 10 tons just because it holds up 9 times out of 10. In trading, the drop from your account peak to its bottom during a losing stretch is called a **drawdown**, such as a $10,000 account dropping $2,000 to $8,000. Before Maria looks at what she might make on Rocket Robotics ($182), she asks whether her account can survive the worst-case dollar loss. A collapsed bridge ends the trip forever; a small cash loss can be recovered if you protect your core savings.\n\nBeginners often brag about their **win rate**, which is the share of trades that make money, such as winning 90 out of 100 tries (90%, or 9 in 10). Suppose Sam collects $100 on 90 trades (+$9,000 total) by making promises on PowerSun Energy ($95), but loses $2,000 on the other 10 trades (\u2212$20,000 total). Despite winning 9 times out of 10, Sam finishes down $11,000 across those 100 trades ($9,000 minus $20,000 is \u2212$11,000). In plain words: winning often means nothing if one bad day wipes out two years of small wins.\n\nEven a good average payout is not the whole story if you need cash on a deadline. Suppose Maria has $10,000 and needs $500 for tuition next month, and a safe government bill pays a sure $500. Shares of Lumend Brands ($42) instead have a 50% chance, or 1 in 2, of gaining $1,250 and a 50% chance of gaining $0. The shares average $625 ($1,250 \xD7 50% is $625), but Maria picks the sure $500 because a $0 month means missing tuition.\n\nHigher potential returns exist in markets because someone has to stomach the bumpy ride. When a stranger online promises Maria an 8% monthly return ($800 a month on $10,000) with zero chance of losing money, she walks away. That pitch is either lying or hiding a rare $5,000 crash that has not hit yet. In plain words: always check the worst-case dollar loss first, and make sure you can afford it on your worst day.",
                 "key_takeaways": [
                   "Higher potential returns always come with real downside swings.",
                   "Ask two questions before every trade: what is the worst-case dollar loss, and can my account survive it?",
@@ -8896,7 +8896,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "f-what-is-a-stock",
                 "title": "What Owning a Share of Stock Really Means",
                 "objective": "See how a share of stock gives you a slice of a real business, and how buyers and sellers set its price every second.",
-                "body": "You have split the cost of a yard-sale table with friends so everyone gets a share of the cash. When Burgess Restaurant Group ($67) wants $670,000 for new kitchens, it sells 10,000 ownership slices called **common stock** at $67 each. Buying 10 shares for $670 ($67 \xD7 10 shares is $670) gives Maria a real slice of future profits. The yard-sale analogy stops there: Maria can sell her shares in seconds without asking the other owners.\n\nWhen Maria sells her 10 shares, she does not ask Burgess Restaurant Group for her $670 back. On the exchange, buyers post a top offer of $66.95 and sellers ask $67.05, leaving a $0.10 gap called the **bid-ask spread**. Sam pays $67.05 per share ($670.50 for 10 shares) to buy now, or gets $66.95 ($669.50 total) when selling. In plain words: a share is worth what a buyer will pay today, and crossing the gap between buyers and sellers costs a small fee.\n\nWhy does Lumend Brands trade at $42 in the morning and $40 by lunch? All day long, people update what they think the company will earn next year. If a surprise report says shipping costs jumped, buyers lower their offers from $42 to $40, cutting Maria's 100 shares from $4,200 to $4,000 ($2 \xD7 100 shares is $200). Nobody at the exchange sets an official price\u2014the last trade between a buyer and a seller is the price.\n\nBefore buying 100 shares of Lumend Brands at $42 for $4,200, Sam checks his worst-case dollar loss. Unlike a bank loan, a company makes no promise to pay Sam back his $4,200 if sales collapse. If Lumend Brands goes out of business and the share price hits $0, Sam loses the entire $4,200 he paid, though he can never lose more than that $4,200. In plain words: buying shares gives you open-ended upside if the business grows, and your worst case in dollars is the full amount you paid.",
+                "body": "You have split the cost of a yard-sale table with friends so everyone gets a share of the cash. When Burgess Restaurant Group ($67) wants $670,000 for new kitchens, it sells 10,000 ownership slices called **common stock** at $67 each. Buying 10 shares for $670 ($67 \xD7 10 shares is $670) gives Maria a real slice of future profits. A yard-sale table locks partners in all day; Maria can sell her shares in seconds without asking the other owners.\n\nWhen Maria sells her 10 shares, she does not ask Burgess Restaurant Group for her $670 back. On the exchange, buyers post a top offer of $66.95 and sellers ask $67.05, leaving a $0.10 gap called the **bid-ask spread**. Sam pays $67.05 per share ($670.50 for 10 shares) to buy now, or gets $66.95 ($669.50 total) when selling. In plain words: a share is worth what a buyer will pay today, and crossing the gap between buyers and sellers costs a small fee.\n\nWhy does Lumend Brands trade at $42 in the morning and $40 by lunch? All day long, people update what they think the company will earn next year. If a surprise report says shipping costs jumped, buyers lower their offers from $42 to $40, cutting Maria's 100 shares from $4,200 to $4,000 ($2 \xD7 100 shares is $200). Nobody at the exchange sets an official price\u2014the last trade between a buyer and a seller is the price.\n\nBefore buying 100 shares of Lumend Brands at $42 for $4,200, Sam checks his worst-case dollar loss. Unlike a bank loan, a company makes no promise to pay Sam back his $4,200 if sales collapse. If Lumend Brands goes out of business and the share price hits $0, Sam loses the entire $4,200 he paid, though he can never lose more than that $4,200. In plain words: buying shares gives you open-ended upside if the business grows, and your worst case in dollars is the full amount you paid.",
                 "key_takeaways": [
                   "A share of common stock is a real slice of a business, its assets, and its future profits.",
                   "You sell shares to other people on the exchange, where the gap between buyer and seller prices is the bid-ask spread.",
@@ -8945,7 +8945,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "f-diversification",
                 "title": "Why Owning Different Businesses Smooths the Ride",
                 "objective": "Spread your cash across businesses that react differently to the same news, and see when that protection can fail.",
-                "body": "You have packed both an umbrella and sunglasses for a trip so neither forecast ruins your day. Splitting $9,500 across businesses that react differently to the same news\u2014like $4,750 in PowerSun Energy ($95) and $4,750 in Burgess Restaurant Group ($67)\u2014is called **diversification**. When fuel prices jump, a $400 gain on PowerSun can offset a $300 dip on Burgess. The trip analogy stops there: weather gear never fails at once, while all stocks can drop together in a panic.\n\nHow closely two stocks move together on the same day is called **correlation**, measured on a scale from \u22121 to +1 where +1 means they move in lockstep. Suppose Sam puts $9,100 across five fast-growing robotics companies, including 10 shares of Rocket Robotics ($182) for $1,820. Because all five share a correlation near +1, a single jump in interest rates can knock 10% off every one of them, costing Sam $910 in one afternoon. In plain words: owning five stocks in the same industry is just one big bet wearing five different shirts.\n\nNow compare Maria's mix of Lumend Brands ($42), PowerSun Energy ($95), and Burgess Restaurant Group ($67). Suppose each stock has a 60% chance, or 3 in 5, of gaining $300 this year and a 40% chance, or 2 in 5, of losing $150. That works out to an average gain of $120 per stock. By holding $3,000 in each instead of $9,000 in just one, Maria keeps the same $360 combined average gain while cutting her daily dollar swings nearly in half. One company's rough quarter gets cushioned by a steady quarter at the other two.\n\nThere is one catch every stock owner must respect. During a sudden market-wide scare, nervous traders sell everything at once to raise cash, pushing correlations across almost all stocks toward +1. In a 20% market drop, even Maria's $9,000 three-stock mix can lose $1,800 in a single week. Only true insurance\u2014like the option contracts you will meet next\u2014puts a hard floor under a market-wide crash. In plain words: spreading cash across different industries protects you from one company blowing up, not from everything falling at once.",
+                "body": "You have packed both an umbrella and sunglasses for a trip so neither forecast ruins your day. Splitting $9,500 across businesses that react differently to the same news\u2014like $4,750 in PowerSun Energy ($95) and $4,750 in Burgess Restaurant Group ($67)\u2014is called **diversification**. When fuel prices jump, a $400 gain on PowerSun can offset a $300 dip on Burgess. Packed weather gear never fails all at once; all stocks can drop together in a panic.\n\nHow closely two stocks move together on the same day is called **correlation**, measured on a scale from \u22121 to +1 where +1 means they move in lockstep. Suppose Sam puts $9,100 across five fast-growing robotics companies, including 10 shares of Rocket Robotics ($182) for $1,820. Because all five share a correlation near +1, a single jump in interest rates can knock 10% off every one of them, costing Sam $910 in one afternoon. In plain words: owning five stocks in the same industry is just one big bet wearing five different shirts.\n\nNow compare Maria's mix of Lumend Brands ($42), PowerSun Energy ($95), and Burgess Restaurant Group ($67). Suppose each stock has a 60% chance, or 3 in 5, of gaining $300 this year and a 40% chance, or 2 in 5, of losing $150. That works out to an average gain of $120 per stock. By holding $3,000 in each instead of $9,000 in just one, Maria keeps the same $360 combined average gain while cutting her daily dollar swings nearly in half. One company's rough quarter gets cushioned by a steady quarter at the other two.\n\nThere is one catch every stock owner must respect. During a sudden market-wide scare, nervous traders sell everything at once to raise cash, pushing correlations across almost all stocks toward +1. In a 20% market drop, even Maria's $9,000 three-stock mix can lose $1,800 in a single week. Only true insurance\u2014like the option contracts you will meet next\u2014puts a hard floor under a market-wide crash. In plain words: spreading cash across different industries protects you from one company blowing up, not from everything falling at once.",
                 "key_takeaways": [
                   "Diversification spreads your cash across businesses that react differently to the same news.",
                   "Owning five companies in the same tech sector is one big bet in disguise because their correlation sits near +1.",
@@ -9000,7 +9000,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "f-lemonade-insurance",
                 "title": "How Insurance Works for Both Sides",
                 "objective": "See how paying a small, known fee up front caps a painful loss, while the seller profits on average across many policies.",
-                "body": "You have paid $25 at a rental-car counter so a bumper dent does not stick you with a $1,500 repair bill. That $25 upfront fee\u2014paid whether or not you dent the car\u2014is called the **premium**. You give up a sure $25 today so the rental company promises to cover a $1,500 loss. The rental-car analogy stops there: you cannot resell a car waiver mid-trip, while market protection contracts trade all day.\n\nNow watch Maria protect 100 shares of PowerSun Energy ($95) worth $9,500. She pays Sam $300 up front for his promise to buy her 100 shares at $90 ($9,000 total) if the stock drops. The $5 per-share gap between $95 and $90 ($500 on 100 shares) is her **deductible**\u2014the first $500 dip she absorbs herself. In plain words: Maria pays $300 and takes the first $500 dip so her worst-case loss is capped at $800, even if PowerSun crashes.\n\nWhy would Sam take the other side and promise to cover a crash for just $300? Suppose a bad drop to $75 (costing Sam $1,500\u2014he must buy the 100 shares at $90 when they are worth only $75) happens only 10% of the time, or 1 in 10 tries. Across 10 separate deals, Sam collects $300 ten times for $3,000 total and pays out $1,500 once, leaving him $1,500 ahead on average ($150 per trade). Sam wins over many tries by spreading his promises across dozens of small trades, while Maria sleeps soundly knowing one crash cannot sink her.\n\nThe honest cost for Maria shows up when the weather stays calm. If PowerSun climbs from $95 to $105, her 100 shares grow by $1,000 to $10,500, and the $300 protection contract expires unused, leaving her with a $700 net gain ($1,000 minus $300 is $700). Paying $300 for protection she did not end up needing was not a mistake\u2014it was the price of capping her worst day at $800. In plain words: buying protection trims a slice off your best-case gain so you can put a hard dollar floor under your worst-case loss.",
+                "body": "You have paid $25 at a rental-car counter so a bumper dent does not stick you with a $1,500 repair bill. That $25 upfront fee\u2014paid whether or not you dent the car\u2014is called the **premium**. You give up a sure $25 today so the rental company promises to cover a $1,500 loss. A rental-car waiver cannot be resold mid-trip; market protection contracts trade all day.\n\nNow watch Maria protect 100 shares of PowerSun Energy ($95) worth $9,500. She pays Sam $300 up front for his promise to buy her 100 shares at $90 ($9,000 total) if the stock drops. The $5 per-share gap between $95 and $90 ($500 on 100 shares) is her **deductible**\u2014the first $500 dip she absorbs herself. In plain words: Maria pays $300 and takes the first $500 dip so her worst-case loss is capped at $800, even if PowerSun crashes.\n\nWhy would Sam take the other side and promise to cover a crash for just $300? Suppose a bad drop to $75 (costing Sam $1,500\u2014he must buy the 100 shares at $90 when they are worth only $75) happens only 10% of the time, or 1 in 10 tries. Across 10 separate deals, Sam collects $300 ten times for $3,000 total and pays out $1,500 once, leaving him $1,500 ahead on average ($150 per trade). Sam wins over many tries by spreading his promises across dozens of small trades, while Maria sleeps soundly knowing one crash cannot sink her.\n\nThe honest cost for Maria shows up when the weather stays calm. If PowerSun climbs from $95 to $105, her 100 shares grow by $1,000 to $10,500, and the $300 protection contract expires unused, leaving her with a $700 net gain ($1,000 minus $300 is $700). Paying $300 for protection she did not end up needing was not a mistake\u2014it was the price of capping her worst day at $800. In plain words: buying protection trims a slice off your best-case gain so you can put a hard dollar floor under your worst-case loss.",
                 "key_takeaways": [
                   "A premium is the fixed cash fee you pay up front\u2014and never get back\u2014to hand off a painful loss.",
                   "A deductible is the first slice of a drop you absorb yourself before the seller's promise kicks in.",
@@ -9049,7 +9049,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "f-bridge-to-options",
                 "title": "How a Put Option Insures 100 Shares",
                 "objective": "Match the parts of an insurance policy to a put option: the 100-share bundle, the strike price floor, the deadline, and the upfront fee.",
-                "body": "You have read a home policy page that lists your coverage floor, your deductible, and your renewal date. On the stock exchange, that same protection contract for 100 shares is called a **put option**, such as paying $200 to insure 100 shares of Lumend Brands ($42). One contract always covers 100 shares, so a $2.00 quote costs $200 ($2 \xD7 100 shares is $200). The home-policy analogy stops there: anyone can trade a put option in seconds without an adjuster.\n\nMaria owns 100 shares of Lumend Brands at $42 ($4,200 total) and buys one 60-day $40 put for $2.00 a share ($200 total). That locked-in $40 exit price is the **strike price**, giving Maria the right to sell her 100 shares at $40 ($4,000 total) before the 60-day deadline. If Lumend crashes to $28, she still sells at $40, capping her total loss at $400 ($200 share dip plus $200 fee). In plain words: the strike price is your guaranteed floor, and the gap between today's price and the strike is your deductible.\n\nWho makes that promise on the other side of Maria's trade? Sam, the option seller, collects Maria's $200 cash today and must buy her 100 shares at $40 ($4,000 total) if Lumend drops below $40 by the deadline. Just like coastal insurance ahead of a storm, Sam charges more when big news is coming. In a quiet week Sam might charge $1.50 ($150 total) for that $40 put, while before big earnings news he charges $3.50 ($350 total).\n\nWhat if good news lands instead and Lumend climbs from $42 to $50? Maria's 100 shares grow by $800 to $5,000, her $40 put expires at $0, and she walks away up $600 net ($800 stock gain minus $200 fee is $600). Sam keeps the $200 fee as his payment for standing ready to take the crash that never happened. In plain words: every option contract is a simple trade between someone paying cash to reshape risk and someone getting paid cash to take that risk on.",
+                "body": "You have read a home policy page that lists your coverage floor, your deductible, and your renewal date. On the stock exchange, that same protection contract for 100 shares is called a **put option**, such as paying $200 to insure 100 shares of Lumend Brands ($42). One contract always covers 100 shares, so a $2.00 quote costs $200 ($2 \xD7 100 shares is $200). A home policy requires a claim and an adjuster; anyone can trade a put option in seconds.\n\nMaria owns 100 shares of Lumend Brands at $42 ($4,200 total) and buys one 60-day $40 put for $2.00 a share ($200 total). That locked-in $40 exit price is the **strike price**, giving Maria the right to sell her 100 shares at $40 ($4,000 total) before the 60-day deadline. If Lumend crashes to $28, she still sells at $40, capping her total loss at $400 ($200 share dip plus $200 fee). In plain words: the strike price is your guaranteed floor, and the gap between today's price and the strike is your deductible.\n\nWho makes that promise on the other side of Maria's trade? Sam, the option seller, collects Maria's $200 cash today and must buy her 100 shares at $40 ($4,000 total) if Lumend drops below $40 by the deadline. Just like coastal insurance ahead of a storm, Sam charges more when big news is coming. In a quiet week Sam might charge $1.50 ($150 total) for that $40 put, while before big earnings news he charges $3.50 ($350 total).\n\nWhat if good news lands instead and Lumend climbs from $42 to $50? Maria's 100 shares grow by $800 to $5,000, her $40 put expires at $0, and she walks away up $600 net ($800 stock gain minus $200 fee is $600). Sam keeps the $200 fee as his payment for standing ready to take the crash that never happened. In plain words: every option contract is a simple trade between someone paying cash to reshape risk and someone getting paid cash to take that risk on.",
                 "key_takeaways": [
                   "A put option gives its buyer the right to sell 100 shares at the strike price on or before the deadline.",
                   "One standard option covers 100 shares, so a $2.00 per-share price costs $200 in real cash ($2 \xD7 100 shares is $200).",
@@ -9112,7 +9112,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "c-calls-puts-defined",
                 "title": "Calls, Puts, and How One Contract Covers 100 Shares",
                 "objective": "Tell a call option from a put option, multiply per-share quotes by 100, and see who gets a choice versus who makes a promise.",
-                "body": "You have paid a $20 fee to hold a $300 flight price for 48 hours while checking your schedule. On the exchange, paying $200 for the right to buy 100 shares of Lumend Brands ($42) at $45 within 60 days is called a **call option**. If Lumend jumps to $52, Maria buys at $45; if not, she loses only her $200 fee. The flight-hold analogy stops there: airline holds cannot be resold, while options trade all day.\n\nWhile a call gives Maria the right to buy 100 shares at a locked-in strike price, a put gives her the right to sell 100 shares at that price. Every standard US stock option covers 100 shares\u2014a fixed 100-share bundle called the **multiplier**\u2014so an option quoted at $1.45 per share costs $145 in cash ($1.45 \xD7 100 shares is $145). If Sam buys one 60-day $65 put on Burgess Restaurant Group ($67) quoted at $2.00, he pays $200 up front for the right to sell 100 shares at $65 ($6,500 total). In plain words: calls lock in a buying ceiling, puts lock in a selling floor, and you always multiply the screen price by 100.\n\nEvery option trade has a buyer who gets a choice and a seller who makes a binding promise. When Maria buys that $45 call on Lumend Brands ($42) for $200, her worst-case loss is strictly capped at $200. Sam, who collected that $200, must deliver 100 shares at $45\u2014if Lumend hits $80, buying at $80 to sell at $45 costs him $3,300 net. Never sell an option without checking the worst-case dollar cost of keeping your promise.\n\nFinally, always compare the option's strike price to today's share price. With Lumend Brands at $42, a $40 call already sits $2 per share ($200 for 100 shares) below today's price, so using it right now would save Maria $200. A $45 call sits $3 above today's $42 price, so it pays nothing unless Lumend climbs past $45 before the deadline. In plain words: the buyer pays a capped fee for a choice, the seller gets paid for a promise, and the strike sets the finish line.",
+                "body": "You have paid a $20 fee to hold a $300 flight price for 48 hours while checking your schedule. On the exchange, paying $200 for the right to buy 100 shares of Lumend Brands ($42) at $45 within 60 days is called a **call option**. If Lumend jumps to $52, Maria buys at $45; if not, she loses only her $200 fee. An airline flight hold cannot be resold; options trade all day.\n\nWhile a call gives Maria the right to buy 100 shares at a locked-in strike price, a put gives her the right to sell 100 shares at that price. Every standard US stock option covers 100 shares\u2014a fixed 100-share bundle called the **multiplier**\u2014so an option quoted at $1.45 per share costs $145 in cash ($1.45 \xD7 100 shares is $145). If Sam buys one 60-day $65 put on Burgess Restaurant Group ($67) quoted at $2.00, he pays $200 up front for the right to sell 100 shares at $65 ($6,500 total). In plain words: calls lock in a buying ceiling, puts lock in a selling floor, and you always multiply the screen price by 100.\n\nEvery option trade has a buyer who gets a choice and a seller who makes a binding promise. When Maria buys that $45 call on Lumend Brands ($42) for $200, her worst-case loss is strictly capped at $200. Sam, who collected that $200, must deliver 100 shares at $45\u2014if Lumend hits $80, buying at $80 to sell at $45 costs him $3,300 net. Never sell an option without checking the worst-case dollar cost of keeping your promise.\n\nFinally, always compare the option's strike price to today's share price. With Lumend Brands at $42, a $40 call already sits $2 per share ($200 for 100 shares) below today's price, so using it right now would save Maria $200. A $45 call sits $3 above today's $42 price, so it pays nothing unless Lumend climbs past $45 before the deadline. In plain words: the buyer pays a capped fee for a choice, the seller gets paid for a promise, and the strike sets the finish line.",
                 "key_takeaways": [
                   "A call option gives its buyer the right to buy 100 shares at the strike price on or before the deadline.",
                   "A put option gives its buyer the right to sell 100 shares at the strike price on or before the deadline.",
@@ -9173,7 +9173,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "c-pricing-intuition",
                 "title": "What You Are Paying For: Real Value Now vs. Time Left",
                 "objective": "Split any option price into what it is worth right now and what you are paying for time and possible movement.",
-                "body": "You have bought a $15 bakery box that holds $10 of cookies inside a $5 tin. Option prices split into two pieces the same way. With Burgess Restaurant Group at $67, a $65 call lets Maria buy $67 shares for $65, giving it $2 per share ($200 for 100 shares) of right-now worth called **intrinsic value**. The bakery analogy stops there: a tin lasts forever, while an option's extra price melts away by the deadline.\n\nIf that $65 call on Burgess Restaurant Group ($67) trades for $3.40 ($340 total), and $2.00 ($200) is intrinsic value, what is the other $1.40 ($140)? That extra $1.40 per share ($140 total) is **time value**\u2014the cash Maria pays Sam for the chance that Burgess climbs even higher before the deadline. Time value is biggest when the strike price sits right at today's $67 stock price, where the outcome is a 50% coin flip, or 1 in 2. In plain words: every option price equals what the contract is worth right this second plus the extra fee for what might still happen.\n\nTwo forces make time value more expensive: more days on the clock and a jumpier stock. A 60-day call on Lumend Brands ($42) costs about $2.80 ($280) while a 30-day call costs $2.00 ($200)\u2014not double, because price swings grow with the square root of time. When news makes Lumend swing wider, Sam charges more for both calls and puts because big moves in either direction become more likely. More days or wilder swings always mean a bigger upfront fee.\n\nTime value is not a gift; it is a melting ice cube. Every quiet day that Burgess stays stuck at $67, a few dollars of Maria's $140 time value vanish into Sam's pocket until $0 of time value remains at the deadline. Before Maria buys any option, she splits the quote in her head: '$340 total is $200 of real value now plus $140 of melting time.' In plain words: always check how many dollars of an option's price will melt to $0 if the stock goes nowhere.",
+                "body": "You have bought a $15 bakery box that holds $10 of cookies inside a $5 tin. Option prices split into two pieces the same way. With Burgess Restaurant Group at $67, a $65 call lets Maria buy $67 shares for $65, giving it $2 per share ($200 for 100 shares) of right-now worth called **intrinsic value**. A cookie tin lasts forever; an option's extra price melts away by the deadline.\n\nIf that $65 call on Burgess Restaurant Group ($67) trades for $3.40 ($340 total), and $2.00 ($200) is intrinsic value, what is the other $1.40 ($140)? That extra $1.40 per share ($140 total) is **time value**\u2014the cash Maria pays Sam for the chance that Burgess climbs even higher before the deadline. Time value is biggest when the strike price sits right at today's $67 stock price, where the outcome is a 50% coin flip, or 1 in 2. In plain words: every option price equals what the contract is worth right this second plus the extra fee for what might still happen.\n\nTwo forces make time value more expensive: more days on the clock and a jumpier stock. A 60-day call on Lumend Brands ($42) costs about $2.80 ($280) while a 30-day call costs $2.00 ($200)\u2014not double, because price swings grow with the square root of time. When news makes Lumend swing wider, Sam charges more for both calls and puts because big moves in either direction become more likely. More days or wilder swings always mean a bigger upfront fee.\n\nTime value is not a gift; it is a melting ice cube. Every quiet day that Burgess stays stuck at $67, a few dollars of Maria's $140 time value vanish into Sam's pocket until $0 of time value remains at the deadline. Before Maria buys any option, she splits the quote in her head: '$340 total is $200 of real value now plus $140 of melting time.' In plain words: always check how many dollars of an option's price will melt to $0 if the stock goes nowhere.",
                 "key_takeaways": [
                   "Every option price splits into intrinsic value (what it is worth right now) plus time value (the price of what might happen).",
                   "Time value is highest when the strike sits right at today's stock price, where the finish is most uncertain.",
@@ -9240,7 +9240,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "c-buying-calls",
                 "title": "Buying a Call: Big Upside, Strict Deadline",
                 "objective": "Calculate the exact stock price a call needs to make money at the deadline, and see why being right too slowly still loses.",
-                "body": "You have bought a $50 discount card that only pays for itself after you spend enough to cover the $50 fee. If Maria pays $2.00 a share ($200 total) for a 60-day $45 call on Lumend Brands ($42), the stock must reach $47 ($45 strike plus $2 fee)\u2014her **breakeven price**\u2014just to get her $200 back at the deadline. Above $47, she gains $100 for every $1 Lumend rises. The card analogy stops there: Maria can resell her call anytime before the deadline.\n\nNow look at the catch that trips up beginners. If Lumend climbs from $42 to $46 by day 60, Maria was right that the stock would rise, yet her $45 call is worth only $1.00 ($100) and she still loses $100 of her $200 fee. Every calm day that passes without a big rally, her option loses a few dollars of time value\u2014a daily fade called **time decay**, such as losing $3 a day on a $200 call. In plain words: a call buyer must be right about direction, the dollar size of the move, and the deadline all at once.\n\nPicking a strike price changes the odds of the trade. On Burgess Restaurant Group ($67), a 60-day $67 call might cost $3.50 ($350 total), needing a rally to $70.50 ($67 plus $3.50) to break even. A cheap $80 call might cost just $0.40 ($40 total), tempting Sam because $40 feels harmless, but Burgess must surge past $80.40 in 60 days\u2014a long shot that wins less than 10% of the time, or 1 in 10. Buying $40 long shots ten times in a row quietly drains $400 just as surely as one big loss.\n\nBefore Maria buys any call, she follows two survival rules. First, she assumes losing the entire $200 fee is a normal outcome and never puts more cash into a call than she can afford to lose 100% of. Second, she picks a calendar day\u2014such as 15 days before the deadline\u2014to sell and salvage what is left if the rally has not arrived on schedule. In plain words: size every call purchase assuming the full fee can go to $0, and close early when the clock is running out on a flat stock.",
+                "body": "You have bought a $50 discount card that only pays for itself after you spend enough to cover the $50 fee. If Maria pays $2.00 a share ($200 total) for a 60-day $45 call on Lumend Brands ($42), the stock must reach $47 ($45 strike plus $2 fee)\u2014her **breakeven price**\u2014just to get her $200 back at the deadline. Above $47, she gains $100 for every $1 Lumend rises. A store discount card cannot be resold; Maria can resell her call anytime before the deadline.\n\nNow look at the catch that trips up beginners. If Lumend climbs from $42 to $46 by day 60, Maria was right that the stock would rise, yet her $45 call is worth only $1.00 ($100) and she still loses $100 of her $200 fee. Every calm day that passes without a big rally, her option loses a few dollars of time value\u2014a daily fade called **time decay**, such as losing $3 a day on a $200 call. In plain words: a call buyer must be right about direction, the dollar size of the move, and the deadline all at once.\n\nPicking a strike price changes the odds of the trade. On Burgess Restaurant Group ($67), a 60-day $67 call might cost $3.50 ($350 total), needing a rally to $70.50 ($67 plus $3.50) to break even. A cheap $80 call might cost just $0.40 ($40 total), tempting Sam because $40 feels harmless, but Burgess must surge past $80.40 in 60 days\u2014a long shot that wins less than 10% of the time, or 1 in 10. Buying $40 long shots ten times in a row quietly drains $400 just as surely as one big loss.\n\nBefore Maria buys any call, she follows two survival rules. First, she assumes losing the entire $200 fee is a normal outcome and never puts more cash into a call than she can afford to lose 100% of. Second, she picks a calendar day\u2014such as 15 days before the deadline\u2014to sell and salvage what is left if the rally has not arrived on schedule. In plain words: size every call purchase assuming the full fee can go to $0, and close early when the clock is running out on a flat stock.",
                 "key_takeaways": [
                   "A call buyer's breakeven price at the deadline is the strike price plus the per-share fee paid ($45 + $2 = $47).",
                   "Your worst-case loss is capped at the upfront cash you paid, while your upside above breakeven is open-ended.",
@@ -9290,7 +9290,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "c-puts-protective",
                 "title": "Buying Puts: Profiting from a Drop or Insuring Your Shares",
                 "objective": "Use a put option two ways: alone to profit when a stock falls, or paired with 100 shares to put a hard dollar floor under a crash.",
-                "body": "You have paid $15 extra for a refundable hotel room so a canceled trip costs $15 instead of $300. Buying a put by itself\u2014a **long put**, like paying $250 for a 60-day $90 put on PowerSun Energy ($95)\u2014lets Sam profit from a drop with his worst loss capped at $250. His breakeven price at the deadline is $87.50 ($90 strike minus $2.50 fee). The hotel analogy stops there: a long put gains $100 for every $1 PowerSun drops below $87.50.\n\nNow pair that same put with 100 shares you already own. When Maria owns 100 shares of PowerSun Energy at $95 ($9,500) and buys one $90 put for $2.50 ($250), that stock-plus-put bundle is called a **protective put**. If PowerSun crashes to $70, her 100 shares drop by $2,500, but her put lets her sell at $90, capping her total worst-case loss at $750 ($500 share drop to $90 plus $250 fee is $750). In plain words: a protective put leaves your upside open if the stock rallies and locks in a hard dollar floor if the stock crashes.\n\nIf a protective put works so well in a crash, why doesn't Maria keep one on her 100 shares of PowerSun ($95) every single month of the year? Because paying $250 every two months six times a year costs $1,500 a year ($250 \xD7 6 is $1,500), eating roughly 16% of her $9,500 stock position even when nothing bad happens. Over five calm years, spending $1,500 a year drains $7,500 in fees. Smart stock owners buy put protection only around clear danger windows\u2014like an earnings report or a rocky month\u2014rather than paying for storm coverage on sunny days.\n\nNotice what pairing 100 shares with a put does to your risk. Holding 100 shares of PowerSun at $95 alone carries $9,500 of downside if the business fails, while holding those 100 shares plus the $90 put caps Maria's 60-day loss at $750. Used this way, an option does not make Maria's life riskier\u2014it takes $8,750 of crash risk off the table for a $250 fee. In plain words: buying a put alone is a capped-loss bet on a drop, and pairing a put with 100 shares makes owning stock safer than holding the shares by themselves.",
+                "body": "You have paid $15 extra for a refundable hotel room so a canceled trip costs $15 instead of $300. Buying a put by itself\u2014a **long put**, like paying $250 for a 60-day $90 put on PowerSun Energy ($95)\u2014lets Sam profit from a drop with his worst loss capped at $250. His breakeven price at the deadline is $87.50 ($90 strike minus $2.50 fee). A refundable hotel room only returns your deposit; a long put gains $100 for every $1 PowerSun drops below $87.50.\n\nNow pair that same put with 100 shares you already own. When Maria owns 100 shares of PowerSun Energy at $95 ($9,500) and buys one $90 put for $2.50 ($250), that stock-plus-put bundle is called a **protective put**. If PowerSun crashes to $70, her 100 shares drop by $2,500, but her put lets her sell at $90, capping her total worst-case loss at $750 ($500 share drop to $90 plus $250 fee is $750). In plain words: a protective put leaves your upside open if the stock rallies and locks in a hard dollar floor if the stock crashes.\n\nIf a protective put works so well in a crash, why doesn't Maria keep one on her 100 shares of PowerSun ($95) every single month of the year? Because paying $250 every two months six times a year costs $1,500 a year ($250 \xD7 6 is $1,500), eating roughly 16% of her $9,500 stock position even when nothing bad happens. Over five calm years, spending $1,500 a year drains $7,500 in fees. Smart stock owners buy put protection only around clear danger windows\u2014like an earnings report or a rocky month\u2014rather than paying for storm coverage on sunny days.\n\nNotice what pairing 100 shares with a put does to your risk. Holding 100 shares of PowerSun at $95 alone carries $9,500 of downside if the business fails, while holding those 100 shares plus the $90 put caps Maria's 60-day loss at $750. Used this way, an option does not make Maria's life riskier\u2014it takes $8,750 of crash risk off the table for a $250 fee. In plain words: buying a put alone is a capped-loss bet on a drop, and pairing a put with 100 shares makes owning stock safer than holding the shares by themselves.",
                 "key_takeaways": [
                   "A long put profits when a stock falls below (strike minus fee), with your worst-case loss capped at the fee you paid.",
                   "A protective put pairs 100 shares with 1 put, capping your worst-case dollar loss while keeping your upside open.",
@@ -9340,7 +9340,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "c-covered-calls",
                 "title": "Covered Calls: Getting Paid Cash to Cap Your Upside",
                 "objective": "Pair 100 shares with a call you sell, calculate your breakeven and profit cap, and weigh the upfront cash against the downside you still keep.",
-                "body": "You have taken a buyer's $40 non-refundable deposit to hold your $400 bicycle for them until Saturday. Owning 100 shares of Burgess Restaurant Group at $67 ($6,700) and selling Sam a 60-day $70 call for $2.00 a share ($200 paid to you today) is called a **covered call**. Maria keeps that $200 cash no matter what. The deposit analogy stops there: while Maria waits, her 100 shares can still fall in price and lose far more than $200.\n\nWalk through what happens to Maria's 100 shares of Burgess ($67) and her $200 cash at the deadline. If Burgess stays at $67, the $70 call expires at $0 and Maria keeps $200. If Burgess jumps to $75, Sam buys her 100 shares at $70\u2014a required handover called **assignment** that caps Maria's total profit at $500 ($300 share gain plus $200 cash). In plain words: selling a call against 100 shares pays you cash today in exchange for capping your upside above the strike.\n\nWhat about the downside when Burgess drops instead of rising? That $200 upfront payment lowers Maria's breakeven price by $2 a share from $67 down to $65 ($67 minus $2 is $65), which only cushions a small dip. If bad news knocks Burgess down to $57, Maria loses $1,000 on her shares and the $200 fee only trims the loss to \u2212$800. Never treat call cash as risk-free income, because you still carry the downside of owning 100 shares.\n\nWhy is it called 'covered'? Because Maria already owns the 100 shares she promised to deliver at $70, unlike an uncovered seller who owns 0 shares and faces unlimited dollar losses if the stock rockets to $120. Before Maria sells a $70 call, she asks herself one question: 'Will I be happy parting with my 100 shares at $70?' In plain words: only sell a covered call at a strike price where you would gladly sell your shares, and remember the shares themselves can still fall.",
+                "body": "You have taken a buyer's $40 non-refundable deposit to hold your $400 bicycle for them until Saturday. Owning 100 shares of Burgess Restaurant Group at $67 ($6,700) and selling Sam a 60-day $70 call for $2.00 a share ($200 paid to you today) is called a **covered call**. Maria keeps that $200 cash no matter what. A bicycle deposit sits on a parked frame; while Maria waits, her 100 shares can still fall in price and lose far more than $200.\n\nWalk through what happens to Maria's 100 shares of Burgess ($67) and her $200 cash at the deadline. If Burgess stays at $67, the $70 call expires at $0 and Maria keeps $200. If Burgess jumps to $75, Sam buys her 100 shares at $70\u2014a required handover called **assignment** that caps Maria's total profit at $500 ($300 share gain plus $200 cash). In plain words: selling a call against 100 shares pays you cash today in exchange for capping your upside above the strike.\n\nWhat about the downside when Burgess drops instead of rising? That $200 upfront payment lowers Maria's breakeven price by $2 a share from $67 down to $65 ($67 minus $2 is $65), which only cushions a small dip. If bad news knocks Burgess down to $57, Maria loses $1,000 on her shares and the $200 fee only trims the loss to \u2212$800. Never treat call cash as risk-free income, because you still carry the downside of owning 100 shares.\n\nWhy is it called 'covered'? Because Maria already owns the 100 shares she promised to deliver at $70, unlike an uncovered seller who owns 0 shares and faces unlimited dollar losses if the stock rockets to $120. Before Maria sells a $70 call, she asks herself one question: 'Will I be happy parting with my 100 shares at $70?' In plain words: only sell a covered call at a strike price where you would gladly sell your shares, and remember the shares themselves can still fall.",
                 "key_takeaways": [
                   "A covered call pairs 100 shares you own with 1 call you sell; you keep the upfront cash in every outcome.",
                   "Your breakeven price is your share cost minus the call fee ($67 \u2212 $2 = $65); your max profit is capped once the stock reaches the strike\u2014here ($70 \u2212 $67 + $2) \xD7 100 = $500 total.",
@@ -9407,7 +9407,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "c-vertical-spreads",
                 "title": "Vertical Spreads: Cutting Your Cost by Capping Your Gain",
                 "objective": "Pair an option you buy with an option you sell at a different strike price. Calculate your max profit, max loss, and breakeven, and see why capping your upside can lower your risk.",
-                "body": "You have bought a $300 festival pass and sold the Sunday wristband you cannot use for $100 to cut your cost. Pairing an option you buy with one you sell at a different strike is a **vertical spread**, like buying a $42 call and selling a $47 call. On Lumend Brands ($42), Maria pays $300 for the $42 call and collects $100 for the $47 call, capping her net loss at $200. The wristband analogy stops there: paper tickets have fixed prices, while both option legs trade up and down until expiration.\n\nWhy does Maria gladly cap her profit at the $47 strike on Lumend ($42)? She expects Lumend to grind toward $46 over 60 days, with only a 10% chance, or 1 in 10, of passing $47. Selling the $47 call lowers her breakeven to $44 ($42 plus $2 net cost) and caps her max profit at $300 ($500 gap minus $200). In plain words: selling a higher call gives up long-shot upside you do not expect so you pay less up front.\n\nSam flips that math around when he expects Burgess Restaurant Group ($67) to slide toward $62. Buying a $67 put for $320 and selling a $62 put for $120 builds a **bear put spread** for a $200 net cost. Sam caps his worst-case loss at $200, lowers his breakeven to $65 ($67 minus $2), and caps his profit at $300 ($500 minus $200). In plain words: whether you build a spread with calls or puts, the option you sell helps pay for the one you buy.\n\nOne timing quirk surprises almost every first-time spread trader. If Lumend hits $49 with 10 days left, Maria's $42/$47 call spread trades near $460 instead of $500 because the $47 call holds $40 of time value. Her spread is not broken\u2014that final $40 of profit arrives only when the $47 call's time value melts at expiration. In plain words: a winning spread reaches its full cap slowly, so closing early to bank $260 of a $300 max gain is smart.",
+                "body": "You have bought a $300 festival pass and sold the Sunday wristband you cannot use for $100 to cut your cost. Pairing an option you buy with one you sell at a different strike is a **vertical spread**, like buying a $42 call and selling a $47 call. On Lumend Brands ($42), Maria pays $300 for the $42 call and collects $100 for the $47 call, capping her net loss at $200. Paper festival wristbands have fixed prices; both option legs trade up and down until expiration.\n\nWhy does Maria gladly cap her profit at the $47 strike on Lumend ($42)? She expects Lumend to grind toward $46 over 60 days, with only a 10% chance, or 1 in 10, of passing $47. Selling the $47 call lowers her breakeven to $44 ($42 plus $2 net cost) and caps her max profit at $300 ($500 gap minus $200). In plain words: selling a higher call gives up long-shot upside you do not expect so you pay less up front.\n\nSam flips that math around when he expects Burgess Restaurant Group ($67) to slide toward $62. Buying a $67 put for $320 and selling a $62 put for $120 builds a **bear put spread** for a $200 net cost. Sam caps his worst-case loss at $200, lowers his breakeven to $65 ($67 minus $2), and caps his profit at $300 ($500 minus $200). In plain words: whether you build a spread with calls or puts, the option you sell helps pay for the one you buy.\n\nOne timing quirk surprises almost every first-time spread trader. If Lumend hits $49 with 10 days left, Maria's $42/$47 call spread trades near $460 instead of $500 because the $47 call holds $40 of time value. Her spread is not broken\u2014that final $40 of profit arrives only when the $47 call's time value melts at expiration. In plain words: a winning spread reaches its full cap slowly, so closing early to bank $260 of a $300 max gain is smart.",
                 "key_takeaways": [
                   "In a bull call spread, your worst-case loss is the net cash paid ($200) and your breakeven is the lower strike plus net cost ($42 + $2 = $44). Your max profit is the strike gap minus net cost ($500 \u2212 $200 = $300).",
                   "Selling the further-away strike helps pay for the option you bought by giving up long-shot gains you do not expect.",
@@ -9457,7 +9457,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "c-straddles-strangles",
                 "title": "Straddles and Strangles: Betting on a Big Move Either Way",
                 "objective": "Build a long straddle and a long strangle, calculate both breakeven prices, and see why a big stock move after earnings can still lose money.",
-                "body": "You have packed both a $15 poncho and $15 sunblock for an all-day stadium show when forecasts conflict. Buying a call and a put at the same strike and deadline is a **long straddle**, such as paying $480 on Burgess Restaurant Group ($67). Maria pays $250 for the $67 call and $230 for the $67 put, winning below $62.20 or above $71.80 while capping her loss at $480. The stadium analogy stops there: weather gear cannot be resold, while one option in a big swing can triple in value.\n\nWhen $480 feels too steep, Sam builds a **long strangle** by buying a $70 call ($110) and a $64 put ($100) for $210 total. Because both strikes start $3 away from Burgess's $67 price, Sam now needs a move below $61.90 or above $72.10 to profit. His worst-case loss shrinks from $480 down to the $210 upfront fee he paid. In plain words: a strangle cuts your upfront dollar cost by more than half, in exchange for needing a bigger move.\n\nA classic trap catches traders right before a major news event. Before Rocket Robotics ($182) reports earnings, Sam pays $1,200 ($12 per share) for a $182 straddle because he expects a big jump. That $1,200 price tag already prices in a $12 move, so when Rocket jumps $8 to $190, Sam's straddle is worth $800 and loses $400. You only profit when the actual dollar move beats the move already baked into the upfront fee you paid.\n\nWhat if Maria sells both the $67 call and $67 put on Burgess ($67) to collect $480 up front? She wins a bit more often than a coin flip, maybe 3 in 5 calm months, inside $62.20 to $71.80, but a jump to $95 loses $2,320 net. Because uncovered short calls carry unlimited risk, our practice floor blocks them unless you add protective wings to cap losses. In plain words: buying a straddle caps your loss and needs a surprise move, while selling one uncovered risks a huge shock loss.",
+                "body": "You have packed both a $15 poncho and $15 sunblock for an all-day stadium show when forecasts conflict. Buying a call and a put at the same strike and deadline is a **long straddle**, such as paying $480 on Burgess Restaurant Group ($67). Maria pays $250 for the $67 call and $230 for the $67 put, winning below $62.20 or above $71.80 while capping her loss at $480. Stadium weather gear cannot be resold; one option in a big swing can triple in value.\n\nWhen $480 feels too steep, Sam builds a **long strangle** by buying a $70 call ($110) and a $64 put ($100) for $210 total. Because both strikes start $3 away from Burgess's $67 price, Sam now needs a move below $61.90 or above $72.10 to profit. His worst-case loss shrinks from $480 down to the $210 upfront fee he paid. In plain words: a strangle cuts your upfront dollar cost by more than half, in exchange for needing a bigger move.\n\nA classic trap catches traders right before a major news event. Before Rocket Robotics ($182) reports earnings, Sam pays $1,200 ($12 per share) for a $182 straddle because he expects a big jump. That $1,200 price tag already prices in a $12 move, so when Rocket jumps $8 to $190, Sam's straddle is worth $800 and loses $400. You only profit when the actual dollar move beats the move already baked into the upfront fee you paid.\n\nWhat if Maria sells both the $67 call and $67 put on Burgess ($67) to collect $480 up front? She wins a bit more often than a coin flip, maybe 3 in 5 calm months, inside $62.20 to $71.80, but a jump to $95 loses $2,320 net. Because uncovered short calls carry unlimited risk, our practice floor blocks them unless you add protective wings to cap losses. In plain words: buying a straddle caps your loss and needs a surprise move, while selling one uncovered risks a huge shock loss.",
                 "key_takeaways": [
                   "A long straddle buys a call and a put at the same strike and deadline; its breakevens are the strike minus the total fee and the strike plus the total fee.",
                   "A long strangle buys a higher-strike call and a lower-strike put, cutting your upfront dollar cost while widening the move you need to win.",
@@ -9507,7 +9507,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "c-calendar-spreads",
                 "title": "Calendar Spreads: Selling Fast Time While Owning Slow Time",
                 "objective": "Pair a short near-deadline option with a long far-deadline option at the same strike price, see how they profit from different decay speeds, and spot the two ways a calendar spread loses.",
-                "body": "You have leased a summer cabin for $1,500 and sublet one busy holiday week for $800 to cut your cost. Selling a near-deadline option and buying a far-deadline option at the same strike is a **calendar spread**, like trading the $42 call on Lumend Brands ($42). Maria sells the 30-day $42 call for $150 and buys the 60-day $42 call for $230, capping her upfront cost at $80. The cabin analogy stops there: a cabin never moves, while a big stock swing shrinks the gap between your two options.\n\nWhy does Maria pair a 30-day call she sold with a 60-day call she bought? Right at the $42 stock price, a 30-day call loses about $5 a day in time value, while a 60-day call loses $2.50. If Lumend sits at $42 on day 30, the short call expires at $0 while her far call is worth $150, netting a $70 profit. In plain words: a calendar spread collects fast-melting time on the near option while holding slow-melting time on the far option.\n\nWhat happens if Lumend rockets from $42 to $55, or drops to $30, before day 30? At $55, both $42 calls trade almost like stock, their time-value gap shrinks toward $0, and Maria loses most of her $80 fee. At $30, both $42 calls sit far above the stock price and fall toward $0 together. A calendar spread's payoff looks like a tent centered on the strike\u2014it wins in calm weeks and loses on big moves.\n\nCalendar spreads also carry a risk that single-deadline vertical spreads never face. Because the two calls expire in different months, their swing forecasts across the calendar\u2014called the **term structure**\u2014can move separately. Surprise news inside the next 20 days can pump the 30-day call Maria sold from $150 to $240 while her 60-day call barely moves. In plain words: verticals trade direction, straddles trade movement size, and calendars trade a quiet month where near time melts faster.",
+                "body": "You have leased a summer cabin for $1,500 and sublet one busy holiday week for $800 to cut your cost. Selling a near-deadline option and buying a far-deadline option at the same strike is a **calendar spread**, like trading the $42 call on Lumend Brands ($42). Maria sells the 30-day $42 call for $150 and buys the 60-day $42 call for $230, capping her upfront cost at $80. A summer cabin never moves; a big stock swing shrinks the gap between your two options.\n\nWhy does Maria pair a 30-day call she sold with a 60-day call she bought? Right at the $42 stock price, a 30-day call loses about $5 a day in time value, while a 60-day call loses $2.50. If Lumend sits at $42 on day 30, the short call expires at $0 while her far call is worth $150, netting a $70 profit. In plain words: a calendar spread collects fast-melting time on the near option while holding slow-melting time on the far option.\n\nWhat happens if Lumend rockets from $42 to $55, or drops to $30, before day 30? At $55, both $42 calls trade almost like stock, their time-value gap shrinks toward $0, and Maria loses most of her $80 fee. At $30, both $42 calls sit far above the stock price and fall toward $0 together. A calendar spread's payoff looks like a tent centered on the strike\u2014it wins in calm weeks and loses on big moves.\n\nCalendar spreads also carry a risk that single-deadline vertical spreads never face. Because the two calls expire in different months, their swing forecasts across the calendar\u2014called the **term structure**\u2014can move separately. Surprise news inside the next 20 days can pump the 30-day call Maria sold from $150 to $240 while her 60-day call barely moves. In plain words: verticals trade direction, straddles trade movement size, and calendars trade a quiet month where near time melts faster.",
                 "key_takeaways": [
                   "A calendar spread sells a near-deadline option and buys a far-deadline option at the same strike, profiting because near-term time value melts faster.",
                   "It makes the most money when the stock finishes right at the strike price at the near deadline; big moves up or down crush the time-value gap.",
@@ -9563,7 +9563,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "c-what-is-volatility",
                 "title": "Historical vs. Implied Volatility: Past Moves vs. Priced-In Swings",
                 "objective": "Tell historical volatility apart from implied volatility, use the divide-by-16 rule to turn an annual IV percentage into a daily dollar move, and see what pushes IV up or down.",
-                "body": "You have checked last winter's heating bills before reading the gas company's fixed-rate quote for next winter. Past stock movement is called **historical volatility**, while the future swing forecast baked into today's option prices is called **implied volatility** (IV), like 32% on Burgess ($67). A 32% annual IV means option prices expect Burgess to finish the year within \xB132% (about $21) roughly 68% of the time, or 2 in 3. The heating-bill analogy stops there: weather ignores utility quotes, while nervous put buyers push a stock's IV higher themselves.\n\nHow do you turn an annual number like 32% IV into a typical daily dollar move? Because a trading year has 252 days and the square root of 252 is about 16, you divide annual IV by 16. On PowerSun Energy ($95) at 32% IV, dividing 32% by 16 gives a 2% daily swing, or about $1.90 per share ($190 per contract). In plain words: divide annual IV by 16 to see the daily percentage swing baked into option prices right now.\n\nThree real-world forces push implied volatility away from a stock's recent past. First, big moves cluster together, so a $6 drop on PowerSun today makes traders price in wider swings tomorrow. Second, scheduled news like Rocket Robotics ($182) earnings pumps IV up beforehand and crushes it once the numbers come out. Third, raw demand moves IV even without news: when funds rush to buy $90 puts on PowerSun, their buying lifts IV.\n\nEvery option strategy you know quietly takes a side on whether that daily swing forecast is fair. When Sam buys a call, put, or straddle on Lumend ($42) for $200, he needs real swings to beat the IV forecast. When Maria sells a covered call on Burgess ($67) for $200, she collects that forecast and wins if the stock stays calmer. In plain words: historical volatility is what happened, implied volatility is the price tag inside options, and every trade compares the two.",
+                "body": "You have checked last winter's heating bills before reading the gas company's fixed-rate quote for next winter. Past stock movement is called **historical volatility**, while the future swing forecast baked into today's option prices is called **implied volatility** (IV), like 32% on Burgess ($67). A 32% annual IV means option prices expect Burgess to finish the year within \xB132% (about $21) roughly 68% of the time, or 2 in 3. Winter weather ignores utility quotes; nervous put buyers push a stock's IV higher themselves.\n\nHow do you turn an annual number like 32% IV into a typical daily dollar move? Because a trading year has 252 days and the square root of 252 is about 16, you divide annual IV by 16. On PowerSun Energy ($95) at 32% IV, dividing 32% by 16 gives a 2% daily swing, or about $1.90 per share ($190 per contract). In plain words: divide annual IV by 16 to see the daily percentage swing baked into option prices right now.\n\nThree real-world forces push implied volatility away from a stock's recent past. First, big moves cluster together, so a $6 drop on PowerSun today makes traders price in wider swings tomorrow. Second, scheduled news like Rocket Robotics ($182) earnings pumps IV up beforehand and crushes it once the numbers come out. Third, raw demand moves IV even without news: when funds rush to buy $90 puts on PowerSun, their buying lifts IV.\n\nEvery option strategy you know quietly takes a side on whether that daily swing forecast is fair. When Sam buys a call, put, or straddle on Lumend ($42) for $200, he needs real swings to beat the IV forecast. When Maria sells a covered call on Burgess ($67) for $200, she collects that forecast and wins if the stock stays calmer. In plain words: historical volatility is what happened, implied volatility is the price tag inside options, and every trade compares the two.",
                 "key_takeaways": [
                   "Historical volatility measures how much the stock actually moved in the past; implied volatility (IV) is the future swing forecast baked into today's option prices.",
                   "Divide annual IV by 16 (the square root of 252 trading days) to find the typical 1-day move options are pricing in: 32% IV \xF7 16 = 2% per day.",
@@ -9613,7 +9613,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "c-using-iv",
                 "title": "Matching Your Strategy to Cheap or Expensive Volatility",
                 "objective": "Compare a stock's current IV to its own 1-year history, match low-IV and high-IV environments to the right option strategies, and avoid the pre-earnings selling trap.",
-                "body": "You know $5 is pricey for bread but cheap for coffee because you compare each item to its usual price. Traders check **IV rank**, which scores today's IV inside that stock's own 1-year range from 0% (cheapest day all year) to 100% (richest day). Lumend ($42) at 35% IV inside a 20%\u201340% range is expensive, while Rocket ($182) at 55% IV inside a 50%\u2013110% range is cheap. The grocery analogy stops there: expensive bread never warns of danger, while high IV often signals a real news jump.\n\nChecking where IV sits against a stock's own history makes choosing a strategy clearer. When Lumend's IV drops to 20%, a 60-day $40 put costs $140 instead of $280, putting protective puts and long calls on sale. When Burgess ($67) sits near the top of its IV range with no news due, a covered call pays Maria $260 instead of $150. In plain words: low IV puts option buying on sale, while high IV pays option sellers more cash when risk is capped.\n\nWatch out for the trap that hurts impatient option sellers. Before Rocket ($182) reports earnings, IV jumps to 95%, tempting Sam to sell options for the **volatility crush**\u2014when IV drops 30 points after news. IV sits at 95% because Rocket can gap $25 overnight ($2,500 per contract), wiping out the extra cash Sam collected. High IV before a scheduled announcement is a fair price for a jump, never free money.\n\nAlways check the IV environment when you grade your own past trades. A 30-day covered call on Burgess ($67) that paid Maria $200 in a 40%-IV month may pay only $95 at 18% IV. Her strategy did not break\u2014the market price of insurance simply cooled off. In plain words: compare every stock's IV to its own 1-year range, check for scheduled news, and match your strategy to the price.",
+                "body": "You know $5 is pricey for bread but cheap for coffee because you compare each item to its usual price. Traders check **IV rank**, which scores today's IV inside that stock's own 1-year range from 0% (cheapest day all year) to 100% (richest day). Lumend ($42) at 35% IV inside a 20%\u201340% range is expensive, while Rocket ($182) at 55% IV inside a 50%\u2013110% range is cheap. Expensive bread never warns of danger; high IV often signals a real news jump.\n\nChecking where IV sits against a stock's own history makes choosing a strategy clearer. When Lumend's IV drops to 20%, a 60-day $40 put costs $140 instead of $280, putting protective puts and long calls on sale. When Burgess ($67) sits near the top of its IV range with no news due, a covered call pays Maria $260 instead of $150. In plain words: low IV puts option buying on sale, while high IV pays option sellers more cash when risk is capped.\n\nWatch out for the trap that hurts impatient option sellers. Before Rocket ($182) reports earnings, IV jumps to 95%, tempting Sam to sell options for the **volatility crush**\u2014when IV drops 30 points after news. IV sits at 95% because Rocket can gap $25 overnight ($2,500 per contract), wiping out the extra cash Sam collected. High IV before a scheduled announcement is a fair price for a jump, never free money.\n\nAlways check the IV environment when you grade your own past trades. A 30-day covered call on Burgess ($67) that paid Maria $200 in a 40%-IV month may pay only $95 at 18% IV. Her strategy did not break\u2014the market price of insurance simply cooled off. In plain words: compare every stock's IV to its own 1-year range, check for scheduled news, and match your strategy to the price.",
                 "key_takeaways": [
                   "Always compare a stock's IV to its own 1-year range (IV rank)\u201435% IV can be expensive on a calm stock while 55% IV is cheap on a jumpy one.",
                   "Low IV relative to history makes buying calls, protective puts, and straddles cheaper; high IV pays more upfront cash on covered calls and vertical spreads.",
@@ -9677,7 +9677,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "g-delta",
                 "title": "Delta: How Much Your Option Moves When the Stock Moves $1",
                 "objective": "Use delta four ways\u2014as a $1 price slope, a rough finish-in-the-money estimate, a share equivalent, and a hedge ratio\u2014without tripping over put signs.",
-                "body": "You have ridden a geared bicycle where every 10 inches your feet push moves the bike 5 inches. How much an option's price changes when the stock moves $1 is called **delta**, like a 0.50-delta call on Lumend ($42) gaining $50 on a $1 rise. Calls have positive deltas from 0 to +1.00 (0 to +100 shares per contract), while puts run from \u22121.00 to 0. The bicycle analogy stops there: metal gears stay fixed, while an option's delta shifts as price, time, and IV move.\n\nWatch out for the double-negative trap when selling puts. If Sam sells one \u22120.30 delta put on Burgess ($67) for $150, selling flips the minus sign to +30 deltas, so Sam wants Burgess to rise. Maria reads a 0.25 call delta four ways: a $25 gain per $1 rally, rough 25% (1 in 4) finish odds, 25 shares, and a **hedge ratio**. In plain words: multiply contracts by 100 and by delta to see how many shares your options act like today.\n\nWhat pushes delta toward 0 or 100 before the deadline arrives? Deep in-the-money options act like 100 shares, options right at the stock price sit near a 50-delta coin flip, and far out-of-the-money options sit near 0. Less time left and lower implied volatility both push deltas toward 0 or 100 because a comeback gets less likely. More days left or higher implied volatility pulls deltas back toward 50 because big swings remain possible.\n\nKeep two safety warnings in mind before relying on delta. First, reading a 0.25 delta as a 25% chance, or 1 in 4, is only a rough model snapshot\u2014not a fixed promise. Second, delta only measures a small $1 step: if Lumend jumps $8 to $50, a 50-delta call gains much more than $400. In plain words: delta shows your share exposure for the next $1 move, and selling a put always adds bullish delta.",
+                "body": "You have ridden a geared bicycle where every 10 inches your feet push moves the bike 5 inches. How much an option's price changes when the stock moves $1 is called **delta**, like a 0.50-delta call on Lumend ($42) gaining $50 on a $1 rise. Calls have positive deltas from 0 to +1.00 (0 to +100 shares per contract), while puts run from \u22121.00 to 0. Metal bicycle gears stay fixed; an option's delta shifts as price, time, and IV move.\n\nWatch out for the double-negative trap when selling puts. If Sam sells one \u22120.30 delta put on Burgess ($67) for $150, selling flips the minus sign to +30 deltas, so Sam wants Burgess to rise. Maria reads a 0.25 call delta four ways: a $25 gain per $1 rally, rough 25% (1 in 4) finish odds, 25 shares, and a **hedge ratio**. In plain words: multiply contracts by 100 and by delta to see how many shares your options act like today.\n\nWhat pushes delta toward 0 or 100 before the deadline arrives? Deep in-the-money options act like 100 shares, options right at the stock price sit near a 50-delta coin flip, and far out-of-the-money options sit near 0. Less time left and lower implied volatility both push deltas toward 0 or 100 because a comeback gets less likely. More days left or higher implied volatility pulls deltas back toward 50 because big swings remain possible.\n\nKeep two safety warnings in mind before relying on delta. First, reading a 0.25 delta as a 25% chance, or 1 in 4, is only a rough model snapshot\u2014not a fixed promise. Second, delta only measures a small $1 step: if Lumend jumps $8 to $50, a 50-delta call gains much more than $400. In plain words: delta shows your share exposure for the next $1 move, and selling a put always adds bullish delta.",
                 "key_takeaways": [
                   "Delta measures how much an option's price changes for a $1 stock move; calls run 0 to +1.00, puts run \u22121.00 to 0, and selling flips the sign.",
                   "Four readings of one number: price change per $1 move, rough model odds of finishing in the money, share equivalent (contracts \xD7 100 \xD7 delta), and share hedge ratio.",
@@ -9738,7 +9738,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "g-theta",
                 "title": "Theta: What Each Passing Day Costs or Pays You",
                 "objective": "Measure daily time decay in dollars with theta, see why traders say 'paying' or 'collecting' theta, and trace how decay speeds up near expiration.",
-                "body": "You have bought a $20 bag of ice for a cookout where water drips out every hour in the sun. The dollar value an option loses per trading day when the stock sits still is called **theta**, like a $350 Burgess ($67) call losing $5 a day. Only the extra time price\u2014called **extrinsic value**\u2014melts away, while real in-the-money value never decays. The ice-bag analogy stops there: ice melts at one steady speed, while an at-the-money option melts much faster in its final week.\n\nTo avoid sign confusion, traders say Maria is 'paying theta' on long options and Sam is 'collecting theta' on shorts. Remember the risk in the same breath: Sam may collect $8 a day on a short $67 put, yet lose $700 on one $9 drop. Because every option loses one calendar day at the same speed, Maria can add her daily theta dollars across all stocks and months. In plain words: option buyers pay a daily time bill for capped-risk upside, and option sellers collect it for bearing jump risk.\n\nWhere on the option chain does theta bite the hardest? Theta peaks right at today's stock price\u2014where extrinsic value is largest\u2014and grows when higher IV packs more time value onto the clock. Even more important, at-the-money decay speeds up near the end: a 60-day $42 call on Lumend ($42) loses $2 a day, while a 3-day call loses $15. Waiting until the final week to sell a flat long option is expensive.\n\nOptions sitting far away from today's stock price follow a different path. A far out-of-the-money $50 call on Lumend ($42) has almost nothing left in the final week, so its daily theta shrinks toward $0. A deep in-the-money option with $0 of extrinsic value also has $0 of theta unless a move back toward the strike revives it. In plain words: time decay accelerates in the final weeks near the strike price, so close flat long options early.",
+                "body": "You have bought a $20 bag of ice for a cookout where water drips out every hour in the sun. The dollar value an option loses per trading day when the stock sits still is called **theta**, like a $350 Burgess ($67) call losing $5 a day. Only the extra time price\u2014called **extrinsic value**\u2014melts away, while real in-the-money value never decays. A bag of ice melts at one steady speed; an at-the-money option melts much faster in its final week.\n\nTo avoid sign confusion, traders say Maria is 'paying theta' on long options and Sam is 'collecting theta' on shorts. Remember the risk in the same breath: Sam may collect $8 a day on a short $67 put, yet lose $700 on one $9 drop. Because every option loses one calendar day at the same speed, Maria can add her daily theta dollars across all stocks and months. In plain words: option buyers pay a daily time bill for capped-risk upside, and option sellers collect it for bearing jump risk.\n\nWhere on the option chain does theta bite the hardest? Theta peaks right at today's stock price\u2014where extrinsic value is largest\u2014and grows when higher IV packs more time value onto the clock. Even more important, at-the-money decay speeds up near the end: a 60-day $42 call on Lumend ($42) loses $2 a day, while a 3-day call loses $15. Waiting until the final week to sell a flat long option is expensive.\n\nOptions sitting far away from today's stock price follow a different path. A far out-of-the-money $50 call on Lumend ($42) has almost nothing left in the final week, so its daily theta shrinks toward $0. A deep in-the-money option with $0 of extrinsic value also has $0 of theta unless a move back toward the strike revives it. In plain words: time decay accelerates in the final weeks near the strike price, so close flat long options early.",
                 "key_takeaways": [
                   "Theta is the dollar value an option loses per trading day when the stock sits still; only extrinsic (time) value decays.",
                   "Option buyers pay theta every quiet day for capped-risk upside; option sellers collect theta in exchange for bearing move risk.",
@@ -9788,7 +9788,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "g-vega",
                 "title": "Vega: How Implied Volatility Swings Change Your Option Price",
                 "objective": "Use vega to turn a 1-point IV change into dollars, compare option price changes in vol points instead of cents, and see why raw vega cannot be added across months.",
-                "body": "You have seen a beach hotel raise room rates by $15 for every 1-point jump in travel demand. The dollar change in an option's price when implied volatility moves 1 point (say 25% to 26%) is called **vega**, like $12 on a Burgess ($67) call. Every plain option you buy has positive vega because wider swings help it, while every option you sell has negative vega. The hotel analogy stops there: room rates only hit new guests, while an IV jump reprices every open option immediately.\n\nVega lets Maria compare any two options cleanly by dividing each price change by vega into **vol points**. Suppose Option A drops $10 with $5 of vega, while Option B drops $7.50 with $3 of vega while Lumend ($42) sits still. Option A fell more in dollars, but dividing price change by vega shows Option A fell 2.0 vol points while Option B fell 2.5 vol points. In plain words: divide an option's dollar change or bid-ask spread by its vega to see the real volatility move.\n\nWhere is vega largest, and what trap awaits across different expiration months? Vega peaks right at today's stock price and grows with time: a 6-month PowerSun ($95) call carries far more vega than a 5-day call. However, you must never add raw vega across months, because a sudden scare can lift 30-day IV by 9 points and 6-month IV by 3. If Sam is long $100 of raw vega in June and short $100 in March, a front-month shock hits his March short three times harder.\n\nTo compare vega across months honestly, traders weight each month by the square root of time. Remember too that stock shares have zero vega\u2014only other options can hedge vega. Even if Maria balances her vega today on Lumend ($42), a $6 stock move will shift both options and unbalance her vega tomorrow. In plain words: long options gain when IV rises, short options lose, and you never sum raw vega across different expirations.",
+                "body": "You have seen a beach hotel raise room rates by $15 for every 1-point jump in travel demand. The dollar change in an option's price when implied volatility moves 1 point (say 25% to 26%) is called **vega**, like $12 on a Burgess ($67) call. Every plain option you buy has positive vega because wider swings help it, while every option you sell has negative vega. Hotel room rates only hit new guests; an IV jump reprices every open option immediately.\n\nVega lets Maria compare any two options cleanly by dividing each price change by vega into **vol points**. Suppose Option A drops $10 with $5 of vega, while Option B drops $7.50 with $3 of vega while Lumend ($42) sits still. Option A fell more in dollars, but dividing price change by vega shows Option A fell 2.0 vol points while Option B fell 2.5 vol points. In plain words: divide an option's dollar change or bid-ask spread by its vega to see the real volatility move.\n\nWhere is vega largest, and what trap awaits across different expiration months? Vega peaks right at today's stock price and grows with time: a 6-month PowerSun ($95) call carries far more vega than a 5-day call. However, you must never add raw vega across months, because a sudden scare can lift 30-day IV by 9 points and 6-month IV by 3. If Sam is long $100 of raw vega in June and short $100 in March, a front-month shock hits his March short three times harder.\n\nTo compare vega across months honestly, traders weight each month by the square root of time. Remember too that stock shares have zero vega\u2014only other options can hedge vega. Even if Maria balances her vega today on Lumend ($42), a $6 stock move will shift both options and unbalance her vega tomorrow. In plain words: long options gain when IV rises, short options lose, and you never sum raw vega across different expirations.",
                 "key_takeaways": [
                   "Vega is the dollar change in an option's price for a 1-point move in implied volatility (such as 25% to 26%); long options are positive vega, short options are negative vega.",
                   "Divide any price change (or bid-ask spread) by vega to read it in vol points\u2014the only unit that compares cleanly across different strikes.",
@@ -9855,7 +9855,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "g-gamma-intro",
                 "title": "Gamma: How Fast Your Delta Changes When the Stock Moves",
                 "objective": "Measure how much delta changes per $1 stock move with gamma, remember why every option you buy has positive gamma, and use the average-delta rule for bigger moves.",
-                "body": "You have pressed a car's gas pedal where the speedometer shows your speed right now, and acceleration shows how fast that speed climbs. In options, how much a contract's delta changes when the stock moves $1 is called **gamma**, like a 50-delta call on Burgess ($67) with 10 gamma climbing to 60 delta at $68. Every option you buy\u2014call or put\u2014has positive gamma, and every option you sell has negative gamma. The car analogy stops there: a driver controls the pedal directly, while an option's gamma changes automatically as the stock price and clock move.\n\nWhy does buying a put also give Maria positive gamma? If Maria owns a \u221230 delta put on Lumend ($42) with 5 gamma and Lumend rises $1 to $43, adding +5 gamma moves her put delta from \u221230 up to \u221225, so she loses fewer dollars on the next $1 rise. If Lumend drops $1 to $41 instead, her put delta moves to \u221235, so she gains more dollars as the fall continues. In plain words: owning any option gives you positive gamma, which makes your delta grow when the stock moves your way and shrink when it moves against you.\n\nThree forces control how much gamma an option carries. First, gamma peaks right at today's stock price, where a $1 move can flip an option between winning and losing, and sits near 0 far away from the strike. Second, fewer days on the clock pack much more gamma into the strike: a 2-day option reacts far more violently to a $1 move than a 90-day option. Third, lower implied volatility increases at-the-money gamma because a $1 move is a big surprise in a quiet market.\n\nGamma also fixes the mistake of using a single starting delta to estimate a bigger stock move. If Sam owns a 50-delta call with 10 gamma on Burgess ($67) and the stock jumps $4 to $71, he uses the **average-delta rule**: the delta starts at 50, ends near 90 (50 plus 4 \xD7 10), and averages 70. Multiplying that 70 average delta by the $4 rally gives a $280 gain per contract instead of the $200 estimate from the starting 50 delta alone. In plain words: average your starting and ending deltas to estimate big moves, and remember that short-dated options near the strike have the sharpest gamma swings.",
+                "body": "You have pressed a car's gas pedal where the speedometer shows your speed right now, and acceleration shows how fast that speed climbs. In options, how much a contract's delta changes when the stock moves $1 is called **gamma**, like a 50-delta call on Burgess ($67) with 10 gamma climbing to 60 delta at $68. Every option you buy\u2014call or put\u2014has positive gamma, and every option you sell has negative gamma. A driver controls the gas pedal directly; an option's gamma changes automatically as the stock price and clock move.\n\nWhy does buying a put also give Maria positive gamma? If Maria owns a \u221230 delta put on Lumend ($42) with 5 gamma and Lumend rises $1 to $43, adding +5 gamma moves her put delta from \u221230 up to \u221225, so she loses fewer dollars on the next $1 rise. If Lumend drops $1 to $41 instead, her put delta moves to \u221235, so she gains more dollars as the fall continues. In plain words: owning any option gives you positive gamma, which makes your delta grow when the stock moves your way and shrink when it moves against you.\n\nThree forces control how much gamma an option carries. First, gamma peaks right at today's stock price, where a $1 move can flip an option between winning and losing, and sits near 0 far away from the strike. Second, fewer days on the clock pack much more gamma into the strike: a 2-day option reacts far more violently to a $1 move than a 90-day option. Third, lower implied volatility increases at-the-money gamma because a $1 move is a big surprise in a quiet market.\n\nGamma also fixes the mistake of using a single starting delta to estimate a bigger stock move. If Sam owns a 50-delta call with 10 gamma on Burgess ($67) and the stock jumps $4 to $71, he uses the **average-delta rule**: the delta starts at 50, ends near 90 (50 plus 4 \xD7 10), and averages 70. Multiplying that 70 average delta by the $4 rally gives a $280 gain per contract instead of the $200 estimate from the starting 50 delta alone. In plain words: average your starting and ending deltas to estimate big moves, and remember that short-dated options near the strike have the sharpest gamma swings.",
                 "key_takeaways": [
                   "Gamma measures how much an option's delta changes per $1 stock move; buying any option gives positive gamma, and selling any option gives negative gamma.",
                   "Gamma peaks right at today's stock price and grows sharper when fewer days remain or when implied volatility is low.",
@@ -9916,7 +9916,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "g-hedging-stale",
                 "title": "Delta Hedging: Turning Stock Swings in Either Direction into Cash",
                 "objective": "Build a delta-neutral position, see why gamma makes a share hedge go stale as soon as the stock moves, and lock in movement gains by re-hedging.",
-                "body": "You have balanced on a park seesaw where the board stays level only until one person leans back an inch. Offsetting your option deltas with shares so small moves net to $0 is called being **delta-neutral**, like Maria owning +500 call deltas on Burgess ($67) and selling 500 shares. The moment Burgess moves $1, gamma changes her call delta and her 500-share hedge no longer matches. The seesaw analogy stops there: shifting your weight at the park pays nothing, while rebalancing a hedged long-option book locks in cash.\n\nWatch how Maria's hedged position makes money whether Burgess ($67) goes up or down. On a $2 rally to $69 with 100 gamma, her call delta climbs from +500 to +700, gaining $1,200 while her 500 short shares lose $1,000 (+$200 net). On a $2 drop to $65, her call delta shrinks to +300, losing $800 while her 500 short shares gain $1,000 (+$200 net again). In plain words: a delta-hedged long-option book profits from a move in either direction because delta grows when you win and shrinks when you lose.\n\nThere is one catch: if Burgess rallies to $69 and slides right back to $67 before Maria acts, that $200 paper profit vanishes. To lock in the $200, Maria places a **re-hedge** at $69 by selling 200 more shares to bring her net delta back to zero. After a $2 drop to $65, she re-hedges by buying back 200 shares at the lower $65 price. Each re-hedge banks roughly \xBD \xD7 gamma \xD7 (move)\xB2, so \xBD \xD7 100 \xD7 ($2)\xB2 equals $200.\n\nNow flip the seat around to see what happens when Sam sells those 10 calls and hedges with 500 shares. Because Sam has negative gamma, a $2 rally forces him to buy 200 shares higher at $69, and a $2 drop forces him to sell lower at $65. Sam accepts being forced to buy high and sell low only because every quiet day pays him Maria's daily theta bill. In plain words: re-hedging long gamma sells rallies and buys dips to bank cash, while short gamma pays on big swings to collect daily theta.",
+                "body": "You have balanced on a park seesaw where the board stays level only until one person leans back an inch. Offsetting your option deltas with shares so small moves net to $0 is called being **delta-neutral**, like Maria owning +500 call deltas on Burgess ($67) and selling 500 shares. The moment Burgess moves $1, gamma changes her call delta and her 500-share hedge no longer matches. Shifting your weight on a seesaw pays nothing; rebalancing a hedged long-option book locks in cash.\n\nWatch how Maria's hedged position makes money whether Burgess ($67) goes up or down. On a $2 rally to $69 with 100 gamma, her call delta climbs from +500 to +700, gaining $1,200 while her 500 short shares lose $1,000 (+$200 net). On a $2 drop to $65, her call delta shrinks to +300, losing $800 while her 500 short shares gain $1,000 (+$200 net again). In plain words: a delta-hedged long-option book profits from a move in either direction because delta grows when you win and shrinks when you lose.\n\nThere is one catch: if Burgess rallies to $69 and slides right back to $67 before Maria acts, that $200 paper profit vanishes. To lock in the $200, Maria places a **re-hedge** at $69 by selling 200 more shares to bring her net delta back to zero. After a $2 drop to $65, she re-hedges by buying back 200 shares at the lower $65 price. Each re-hedge banks roughly \xBD \xD7 gamma \xD7 (move)\xB2, so \xBD \xD7 100 \xD7 ($2)\xB2 equals $200.\n\nNow flip the seat around to see what happens when Sam sells those 10 calls and hedges with 500 shares. Because Sam has negative gamma, a $2 rally forces him to buy 200 shares higher at $69, and a $2 drop forces him to sell lower at $65. Sam accepts being forced to buy high and sell low only because every quiet day pays him Maria's daily theta bill. In plain words: re-hedging long gamma sells rallies and buys dips to bank cash, while short gamma pays on big swings to collect daily theta.",
                 "key_takeaways": [
                   "A delta-neutral hedge is balanced only at the exact stock price where you set it; gamma makes it go stale as soon as the stock moves.",
                   "A delta-hedged long-gamma position makes money on moves in BOTH directions because option delta grows with your winners and shrinks on your losers.",
@@ -9977,7 +9977,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "g-gamma-theta-tradeoff",
                 "title": "Gamma vs. Theta: The Daily Move Needed to Pay Your Time Bill",
                 "objective": "Calculate the daily breakeven stock move from your theta and gamma, compare it to the market's implied daily swing, and weigh long-gamma bleed against short-gamma shock risk.",
-                "body": "You have paid $75 to rent a weekend market booth where you only profit on days when sales beat your $75 rent. Trading a delta-hedged long-option book against its daily time bill is called **gamma scalping**, and it works the same way. Maria earns \xBD \xD7 gamma \xD7 (move)\xB2 on swings and pays theta daily, so her daily **breakeven move** is \u221A(2 \xD7 daily theta \xF7 gamma). The booth analogy stops there: craft sales grow one item at a time, while gamma profits grow with the square of the move.\n\nWalk through Maria's numbers on PowerSun Energy ($100) when she pays $75 a day in theta and holds 50 gamma. Her daily breakeven move is the square root of (2 \xD7 $75 \xF7 50), which is \u221A3, or **$1.73**. At 25% implied volatility, the divide-by-16 rule prices in typical daily swings of $100 \xD7 25% \xF7 16, or about **$1.56** a day. In plain words: gamma trading pits realized volatility (actual swings that pay you gamma) against implied volatility (the daily theta bill you pay).\n\nBecause gamma profit grows with the square of the move, how often Maria re-hedges changes her payout. Waiting for a full $2.00 move on 50 gamma lets one re-hedge bank $100 (\xBD \xD7 50 \xD7 $4 is $100). Re-hedging at a $1.00 move\u2014half the distance\u2014banks only $25 (\xBD \xD7 50 \xD7 $1 is $25), or one-quarter as much. Tight hedging banks small crumbs often, while wider triggers wait for big moves that pay four times faster.\n\nCompare the worst-case risks of the two seats before you size a position \u2014 using the local approximation, which holds gamma and IV fixed and ignores fees. On that simplified math, when Maria is long gamma her worst quiet day costs about her $75 theta bill, while a $10 crash pays roughly $2,500. When Sam is short gamma, his best quiet day collects about $75, while that same $10 crash costs him roughly $2,500 \u2014 and in a real crash it is usually WORSE, because gamma itself grows and IV spikes against him on the way down. In plain words: long gamma bleeds slowly in calm weeks and wins big in storms, while short gamma collects small daily cash until a shock hits \u2014 and the shock math above is the friendly version.",
+                "body": "You have paid $75 to rent a weekend market booth where you only profit on days when sales beat your $75 rent. Trading a delta-hedged long-option book against its daily time bill is called **gamma scalping**, and it works the same way. Maria earns \xBD \xD7 gamma \xD7 (move)\xB2 on swings and pays theta daily, so her daily **breakeven move** is \u221A(2 \xD7 daily theta \xF7 gamma). Market-booth craft sales grow one item at a time; gamma profits grow with the square of the move.\n\nWalk through Maria's numbers on PowerSun Energy ($100) when she pays $75 a day in theta and holds 50 gamma. Her daily breakeven move is the square root of (2 \xD7 $75 \xF7 50), which is \u221A3, or **$1.73**. At 25% implied volatility, the divide-by-16 rule prices in typical daily swings of $100 \xD7 25% \xF7 16, or about **$1.56** a day. In plain words: gamma trading pits realized volatility (actual swings that pay you gamma) against implied volatility (the daily theta bill you pay).\n\nBecause gamma profit grows with the square of the move, how often Maria re-hedges changes her payout. Waiting for a full $2.00 move on 50 gamma lets one re-hedge bank $100 (\xBD \xD7 50 \xD7 $4 is $100). Re-hedging at a $1.00 move\u2014half the distance\u2014banks only $25 (\xBD \xD7 50 \xD7 $1 is $25), or one-quarter as much. Tight hedging banks small crumbs often, while wider triggers wait for big moves that pay four times faster.\n\nCompare the worst-case risks of the two seats before you size a position \u2014 using the local approximation, which holds gamma and IV fixed and ignores fees. On that simplified math, when Maria is long gamma her worst quiet day costs about her $75 theta bill, while a $10 crash pays roughly $2,500. When Sam is short gamma, his best quiet day collects about $75, while that same $10 crash costs him roughly $2,500 \u2014 and in a real crash it is usually WORSE, because gamma itself grows and IV spikes against him on the way down. In plain words: long gamma bleeds slowly in calm weeks and wins big in storms, while short gamma collects small daily cash until a shock hits \u2014 and the shock math above is the friendly version.",
                 "key_takeaways": [
                   "Your daily breakeven move is \u221A(2 \xD7 daily theta \xF7 gamma); compare it to the implied daily move (spot \xD7 IV \xF7 16) to judge the price tag.",
                   "Gamma trading is realized volatility versus implied volatility: theta is priced off the market's forecast, while re-hedging profits come from actual moves.",
@@ -10044,7 +10044,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "g-implied-vs-realized",
                 "title": "Implied vs. Realized Volatility: How Option Prices Become a Forecast",
                 "objective": "See how option prices map one-to-one to implied volatility, separate order-flow bumps from real news, and understand why implied and realized volatility stay tethered.",
-                "body": "You have figured out a driver's 60-mile-per-hour speed by seeing they covered 180 miles in 3 hours. Pricing models work in reverse: plug in stock price, strike, days left, and option price to solve for one implied volatility (IV). Because wider swings always add value, a $2.40 call on Lumend ($42) maps to one exact IV, such as 28%. The highway analogy stops there: road trips measure past miles, while IV measures the future swings traders are paying for.\n\nWhy is a 10-day option's IV quoted as an annual percentage like 60%? Quoting every option on the same 252-day scale lets Maria compare a 10-day Rocket ($182) option against a 90-day Burgess ($67) option. Dividing 60% by 16 says traders expect 3.75% daily swings (about $6.80 a day on Rocket) over the next 10 days. In plain words: every option price corresponds to one implied volatility, quoted on an annual scale so any two contracts compare cleanly.\n\nWhen Maria sees PowerSun ($95) jump from 24% IV to 31% IV on Tuesday, she asks what pushed it. Recent actual movement\u2014called **realized volatility**\u2014anchors IV because wild days tend to cluster together. Scheduled news lifts IV in the specific week holding the event, while heavy **order flow** lifts IV even without news. If a fund buys 5,000 PowerSun puts, that buying creates a temporary IV bump that often fades once the order finishes.\n\nWhy can't implied volatility sit 15 points below realized volatility forever? If PowerSun moved $2.50 a day (42% realized vol) while options sat at 20% IV, Maria would buy straddles and gamma-scalp for steady profits. On broad indexes like the Academy 500 ($500), IV usually runs 2 to 4 points above realized volatility as an insurance cushion. In plain words: hedging profits keep implied volatility tethered to actual stock swings over time, while order-flow bumps create short-term trading setups.",
+                "body": "You have figured out a driver's 60-mile-per-hour speed by seeing they covered 180 miles in 3 hours. Pricing models work in reverse: plug in stock price, strike, days left, and option price to solve for one implied volatility (IV). Because wider swings always add value, a $2.40 call on Lumend ($42) maps to one exact IV, such as 28%. Road trips measure past miles; IV measures the future swings traders are paying for.\n\nWhy is a 10-day option's IV quoted as an annual percentage like 60%? Quoting every option on the same 252-day scale lets Maria compare a 10-day Rocket ($182) option against a 90-day Burgess ($67) option. Dividing 60% by 16 says traders expect 3.75% daily swings (about $6.80 a day on Rocket) over the next 10 days. In plain words: every option price corresponds to one implied volatility, quoted on an annual scale so any two contracts compare cleanly.\n\nWhen Maria sees PowerSun ($95) jump from 24% IV to 31% IV on Tuesday, she asks what pushed it. Recent actual movement\u2014called **realized volatility**\u2014anchors IV because wild days tend to cluster together. Scheduled news lifts IV in the specific week holding the event, while heavy **order flow** lifts IV even without news. If a fund buys 5,000 PowerSun puts, that buying creates a temporary IV bump that often fades once the order finishes.\n\nWhy can't implied volatility sit 15 points below realized volatility forever? If PowerSun moved $2.50 a day (42% realized vol) while options sat at 20% IV, Maria would buy straddles and gamma-scalp for steady profits. On broad indexes like the Academy 500 ($500), IV usually runs 2 to 4 points above realized volatility as an insurance cushion. In plain words: hedging profits keep implied volatility tethered to actual stock swings over time, while order-flow bumps create short-term trading setups.",
                 "key_takeaways": [
                   "Every option price maps one-to-one to a single implied volatility (IV) solved backwards from the pricing model.",
                   "Annualizing IV is a comparison yardstick\u2014a 2-week option at 60% IV prices in 3.75% daily swings (60% \xF7 16) for those 2 weeks only.",
@@ -10105,7 +10105,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "g-iv-as-price",
                 "title": "Why Implied Volatility Is the True Price of Any Option",
                 "objective": "Separate stock-driven delta moves from real changes in option expensiveness, use vega to convert dollar discounts into vol points, and see why a resting dollar bid is a floating vol quote.",
-                "body": "You have judged whether a jeweler raised their crafting fee on a gold ring by subtracting raw gold's price from the tag. If Lumend ($42) rises $0.40 and a 50-delta call climbs $20 from $200 to $220, that entire $20 rise came from delta. The option's implied volatility did not budge, so to Maria its real price tag is unchanged. The ring analogy stops there: a ring's gold weight stays fixed, while an option's delta shifts as the stock moves.\n\nA rule called **put-call parity** says a call and a put at the same strike hold identical extrinsic time value once delta-hedged. Because the in-the-money side just bundles stock value, traders focus on out-of-the-money puts below the stock price and out-of-the-money calls above it. All trading disagreement lives in extrinsic time value, and implied volatility measures that time value cleanly across every strike. In plain words: dollar option prices mix stock movement with time value, while implied volatility strips out the stock move.\n\nVega lets Sam translate between dollars and vol points in two seconds. Suppose a Burgess ($67) call is worth $150 at 25% IV with $5 of vega per point, and Sam buys it for $135. Dividing his $15 discount by $5 vega means he bought at **22% IV**\u20143 vol points below the market. Works in reverse too: holding +$12 of vega on Lumend ($42) when IV rises 3 points earns +$36 per contract.\n\nThis mindset reveals a costly trap in resting dollar limit orders. Sam leaves a resting bid at $140 when fair value at 25% IV is $150, aiming to buy at 23% IV. If Burgess drops $0.40 or market IV slides to 22%, Sam's untouched $140 bid becomes a **floating vol quote** offering to overpay. In plain words: a resting dollar order silently changes its implied-volatility price whenever the stock or the market's IV moves.",
+                "body": "You have judged whether a jeweler raised their crafting fee on a gold ring by subtracting raw gold's price from the tag. If Lumend ($42) rises $0.40 and a 50-delta call climbs $20 from $200 to $220, that entire $20 rise came from delta. The option's implied volatility did not budge, so to Maria its real price tag is unchanged. A gold ring's weight stays fixed; an option's delta shifts as the stock moves.\n\nA rule called **put-call parity** says a call and a put at the same strike hold identical extrinsic time value once delta-hedged. Because the in-the-money side just bundles stock value, traders focus on out-of-the-money puts below the stock price and out-of-the-money calls above it. All trading disagreement lives in extrinsic time value, and implied volatility measures that time value cleanly across every strike. In plain words: dollar option prices mix stock movement with time value, while implied volatility strips out the stock move.\n\nVega lets Sam translate between dollars and vol points in two seconds. Suppose a Burgess ($67) call is worth $150 at 25% IV with $5 of vega per point, and Sam buys it for $135. Dividing his $15 discount by $5 vega means he bought at **22% IV**\u20143 vol points below the market. Works in reverse too: holding +$12 of vega on Lumend ($42) when IV rises 3 points earns +$36 per contract.\n\nThis mindset reveals a costly trap in resting dollar limit orders. Sam leaves a resting bid at $140 when fair value at 25% IV is $150, aiming to buy at 23% IV. If Burgess drops $0.40 or market IV slides to 22%, Sam's untouched $140 bid becomes a **floating vol quote** offering to overpay. In plain words: a resting dollar order silently changes its implied-volatility price whenever the stock or the market's IV moves.",
                 "key_takeaways": [
                   "When an option's dollar price changes by (delta \xD7 stock move), its implied volatility\u2014and its true expensiveness\u2014has not changed at all.",
                   "Put-call parity means the call and put at the same strike share the same time value and IV; out-of-the-money options isolate that pure time value.",
@@ -10155,7 +10155,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "g-skew-smile",
                 "title": "Why the Smile Exists: Put Skew and Curve Shape",
                 "objective": "See why downside puts trade at higher IV than upside calls, separate a parallel level shift from a curve twist, and watch how a big stock move changes your exposure.",
-                "body": "You have seen flood insurers charge $1,200 a year for a ground-floor apartment and $300 for a fourth-floor unit upstairs. On Burgess ($67), the $67 strike might trade at 25% IV while the $60 put trades at 31% and the $75 call trades at 23%. That slope from pricier downside puts to cheaper upside calls is called **skew**, and when both far wings lift it forms a smile. The apartment analogy stops there: building floors never move, while a $7 stock drop makes the $60 strike the new ground floor.\n\nTwo main forces keep downside put IV higher than upside call IV on stocks and indexes. First, stockholders steadily buy downside puts for crash protection while selling upside covered calls, pushing put prices up. Second, market crashes happen faster and drop further than normal rallies\u2014and fear spikes as they fall\u2014so sellers demand higher fees for downside risk. In plain words: downside puts cost more IV than upside calls because crash demand is heavy and downside risk is sharper.\n\nMaria splits any move in the curve into a level shift (all strikes move 2 points together) and a shape twist (put skew steepens). A delta-hedged $67 straddle on Burgess ($67) sits in the middle and feels level shifts almost exclusively. A delta-hedged **risk reversal**\u2014selling the $62 put at 29% IV and buying the $72 call at 23% IV\u2014cancels center vega and trades the 6-point skew slope. Matching the structure to your view keeps level noise out of a shape trade.\n\nNever forget that a big stock move changes which part of the curve you are holding. Suppose Sam sells a wide $60/$75 strangle on Burgess ($67), and bad news knocks Burgess down from $67 to $60. His $60 short put now sits right at the $60 stock price with peak gamma and peak level vega at the worst moment. In plain words: straddles trade overall IV level, risk reversals trade skew shape, and a big stock move turns wing positions into center-strike risk.",
+                "body": "You have seen flood insurers charge $1,200 a year for a ground-floor apartment and $300 for a fourth-floor unit upstairs. On Burgess ($67), the $67 strike might trade at 25% IV while the $60 put trades at 31% and the $75 call trades at 23%. That slope from pricier downside puts to cheaper upside calls is called **skew**, and when both far wings lift it forms a smile. Apartment building floors never move; a $7 stock drop makes the $60 strike the new ground floor.\n\nTwo main forces keep downside put IV higher than upside call IV on stocks and indexes. First, stockholders steadily buy downside puts for crash protection while selling upside covered calls, pushing put prices up. Second, market crashes happen faster and drop further than normal rallies\u2014and fear spikes as they fall\u2014so sellers demand higher fees for downside risk. In plain words: downside puts cost more IV than upside calls because crash demand is heavy and downside risk is sharper.\n\nMaria splits any move in the curve into a level shift (all strikes move 2 points together) and a shape twist (put skew steepens). A delta-hedged $67 straddle on Burgess ($67) sits in the middle and feels level shifts almost exclusively. A delta-hedged **risk reversal**\u2014selling the $62 put at 29% IV and buying the $72 call at 23% IV\u2014cancels center vega and trades the 6-point skew slope. Matching the structure to your view keeps level noise out of a shape trade.\n\nNever forget that a big stock move changes which part of the curve you are holding. Suppose Sam sells a wide $60/$75 strangle on Burgess ($67), and bad news knocks Burgess down from $67 to $60. His $60 short put now sits right at the $60 stock price with peak gamma and peak level vega at the worst moment. In plain words: straddles trade overall IV level, risk reversals trade skew shape, and a big stock move turns wing positions into center-strike risk.",
                 "key_takeaways": [
                   "Each strike in the same expiration has its own IV; on stocks and indexes, downside puts usually trade at higher IV than upside calls (put skew).",
                   "Put skew exists because investors buy crash protection, market drops are sharper than rallies, and IV spikes when stocks fall.",
@@ -10230,7 +10230,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "p-scalping-craft",
                 "title": "The Scalper's Craft: Rules, Orders, and Partial Hedges",
                 "objective": "Turn gamma-hedging mechanics into a calm daily routine using resting limit orders, partial hedges, and clean exits.",
-                "body": "If you have ever set a home thermostat before going to sleep, you know automatic rules beat getting up at 3 a.m. to tweak the dial. In gamma scalping, a **resting limit order** is an order placed in the book ahead of time\u2014like offering to sell 30 shares of Lumend Brands (LMND) at $43.50. Because a long-gamma position always sells rallies and buys dips, Maria can place both orders over breakfast instead of chasing fast midday spikes. The thermostat analogy stops there: stock prices can blow right past your first target or reverse a penny short of your order.\n\nSuppose Maria owns an at-the-money $42 LMND straddle with +0.30 gamma and leaves a resting order to sell 30 shares at $43.00 and buy 30 shares at $41.00. At 11:14 a.m., LMND spikes to $43.05 for ninety seconds and drops back to $42.00. Maria's resting order sells 30 shares at $43.00 and buys them back at $42.00 for $30 of cash, while Sam, watching manually, misses the ninety-second spike completely. In plain words: pre-placed orders catch brief price spikes that human fingers miss.\n\nMaria does not have to flatten every single share of delta on the first move. A **partial hedge** trims only part of your accumulated delta\u2014say selling 15 shares of LMND when your straddle picks up +30 delta on a $1 rally. Selling 15 shares banks $15 if LMND falls back by $1, while keeping +15 delta working if the rally continues to $44. Splitting orders across several prices\u2014selling 10 shares at $42.75, 10 at $43.00, and 10 at $43.25\u2014also keeps an all-or-nothing order from missing by one cent.\n\nA costly bookkeeping mistake ruins good scalping weeks. If Maria sells her LMND straddle after a volatility pop, she must close her leftover stock hedge at the same time. Without the straddle's gamma, 30 leftover short shares are just an unhedged bet against the stock. In plain words: when the option trade is over, close the stock hedge too so leftover shares never turn into an accidental bet.",
+                "body": "If you have ever set a home thermostat before going to sleep, you know automatic rules beat getting up at 3 a.m. to tweak the dial. In gamma scalping, a **resting limit order** is an order placed in the book ahead of time\u2014like offering to sell 30 shares of Lumend Brands (LMND) at $43.50. Because a long-gamma position always sells rallies and buys dips, Maria can place both orders over breakfast instead of chasing fast midday spikes. A home thermostat clicks at its exact degree; stock prices can blow right past your first target or reverse a penny short of your order.\n\nSuppose Maria owns an at-the-money $42 LMND straddle with +0.30 gamma and leaves a resting order to sell 30 shares at $43.00 and buy 30 shares at $41.00. At 11:14 a.m., LMND spikes to $43.05 for ninety seconds and drops back to $42.00. Maria's resting order sells 30 shares at $43.00 and buys them back at $42.00 for $30 of cash, while Sam, watching manually, misses the ninety-second spike completely. In plain words: pre-placed orders catch brief price spikes that human fingers miss.\n\nMaria does not have to flatten every single share of delta on the first move. A **partial hedge** trims only part of your accumulated delta\u2014say selling 15 shares of LMND when your straddle picks up +30 delta on a $1 rally. Selling 15 shares banks $15 if LMND falls back by $1, while keeping +15 delta working if the rally continues to $44. Splitting orders across several prices\u2014selling 10 shares at $42.75, 10 at $43.00, and 10 at $43.25\u2014also keeps an all-or-nothing order from missing by one cent.\n\nA costly bookkeeping mistake ruins good scalping weeks. If Maria sells her LMND straddle after a volatility pop, she must close her leftover stock hedge at the same time. Without the straddle's gamma, 30 leftover short shares are just an unhedged bet against the stock. In plain words: when the option trade is over, close the stock hedge too so leftover shares never turn into an accidental bet.",
                 "key_takeaways": [
                   "Set your hedging rules before the market opens; improvising in the middle of a fast move leads to late, emotional trades.",
                   "Place resting limit orders ahead of time at your target prices so brief spikes get captured automatically.",
@@ -10291,7 +10291,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "p-quadratic-frequency",
                 "title": "Path Dependency: Same Vol, Different P&L",
                 "objective": "See why gamma scalping P&L depends on the exact price path and hedging schedule\u2014and how buyer and seller can both win on the same stock.",
-                "body": "Two weeks can both drop two inches of rain, yet a gentle five-day drizzle soaks a garden while a twenty-minute flash flood washes the soil away. In options, **path dependency** means two months with the exact same 24% realized volatility can produce opposite profits depending on how the daily moves arrive. A $42 LMND straddle with 0.30 gamma earns about $15 on a $1 move (0.5 \xD7 0.30 \xD7 1\xB2 \xD7 100), but $240 on a single $4 move. The rain analogy stops there: in options, your own hedging schedule decides whether you harvest the drizzle or the flood.\n\nWatch how both sides of the same trade can win in the same week. Sam sells the $42 LMND straddle at 25% IV and hedges once a day at the 4 p.m. close, while Maria buys it and hedges every $1.50 intraday swing. If LMND swings $2 up and down inside each day but closes near $42 every afternoon, Sam rarely trades and keeps his theta, while Maria scalps the intraday swings. In plain words: your hedging schedule chooses which swings you actually capture.\n\nYour **hedge spacing** is the move size or time gap that triggers a rebalance\u2014such as hedging every $1 move versus waiting for a $3 move. If Maria hedges tightly after every $1 move, she thrives in a choppy back-and-forth week. However, if LMND marches straight from $42 to $46 in four $1 steps, tight hedging sells shares too early and earns $60 instead of $240. Loose hedging starves during small chop, but captures the squared payoff when a big trend or gap finally hits.\n\nBecause of path dependency, saying 'implied volatility was 25% and realized was 22%, so sellers won' is only half a sentence. A seller who hedged every noisy intraday swing could still lose money in a 22% month. Match your trigger spacing to the kind of market you expect\u2014tight triggers for range-bound chop, wider triggers when waiting for a breakout. In plain words: you do not earn a single headline volatility number\u2014you earn the specific swings your hedge rule trades.",
+                "body": "Two weeks can both drop two inches of rain, yet a gentle five-day drizzle soaks a garden while a twenty-minute flash flood washes the soil away. In options, **path dependency** means two months with the exact same 24% realized volatility can produce opposite profits depending on how the daily moves arrive. A $42 LMND straddle with 0.30 gamma earns about $15 on a $1 move (0.5 \xD7 0.30 \xD7 1\xB2 \xD7 100), but $240 on a single $4 move. Gardeners cannot schedule the rain; in options, your own hedging schedule decides whether you harvest the drizzle or the flood.\n\nWatch how both sides of the same trade can win in the same week. Sam sells the $42 LMND straddle at 25% IV and hedges once a day at the 4 p.m. close, while Maria buys it and hedges every $1.50 intraday swing. If LMND swings $2 up and down inside each day but closes near $42 every afternoon, Sam rarely trades and keeps his theta, while Maria scalps the intraday swings. In plain words: your hedging schedule chooses which swings you actually capture.\n\nYour **hedge spacing** is the move size or time gap that triggers a rebalance\u2014such as hedging every $1 move versus waiting for a $3 move. If Maria hedges tightly after every $1 move, she thrives in a choppy back-and-forth week. However, if LMND marches straight from $42 to $46 in four $1 steps, tight hedging sells shares too early and earns $60 instead of $240. Loose hedging starves during small chop, but captures the squared payoff when a big trend or gap finally hits.\n\nBecause of path dependency, saying 'implied volatility was 25% and realized was 22%, so sellers won' is only half a sentence. A seller who hedged every noisy intraday swing could still lose money in a 22% month. Match your trigger spacing to the kind of market you expect\u2014tight triggers for range-bound chop, wider triggers when waiting for a breakout. In plain words: you do not earn a single headline volatility number\u2014you earn the specific swings your hedge rule trades.",
                 "key_takeaways": [
                   "Realized volatility has no single profit outcome until you specify how often and at what intervals you hedged.",
                   "An option buyer hedging intraday swings and an option seller hedging only at the daily close can both profit on the same stock path.",
@@ -10341,7 +10341,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "p-expiry-vega-shocks",
                 "title": "The Edges of the Map: Expiration, Pin Risk, and Vega Shocks",
                 "objective": "Spot the three places where textbook gamma scalping breaks down: expiration-week gamma explosions, strike pinning, and correlated vega shocks.",
-                "body": "Steering a car at 25 miles per hour feels routine on dry pavement, but on black ice a tiny turn of the wheel spins the car across the road. In expiration week, an at-the-money option behaves like black ice because its delta must snap to either 0 or 1.00 before Friday's closing bell. With hours left on a $42 LMND call, a 25-cent wiggle from $41.90 to $42.15 can whip delta from +0.25 to +0.75, creating enormous gamma. The black-ice analogy stops there: in options, you can simply sell or roll the position on Monday of expiration week and skip the skid.\n\nWhen thousands of contracts sit open at the $42 strike on expiration Friday, **pin risk** appears\u2014the danger that the stock closes at $42.01 or $41.99 and leaves assignment uncertain. Traders who own the $42 strike all sell shares at $42.30 and buy shares at $41.70 to hedge their gamma, which pushes LMND right back toward $42.00. If Maria still owns the $42 straddle on Friday afternoon, that magnet traps LMND still while her steepest theta bill drains what is left of the premium. In plain words: heavy open interest can glue a stock to a strike on Friday, starving option buyers while leaving option sellers guessing about weekend shares.\n\nAway from expiration, the biggest surprise comes when stock prices and implied volatility move at the same time. Suppose Sam is short a $67 Burgess Restaurant Group (BRGR) straddle\u2014short gamma and short $12 of vega\u2014when bad news drops BRGR from $67 to $61. Sam loses twice at once: his short gamma forces him to sell shares low after the drop, and a 6-point IV spike adds another $72 of vega loss. The only time vega cushions a short-gamma loss is after a scheduled event like earnings, when the post-announcement IV crush can offset part of the price gap.\n\nTo keep your book healthy across strikes, check the **gamma-theta ratio**\u2014how much gamma you get for each dollar of daily theta rent, such as 0.10 gamma per $10 theta. Because out-of-the-money puts trade at high IV on the skew, buying overpriced wing puts while selling cheaper at-the-money options can leave you short gamma AND paying net theta. That combination loses if the stock sits still and loses if the stock jumps. In plain words: never build a multi-leg book that pays daily time rent while also losing on big price moves.",
+                "body": "Steering a car at 25 miles per hour feels routine on dry pavement, but on black ice a tiny turn of the wheel spins the car across the road. In expiration week, an at-the-money option behaves like black ice because its delta must snap to either 0 or 1.00 before Friday's closing bell. With hours left on a $42 LMND call, a 25-cent wiggle from $41.90 to $42.15 can whip delta from +0.25 to +0.75, creating enormous gamma. Drivers cannot skip a patch of black ice; in options, you can sell or roll the position on Monday of expiration week and skip the skid.\n\nWhen thousands of contracts sit open at the $42 strike on expiration Friday, **pin risk** appears\u2014the danger that the stock closes at $42.01 or $41.99 and leaves assignment uncertain. Traders who own the $42 strike all sell shares at $42.30 and buy shares at $41.70 to hedge their gamma, which pushes LMND right back toward $42.00. If Maria still owns the $42 straddle on Friday afternoon, that magnet traps LMND still while her steepest theta bill drains what is left of the premium. In plain words: heavy open interest can glue a stock to a strike on Friday, starving option buyers while leaving option sellers guessing about weekend shares.\n\nAway from expiration, the biggest surprise comes when stock prices and implied volatility move at the same time. Suppose Sam is short a $67 Burgess Restaurant Group (BRGR) straddle\u2014short gamma and short $12 of vega\u2014when bad news drops BRGR from $67 to $61. Sam loses twice at once: his short gamma forces him to sell shares low after the drop, and a 6-point IV spike adds another $72 of vega loss. The only time vega cushions a short-gamma loss is after a scheduled event like earnings, when the post-announcement IV crush can offset part of the price gap.\n\nTo keep your book healthy across strikes, check the **gamma-theta ratio**\u2014how much gamma you get for each dollar of daily theta rent, such as 0.10 gamma per $10 theta. Because out-of-the-money puts trade at high IV on the skew, buying overpriced wing puts while selling cheaper at-the-money options can leave you short gamma AND paying net theta. That combination loses if the stock sits still and loses if the stock jumps. In plain words: never build a multi-leg book that pays daily time rent while also losing on big price moves.",
                 "key_takeaways": [
                   "At-the-money gamma explodes in expiration week as delta snaps between 0 and 1.00; many traders close or roll before the final week.",
                   "Heavy open interest at a strike can pin the stock near that price on Friday as long-gamma hedgers sell above and buy below.",
@@ -10408,7 +10408,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "p-outright-vol",
                 "title": "Outright Vol: Buying Cheap Fear, Selling Rich Fear",
                 "objective": "Structure trades around cheap or expensive implied volatility while defending against theta drag and vega slippage.",
-                "body": "Buying bags of rock salt in October is smart when an icy winter is coming, unless storage fees eat your profit before the first January snowstorm arrives. In volatility trading, **theta drag** is that daily storage bill\u2014paying $7 a day in time decay while waiting for Lumend Brands (LMND) implied volatility to rise from 18% to 25%. If Maria buys a 30-day $42 LMND straddle for $310 and the volatility jump takes six weeks instead of two, daily decay can eat more than the IV bounce pays. The rock-salt analogy stops there: options also lose sensitivity to volatility if the stock price wanders away from your strike while you wait.\n\nThat second hazard is **vega slippage**\u2014losing your vega exposure because the stock drifted away from your strike before implied volatility finally jumped. Suppose Maria buys the $42 LMND straddle with $11 of vega per 1-point IV move, and LMND grinds quietly from $42 to $49 over three weeks. At $49, the $42 call is deep in the money and the $42 put is far out of the money, so the straddle's vega has shriveled from $11 to $3. In plain words: if the stock wanders far from your strike before volatility pops, your straddle is no longer in position to get paid.\n\nMaria has three practical ways to defend a long-volatility trade against those twin leaks. First, she can buy a 60-day or 90-day straddle instead of a 20-day straddle, which gives her more vega per dollar of daily theta rent. Second, she can gamma-scalp the daily stock swings so realized movement helps pay the theta bill while she waits. Third, she can buy a wider strangle\u2014such as the $39 put and $45 call\u2014or roll her straddle to the new stock price so her vega stays active.\n\nBefore buying 'cheap' implied volatility or selling 'rich' implied volatility, always check whether the market knows something you missed. Low IV in Galaxy Media (GLXY) at $23.50 might reflect a buyout agreement that locked the share price in place. High IV in Rocket Robotics (RCKT) at $182 might sit right ahead of a major clinical or product ruling. In plain words: pick an expiration long enough to survive the wait, keep your strikes near the stock, and check the news calendar first.",
+                "body": "Buying bags of rock salt in October is smart when an icy winter is coming, unless storage fees eat your profit before the first January snowstorm arrives. In volatility trading, **theta drag** is that daily storage bill\u2014paying $7 a day in time decay while waiting for Lumend Brands (LMND) implied volatility to rise from 18% to 25%. If Maria buys a 30-day $42 LMND straddle for $310 and the volatility jump takes six weeks instead of two, daily decay can eat more than the IV bounce pays. Stored rock salt never loses its strength; options also lose sensitivity to volatility if the stock price wanders away from your strike while you wait.\n\nThat second hazard is **vega slippage**\u2014losing your vega exposure because the stock drifted away from your strike before implied volatility finally jumped. Suppose Maria buys the $42 LMND straddle with $11 of vega per 1-point IV move, and LMND grinds quietly from $42 to $49 over three weeks. At $49, the $42 call is deep in the money and the $42 put is far out of the money, so the straddle's vega has shriveled from $11 to $3. In plain words: if the stock wanders far from your strike before volatility pops, your straddle is no longer in position to get paid.\n\nMaria has three practical ways to defend a long-volatility trade against those twin leaks. First, she can buy a 60-day or 90-day straddle instead of a 20-day straddle, which gives her more vega per dollar of daily theta rent. Second, she can gamma-scalp the daily stock swings so realized movement helps pay the theta bill while she waits. Third, she can buy a wider strangle\u2014such as the $39 put and $45 call\u2014or roll her straddle to the new stock price so her vega stays active.\n\nBefore buying 'cheap' implied volatility or selling 'rich' implied volatility, always check whether the market knows something you missed. Low IV in Galaxy Media (GLXY) at $23.50 might reflect a buyout agreement that locked the share price in place. High IV in Rocket Robotics (RCKT) at $182 might sit right ahead of a major clinical or product ruling. In plain words: pick an expiration long enough to survive the wait, keep your strikes near the stock, and check the news calendar first.",
                 "key_takeaways": [
                   "Long-volatility trades fail from theta drag (waiting too long) and vega slippage (the stock drifting off your strike) as often as from wrong IV forecasts.",
                   "Strangles spread vega across a wider price range than a single-strike straddle, and rolling keeps an older straddle centered near the stock.",
@@ -10469,7 +10469,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "p-term-structure",
                 "title": "The Calendar Dimension: Term Structure and Time-Weighted Vega",
                 "objective": "Read implied volatility across expirations, understand why front-month IV moves fastest, and size calendar trades with time-weighted vega.",
-                "body": "Drop a rock into the shallow end of a pool and the water splashes high right where it hits, while the far end barely ripples. Options expirations line up in a **term structure**\u2014each month's implied volatility plotted by date, such as 30-day LMND options at 22% IV and 90-day options at 25% IV. When sudden news hits, 30-day implied volatility might jump 8 points to 30%, while 180-day implied volatility rises only 2 points because a short scare averages out over six months. The ripple analogy stops there: in options, a scheduled event like earnings can load a giant splash into one specific expiration week in advance.\n\nBecause near-term IV moves much faster than long-term IV, comparing raw vega across different months can fool you. Traders use **time-weighted vega**, scaling back-month vega by the square root of the time ratio\u2014for 30 days versus 90 days, multiply 90-day vega by 0.58. Here is the handy shortcut: because a longer option's raw vega is naturally larger by that same square-root factor, a 1-for-1 calendar spread is already roughly balanced. In plain words: near-month volatility jumps harder than back-month volatility, and a 1-to-1 calendar spread naturally accounts for most of that speed difference.\n\nScheduled events create sharp spikes in the term structure. Suppose PowerSun Energy (PWRS) at $95 reports earnings in two weeks, pushing 15-day IV to 45% while 45-day IV sits at 28%. That 45% front-month IV is not a pricing mistake; it packs a one-day earnings jump on top of normal daily movement. Before trading any gap between near-month and back-month IV, Maria always checks whether an earnings report or product ruling falls inside the front expiration.\n\nThe morning after PWRS reports earnings, front-month IV snaps back down toward 28%\u2014the classic post-earnings volatility crush. Selling that 45% front-month option only makes money if the actual stock jump is smaller than the one-day move already priced into that 45% IV. If PWRS gaps $10 on the announcement, the loss on the short front-month strike will overwhelm the volatility crush. In plain words: a steep drop-off from front-month IV to back-month IV usually prices a real news event, and you only win by beating the priced-in jump.",
+                "body": "Drop a rock into the shallow end of a pool and the water splashes high right where it hits, while the far end barely ripples. Options expirations line up in a **term structure**\u2014each month's implied volatility plotted by date, such as 30-day LMND options at 22% IV and 90-day options at 25% IV. When sudden news hits, 30-day implied volatility might jump 8 points to 30%, while 180-day implied volatility rises only 2 points because a short scare averages out over six months. Pool ripples always fade across the water; in options, a scheduled event like earnings can load a giant splash into one specific expiration week in advance.\n\nBecause near-term IV moves much faster than long-term IV, comparing raw vega across different months can fool you. Traders use **time-weighted vega**, scaling back-month vega by the square root of the time ratio\u2014for 30 days versus 90 days, multiply 90-day vega by 0.58. Here is the handy shortcut: because a longer option's raw vega is naturally larger by that same square-root factor, a 1-for-1 calendar spread is already roughly balanced. In plain words: near-month volatility jumps harder than back-month volatility, and a 1-to-1 calendar spread naturally accounts for most of that speed difference.\n\nScheduled events create sharp spikes in the term structure. Suppose PowerSun Energy (PWRS) at $95 reports earnings in two weeks, pushing 15-day IV to 45% while 45-day IV sits at 28%. That 45% front-month IV is not a pricing mistake; it packs a one-day earnings jump on top of normal daily movement. Before trading any gap between near-month and back-month IV, Maria always checks whether an earnings report or product ruling falls inside the front expiration.\n\nThe morning after PWRS reports earnings, front-month IV snaps back down toward 28%\u2014the classic post-earnings volatility crush. Selling that 45% front-month option only makes money if the actual stock jump is smaller than the one-day move already priced into that 45% IV. If PWRS gaps $10 on the announcement, the loss on the short front-month strike will overwhelm the volatility crush. In plain words: a steep drop-off from front-month IV to back-month IV usually prices a real news event, and you only win by beating the priced-in jump.",
                 "key_takeaways": [
                   "Front-month implied volatility moves several times faster than back-month implied volatility during market shocks.",
                   "Time-weighted vega scales each month by the square root of time, which is why a 1-for-1 calendar spread is roughly balanced in volatility shocks.",
@@ -10536,7 +10536,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "p-mm-business",
                 "title": "The Market Maker's Business: Edge, Width, and Skewed Quotes",
                 "objective": "See how option market makers price their bid-ask spread in volatility units, shade quotes to manage inventory, and adjust size to control risk.",
-                "body": "A neighborhood used-car dealer stays in business by buying sedans at $14,500 and selling them at $15,000, not by guessing where car prices will be next year. An option market maker posts a two-sided quote\u2014say bidding $1.46 and offering $1.54 on a $42 LMND call\u2014to earn the 8-cent spread while hedging the stock risk. To judge whether 8 cents is enough pay, the dealer measures **width in vol** by dividing the dollar spread by vega: $0.08 \xF7 $0.16 vega equals 0.50 volatility points. The car-lot analogy stops there: when a liquid option market trades $1.48 to $1.52 while your model says $1.60, you adjust your volatility input toward the market.\n\nSuppose LMND implied volatility routinely jumps 3 full points a day. Quoting 0.50 vol points wide on that $42 call means one normal afternoon volatility swing is six times larger than the spread Maria collects on a fill. If she quotes too wide, competing dealers win every order; if she quotes too tight, one-sided customer buying stacks her book with inventory right before prices move. In plain words: divide the bid-ask spread by vega to see your true cushion in volatility points.\n\nOnce inventory piles up, a market maker uses **quote skewing**\u2014shifting both the bid and the ask down or up together, such as moving $1.46/$1.54 down to $1.43/$1.51. If Maria is already stuffed with long front-month options, sliding both sides down by 3 cents makes her offer attractive to buyers while keeping reluctant sellers away. Lowering only the offer to $1.51 while leaving the bid at $1.46 would just shrink her spread to 5 cents and give away her edge. She also never shifts her offer below her own fair value of $1.50, or rival traders will snap up her underpriced contracts immediately.\n\nQuote size is the second lever on the screen. When Maria wants to sell off extra long options, she might show 10 contracts on her bid and 50 contracts on her offer. In a quiet, thinly traded option where getting out takes days, she shrinks her quoted size and widens her spread even when her book is flat. In plain words: you only bank the bid-ask spread when you manage to exit the inventory, so shift both sides together and quote smaller in thin markets.",
+                "body": "A neighborhood used-car dealer stays in business by buying sedans at $14,500 and selling them at $15,000, not by guessing where car prices will be next year. An option market maker posts a two-sided quote\u2014say bidding $1.46 and offering $1.54 on a $42 LMND call\u2014to earn the 8-cent spread while hedging the stock risk. To judge whether 8 cents is enough pay, the dealer measures **width in vol** by dividing the dollar spread by vega: $0.08 \xF7 $0.16 vega equals 0.50 volatility points. Used-car dealers set their own lot prices; when a liquid option market trades $1.48 to $1.52 while your model says $1.60, you adjust your volatility input toward the market.\n\nSuppose LMND implied volatility routinely jumps 3 full points a day. Quoting 0.50 vol points wide on that $42 call means one normal afternoon volatility swing is six times larger than the spread Maria collects on a fill. If she quotes too wide, competing dealers win every order; if she quotes too tight, one-sided customer buying stacks her book with inventory right before prices move. In plain words: divide the bid-ask spread by vega to see your true cushion in volatility points.\n\nOnce inventory piles up, a market maker uses **quote skewing**\u2014shifting both the bid and the ask down or up together, such as moving $1.46/$1.54 down to $1.43/$1.51. If Maria is already stuffed with long front-month options, sliding both sides down by 3 cents makes her offer attractive to buyers while keeping reluctant sellers away. Lowering only the offer to $1.51 while leaving the bid at $1.46 would just shrink her spread to 5 cents and give away her edge. She also never shifts her offer below her own fair value of $1.50, or rival traders will snap up her underpriced contracts immediately.\n\nQuote size is the second lever on the screen. When Maria wants to sell off extra long options, she might show 10 contracts on her bid and 50 contracts on her offer. In a quiet, thinly traded option where getting out takes days, she shrinks her quoted size and widens her spread even when her book is flat. In plain words: you only bank the bid-ask spread when you manage to exit the inventory, so shift both sides together and quote smaller in thin markets.",
                 "key_takeaways": [
                   "Measure any option's bid-ask spread in volatility points (dollar width \xF7 vega) and compare it to how much IV moves in a day.",
                   "When a deep, active market trades away from your theoretical value, update your volatility input toward the market rather than fighting the tape.",
@@ -10597,7 +10597,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "p-risk-matrix",
                 "title": "Seeing the Whole Book: Risk Matrix and Butterfly-Stripping",
                 "objective": "Read a multi-leg option book from a spot-and-volatility risk matrix rather than an inventory list, and simplify complex books by stripping out low-risk butterflies.",
-                "body": "Before a road trip, a weather radar map shows where the storm cells are heading far better than a printed list of fifty town temperatures. In options, a **risk matrix** is a grid showing your book's P&L and Greeks across spot moves (like \u221210% to +10%) and volatility shifts (like \u22125 to +5 points). An inventory list only shows what contracts you hold today, while the matrix reveals where hidden short strikes will blow up if the stock drops 8%. The weather-radar analogy stops there: in options, you can buy a specific hedge strike to erase the worst storm cell on your grid.\n\nSuppose Sam's book looks calm at today's $67 BRGR price\u2014near-zero delta and modest theta\u2014because he bought one $65 put and sold two $60 puts. His risk matrix tells the real story: if BRGR drops to $58 with a 5-point IV spike, those extra short $60 puts create heavy losses. By spotting that red corner cell on the matrix before the drop happens, Sam can buy a $55 put to cap the downside cell. In plain words: today's totals can look flat while a big move hides a trap, so always check the full grid of stock and volatility shocks.\n\nWhen a book grows to twenty different strikes, traders simplify the list using **butterfly-stripping**\u2014mentally crossing out balanced 1-by-2-by-1 butterfly spreads whose net vega is nearly zero. Owning one $40 call (12 vega), shorting two $42 calls (10.5 vega each), and owning one $44 call (9.5 vega) leaves just 0.5 net vega. When plenty of time remains, Maria can cross that tight butterfly off her mental summary and focus on the leftover unhedged strikes. That also explains why buying one more long option can lower total risk: adding a missing $44 call turns an exposed 1-by-2 ratio into a capped butterfly.\n\nEven if nobody places a trade, an option book changes shape over a three-day weekend. As calendar days pass, out-of-the-money option deltas bleed toward zero, so a Friday stock hedge against out-of-the-money puts can wake up oversized on Monday morning. Checking the time-decay preview for +1d, +3d, and +5d on Friday afternoon lets Maria trim her stock hedge before the weekend starts. In plain words: use the shock grid and the multi-day time preview so Monday morning never catches your book by surprise.",
+                "body": "Before a road trip, a weather radar map shows where the storm cells are heading far better than a printed list of fifty town temperatures. In options, a **risk matrix** is a grid showing your book's P&L and Greeks across spot moves (like \u221210% to +10%) and volatility shifts (like \u22125 to +5 points). An inventory list only shows what contracts you hold today, while the matrix reveals where hidden short strikes will blow up if the stock drops 8%. A weather radar cannot erase a storm; in options, you can buy a specific hedge strike to erase the worst storm cell on your grid.\n\nSuppose Sam's book looks calm at today's $67 BRGR price\u2014near-zero delta and modest theta\u2014because he bought one $65 put and sold two $60 puts. His risk matrix tells the real story: if BRGR drops to $58 with a 5-point IV spike, those extra short $60 puts create heavy losses. By spotting that red corner cell on the matrix before the drop happens, Sam can buy a $55 put to cap the downside cell. In plain words: today's totals can look flat while a big move hides a trap, so always check the full grid of stock and volatility shocks.\n\nWhen a book grows to twenty different strikes, traders simplify the list using **butterfly-stripping**\u2014mentally crossing out balanced 1-by-2-by-1 butterfly spreads whose net vega is nearly zero. Owning one $40 call (12 vega), shorting two $42 calls (10.5 vega each), and owning one $44 call (9.5 vega) leaves just 0.5 net vega. When plenty of time remains, Maria can cross that tight butterfly off her mental summary and focus on the leftover unhedged strikes. That also explains why buying one more long option can lower total risk: adding a missing $44 call turns an exposed 1-by-2 ratio into a capped butterfly.\n\nEven if nobody places a trade, an option book changes shape over a three-day weekend. As calendar days pass, out-of-the-money option deltas bleed toward zero, so a Friday stock hedge against out-of-the-money puts can wake up oversized on Monday morning. Checking the time-decay preview for +1d, +3d, and +5d on Friday afternoon lets Maria trim her stock hedge before the weekend starts. In plain words: use the shock grid and the multi-day time preview so Monday morning never catches your book by surprise.",
                 "key_takeaways": [
                   "Manage a multi-leg book from the Spot \xD7 IV risk matrix rather than relying on today's single-price Greek totals.",
                   "Ratio spreads can look flat at today's stock price while hiding severe losses in the crash-plus-vol-spike corner of the matrix.",
@@ -10658,7 +10658,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "id": "p-higher-order",
                 "title": "When Your Greeks Shift Underneath You",
                 "objective": "Predict how delta and vega shift when stock price, implied volatility, and time move together\u2014using vanna, vomma, and charm to stress-test a book.",
-                "body": "Walking across a boat deck is easy in calm water, but when a wave tilts the deck while you step forward, both motions combine to throw you off balance. Higher-order Greeks measure how your main Greeks tilt when volatility or time shifts underneath your feet. **Vomma** measures how much your vega changes per 1-point shift in implied volatility\u2014for example, a long $38 LMND put gaining +$1.50 of extra vega when IV rises 1 point. The boat-deck analogy stops there: in out-of-the-money wing options, positive vomma actually helps option buyers by growing their vega as volatility rises and shrinking it as volatility falls. In plain words: vomma means your vega itself moves when volatility moves.\n\nThe tricky side of vomma hits traders who sell out-of-the-money wings to bet on falling volatility. Because short wings carry negative vomma, a drop in implied volatility shrinks the very short-vega position that was supposed to profit \u2014 the win gets smaller exactly as the bet starts working. (A book made only of short vanilla options stays short vega; vomma alone never flips it long.) **Vanna** measures how delta changes when implied volatility moves\u2014for instance, a hedged long $38 LMND put picking up \u22120.08 extra delta when IV spikes 5 points with LMND unchanged. In plain words: wing options do not keep fixed Greeks\u2014their vega and delta swell when volatility jumps and shrink when volatility calms down.\n\nTime acts like falling volatility on out-of-the-money options, a daily drift traders call charm. As each day passes, an out-of-the-money option's delta bleeds toward zero\u2014say a $38 LMND put sliding from \u22120.22 delta on Thursday to \u22120.16 delta by Monday. If Maria hedged that \u22120.22 put delta by owning 22 shares of LMND on Friday, she arrives Monday morning net long 6 shares even if LMND never moved. Notice why falling implied volatility and passing calendar time feel like siblings: both shrink the chance an out-of-the-money strike finishes in the money.\n\nThese cross-effects explain why you must stress-test every book against combined shocks\u2014like a sharp stock drop paired with an implied volatility spike. In a crash-and-vol-spike, a short put ladder suffers four hits at once: losing gamma hedges, rising vega marks, vanna pushing the book's delta LONGER just as the market falls (the spiking IV makes each short put act more like long stock \u2014 exactly the wrong direction), and vomma deepening the short-vega hole. None of those four amplifiers looks scary when the stock is quiet on a Tuesday morning. In plain words: know your Greeks, know how they shift when price and volatility move together, and test every trade in the simulator before risking real cash.",
+                "body": "Walking across a boat deck is easy in calm water, but when a wave tilts the deck while you step forward, both motions combine to throw you off balance. Higher-order Greeks measure how your main Greeks tilt when volatility or time shifts underneath your feet. **Vomma** measures how much your vega changes per 1-point shift in implied volatility\u2014for example, a long $38 LMND put gaining +$1.50 of extra vega when IV rises 1 point. Tilting boat decks never help your balance; in out-of-the-money wing options, positive vomma helps option buyers by growing their vega as volatility rises and shrinking it as volatility falls. In plain words: vomma means your vega itself moves when volatility moves.\n\nThe tricky side of vomma hits traders who sell out-of-the-money wings to bet on falling volatility. Because short wings carry negative vomma, a drop in implied volatility shrinks the very short-vega position that was supposed to profit \u2014 the win gets smaller exactly as the bet starts working. (A book made only of short vanilla options stays short vega; vomma alone never flips it long.) **Vanna** measures how delta changes when implied volatility moves\u2014for instance, a hedged long $38 LMND put picking up \u22120.08 extra delta when IV spikes 5 points with LMND unchanged. In plain words: wing options do not keep fixed Greeks\u2014their vega and delta swell when volatility jumps and shrink when volatility calms down.\n\nTime acts like falling volatility on out-of-the-money options, a daily drift traders call charm. As each day passes, an out-of-the-money option's delta bleeds toward zero\u2014say a $38 LMND put sliding from \u22120.22 delta on Thursday to \u22120.16 delta by Monday. If Maria hedged that \u22120.22 put delta by owning 22 shares of LMND on Friday, she arrives Monday morning net long 6 shares even if LMND never moved. Notice why falling implied volatility and passing calendar time feel like siblings: both shrink the chance an out-of-the-money strike finishes in the money.\n\nThese cross-effects explain why you must stress-test every book against combined shocks\u2014like a sharp stock drop paired with an implied volatility spike. In a crash-and-vol-spike, a short put ladder suffers four hits at once: losing gamma hedges, rising vega marks, vanna pushing the book's delta LONGER just as the market falls (the spiking IV makes each short put act more like long stock \u2014 exactly the wrong direction), and vomma deepening the short-vega hole. None of those four amplifiers looks scary when the stock is quiet on a Tuesday morning. In plain words: know your Greeks, know how they shift when price and volatility move together, and test every trade in the simulator before risking real cash.",
                 "key_takeaways": [
                   "Vomma lives in out-of-the-money wings: long wings gain vega when IV rises, while short-wing books can see their short vega shrink as IV falls.",
                   "Vanna shifts an option's delta when implied volatility changes, creating new delta exposure even before the stock moves.",
@@ -10762,7 +10762,8 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     { id: "strategy", ic: "layers", label: "Builder" },
     { id: "greeks", ic: "temple", label: "Greeks" },
     { id: "vol", ic: "wave", label: "Volatility" },
-    { id: "risk", ic: "grid", label: "Risk Desk" }
+    { id: "risk", ic: "grid", label: "Risk Desk" },
+    { id: "calculator", ic: "grid", label: "Calculator" }
   ];
   var LAB_IDS = new Set(LABS.map((l) => l.id));
   var YOU_IDS = /* @__PURE__ */ new Set(["journal", "progress", "settings", "upgrade", "welcome", "legal", "start"]);
@@ -11122,7 +11123,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     }
     const landing = name === "start";
     document.body.classList.toggle("oa-landing", landing);
-    const view16 = VIEWS[name] || VIEWS.home;
+    const view18 = VIEWS[name] || VIEWS.home;
     if (currentCleanup) {
       try {
         currentCleanup();
@@ -11137,7 +11138,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     refreshTabActive(name);
     contentEl.innerHTML = "";
     window.scrollTo(0, 0);
-    currentCleanup = view16.render(contentEl, parts.slice(1)) || null;
+    currentCleanup = view18.render(contentEl, parts.slice(1)) || null;
     renderNext();
   }
   function renderNext() {
@@ -11836,10 +11837,10 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     const pids = [...byProg.keys()].sort((a, b) => (PROGRAM_META[a]?.order ?? 99) - (PROGRAM_META[b]?.order ?? 99));
     for (const pid2 of pids) {
       const meta = PROGRAM_META[pid2] || { title: pid2, blurb: "" };
-      const section = el("div", { class: "program-section", style: "margin-top:28px" });
-      section.appendChild(el("div", { class: "eyebrow" }, "Program"));
-      section.appendChild(el("h2", { style: "margin:2px 0 4px" }, meta.title));
-      if (meta.blurb) section.appendChild(el("p", { class: "sub", style: "max-width:68ch;margin:0 0 12px" }, meta.blurb));
+      const section2 = el("div", { class: "program-section", style: "margin-top:28px" });
+      section2.appendChild(el("div", { class: "eyebrow" }, "Program"));
+      section2.appendChild(el("h2", { style: "margin:2px 0 4px" }, meta.title));
+      if (meta.blurb) section2.appendChild(el("p", { class: "sub", style: "max-width:68ch;margin:0 0 12px" }, meta.blurb));
       const wrap = el("div", { class: "grid2" });
       for (const t of byProg.get(pid2)) {
         const pr = trackProgress(t);
@@ -11864,8 +11865,8 @@ Reading these two parts tells Maria what she is really buying before she clicks.
           el("div", { class: "small muted num" }, `${pr.done}/${pr.total} lessons`)
         ));
       }
-      section.appendChild(wrap);
-      root.appendChild(section);
+      section2.appendChild(wrap);
+      root.appendChild(section2);
     }
   }
   function renderTrack(root, tid) {
@@ -11882,6 +11883,11 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     root.appendChild(el("div", { class: "eyebrow" }, t.audience));
     root.appendChild(el("h1", {}, t.title));
     root.appendChild(el("p", { class: "sub", style: "max-width:68ch" }, t.description || ""));
+    root.appendChild(el(
+      "div",
+      { class: "btn-row mt1" },
+      el("a", { class: "btn", href: "#/guide/" + t.id }, icon("bookOpen"), " Study guide")
+    ));
     const bannerHost = el("div", {});
     root.appendChild(bannerHost);
     if (overview.needsPlacement) {
@@ -12191,19 +12197,19 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     if (!Array.isArray(closes) || !Number.isFinite(window2) || window2 <= 0) return [];
     const w = Math.floor(window2);
     if (w <= 0) return [];
-    const valid = [];
+    const valid2 = [];
     for (let i = 0; i < closes.length; i++) {
       const p = closePrice(closes[i]);
       if (Number.isFinite(p) && p > 0) {
-        valid.push({ day: closeDay(closes[i], i), p });
+        valid2.push({ day: closeDay(closes[i], i), p });
       }
     }
-    if (valid.length <= w) return [];
+    if (valid2.length <= w) return [];
     const series = [];
-    for (let i = w; i < valid.length; i++) {
+    for (let i = w; i < valid2.length; i++) {
       series.push({
-        day: valid[i].day,
-        hv: hv(valid.slice(i - w, i + 1), w)
+        day: valid2[i].day,
+        hv: hv(valid2.slice(i - w, i + 1), w)
       });
     }
     return series;
@@ -12736,12 +12742,12 @@ Reading these two parts tells Maria what she is really buying before she clicks.
         };
         if (!chart) chart = line(chartBox, opts);
         else chart.update(opts);
-        const stat = (k, v, cls = "") => el("div", { class: "stat" }, el("div", { class: "k" }, k), el("div", { class: "v " + cls }, v));
-        statsRow.appendChild(stat(cost >= 0 ? "Net debit" : "Net credit", F.usd(Math.abs(cost))));
+        const stat2 = (k, v, cls = "") => el("div", { class: "stat" }, el("div", { class: "k" }, k), el("div", { class: "v " + cls }, v));
+        statsRow.appendChild(stat2(cost >= 0 ? "Net debit" : "Net credit", F.usd(Math.abs(cost))));
         if (splitExp) {
-          statsRow.appendChild(stat("Max profit", "\u2014"));
-          statsRow.appendChild(stat("Max loss", "\u2014"));
-          statsRow.appendChild(stat("Breakeven", "\u2014"));
+          statsRow.appendChild(stat2("Max profit", "\u2014"));
+          statsRow.appendChild(stat2("Max loss", "\u2014"));
+          statsRow.appendChild(stat2("Breakeven", "\u2014"));
           statsRow.appendChild(el(
             "div",
             { class: "stat pop-stat" },
@@ -12754,9 +12760,9 @@ Reading these two parts tells Maria what she is really buying before she clicks.
             )
           ));
         } else {
-          statsRow.appendChild(stat("Max profit", maxLabel, "up"));
-          statsRow.appendChild(stat("Max loss", minLabel, "down"));
-          statsRow.appendChild(stat("Breakeven" + (bes.length > 1 ? "s" : ""), bes.length ? bes.map((b) => F.usd(b, 2)).join(" \xB7 ") : "\u2014"));
+          statsRow.appendChild(stat2("Max profit", maxLabel, "up"));
+          statsRow.appendChild(stat2("Max loss", minLabel, "down"));
+          statsRow.appendChild(stat2("Breakeven" + (bes.length > 1 ? "s" : ""), bes.length ? bes.map((b) => F.usd(b, 2)).join(" \xB7 ") : "\u2014"));
           const pop = modelWinOdds(S2, iv, days, valueAtExpiry2, cost);
           statsRow.appendChild(el(
             "div",
@@ -15436,9 +15442,669 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     }
   };
 
+  // src/ui/views/calculator.js
+  var usd2 = (n) => n.toLocaleString("en-US", { style: "currency", currency: "USD" });
+  var gridStyle = "display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;align-items:end";
+  function field(label, input) {
+    return el("label", { style: "display:grid;gap:6px" }, el("span", { class: "small muted" }, label), input);
+  }
+  function number(value, min, step = "any") {
+    return el("input", { type: "number", value, min, step, required: true, class: "num", style: "width:100%;min-width:0" });
+  }
+  function valid(inputs) {
+    return inputs.every((input) => input.value.trim() !== "" && Number.isFinite(input.valueAsNumber) && input.validity.valid);
+  }
+  function stat(label, value) {
+    return el("div", { class: "stat" }, el("div", { class: "k" }, label), el("div", { class: "v num" }, value));
+  }
+  function positionBreakevens(legs, S2) {
+    const knots = [.../* @__PURE__ */ new Set([0, ...legs.filter((l) => l.kind !== "stock").map((l) => l.strike)])].sort((a, b) => a - b);
+    const last = knots[knots.length - 1];
+    const slope = legs.reduce((sum, l) => sum + (l.kind === "put" ? 0 : l.side * l.qty * (l.kind === "stock" ? 1 : 100)), 0);
+    const tailRoot = slope ? last - pnlAtExpiry(legs, last) / slope : last;
+    knots.push(Math.max(last, S2, tailRoot, 1) * 2 + 1);
+    const points = [];
+    const intervals = [];
+    for (let i = 1; i < knots.length; i++) {
+      const a = knots[i - 1], b = knots[i];
+      const ya = pnlAtExpiry(legs, a), yb = pnlAtExpiry(legs, b);
+      if (Math.abs(ya) < 1e-8 && Math.abs(yb) < 1e-8) {
+        intervals.push([a, i === knots.length - 1 ? Infinity : b]);
+      } else {
+        if (Math.abs(ya) < 1e-8) points.push(a);
+        if (Math.abs(yb) < 1e-8) points.push(b);
+        points.push(...breakevens(legs, a, b, 1));
+      }
+    }
+    const unique = points.sort((a, b) => a - b).filter((p, i, all) => (!i || Math.abs(p - all[i - 1]) > 1e-7) && !intervals.some(([a, b]) => p >= a && p <= b));
+    return [...unique.map(usd2), ...intervals.map(([a, b]) => b === Infinity ? `${usd2(a)} and above` : `${usd2(a)} to ${usd2(b)}`)].join(", ") || "None";
+  }
+  var view16 = {
+    render(root) {
+      root.appendChild(viewHeader("Options calculator", "Run the numbers"));
+      root.appendChild(el("p", { class: "sub" }, "Explore a position at expiration or price an option with Black-Scholes."));
+      root.appendChild(simDisclaimer());
+      const position = el(
+        "section",
+        { class: "card mt2" },
+        el("h2", {}, "Position calculator"),
+        el("p", { class: "sub" }, "Options use 100 shares per contract; stock quantity is shares. Premium and stock entry price are per share. All options share one expiration. Results exclude fees.")
+      );
+      const spot = number(100, 0.01);
+      position.appendChild(field("Current stock price ($)", spot));
+      const rows2 = el("div", { class: "mt2" });
+      const results = el("div", { class: "stats mt2", "aria-live": "polite" });
+      const message = el("p", { class: "sub", role: "status" });
+      const chartBox = el("div", {});
+      const editors = [];
+      function updatePosition() {
+        results.replaceChildren();
+        chartBox.replaceChildren();
+        if (!editors.length) {
+          message.textContent = "Add a leg to calculate a position.";
+          return;
+        }
+        if (!valid([spot, ...editors.flatMap((row) => [row.qty, row.entry, ...row.kind.value === "stock" ? [] : [row.strike]])])) {
+          message.textContent = "Enter a positive stock price, positive whole quantities, positive option strikes, and nonnegative premiums or entry prices.";
+          return;
+        }
+        message.textContent = "";
+        const legs = editors.map((row) => ({
+          kind: row.kind.value,
+          side: Number(row.side.value),
+          qty: row.qty.valueAsNumber,
+          entry: row.entry.valueAsNumber,
+          ...row.kind.value === "stock" ? {} : { strike: row.strike.valueAsNumber }
+        }));
+        const S3 = spot.valueAsNumber;
+        const cost = entryCost(legs);
+        const loss = maxLossAtExpiry(legs, S3);
+        const profit = maxLossAtExpiry(legs.map((l) => ({ ...l, side: -l.side })), S3);
+        results.append(
+          stat(cost > 0 ? "Net debit" : cost < 0 ? "Net credit" : "Net cost", usd2(Math.abs(cost))),
+          stat("Breakeven(s)", positionBreakevens(legs, S3)),
+          stat("Max profit", profit.bounded ? usd2(Math.max(0, -profit.amount)) : "Unlimited"),
+          stat("Max loss", loss.bounded ? usd2(Math.max(0, -loss.amount)) : "Unlimited")
+        );
+        const diagram = payoffDiagram({
+          legs,
+          S: S3,
+          title: "Profit / loss at expiration",
+          caption: "Chart shows a stock-price window. Position totals and full-range profit/loss limits appear above."
+        });
+        for (const text of diagram.querySelectorAll("svg text")) {
+          if (text.textContent.startsWith("Max profit ")) text.textContent = text.textContent.replace("Max profit ", "Window peak ");
+        }
+        chartBox.appendChild(diagram);
+      }
+      function addLeg() {
+        const kind = el("select", {}, ...["call", "put", "stock"].map((value) => el("option", { value }, value === "stock" ? "Stock" : value === "call" ? "Call" : "Put")));
+        const side = el("select", {}, el("option", { value: 1 }, "Long"), el("option", { value: -1 }, "Short"));
+        const qty = number(1, 1, "1");
+        const strike = number(valid([spot]) ? spot.valueAsNumber : 100, 0.01);
+        const entry = number(5, 0);
+        const qtyField = field("Quantity (contracts)", qty);
+        const entryField = field("Premium ($ / share)", entry);
+        const row = { kind, side, qty, strike, entry };
+        const box = el(
+          "div",
+          { class: "mt2", style: gridStyle },
+          field("Kind", kind),
+          field("Side", side),
+          qtyField,
+          field("Strike ($)", strike),
+          entryField,
+          el("button", { type: "button", class: "btn sm", "aria-label": "Remove leg", onclick: () => {
+            editors.splice(editors.indexOf(row), 1);
+            box.remove();
+            updatePosition();
+          } }, "Remove")
+        );
+        kind.addEventListener("change", () => {
+          const stock = kind.value === "stock";
+          strike.disabled = stock;
+          qtyField.firstChild.textContent = stock ? "Quantity (shares)" : "Quantity (contracts)";
+          entryField.firstChild.textContent = stock ? "Entry price ($ / share)" : "Premium ($ / share)";
+          updatePosition();
+        });
+        box.addEventListener("input", updatePosition);
+        box.addEventListener("change", updatePosition);
+        editors.push(row);
+        rows2.appendChild(box);
+        updatePosition();
+      }
+      position.append(rows2, el("button", { type: "button", class: "btn sm mt2", onclick: addLeg }, "+ Add leg"), message, results, chartBox);
+      spot.addEventListener("input", updatePosition);
+      root.appendChild(position);
+      addLeg();
+      const pricer = el(
+        "section",
+        { class: "card mt2" },
+        el("h2", {}, "Option pricer"),
+        el("p", { class: "sub" }, "European options, no dividends. Prices and Greeks are per share; multiply by 100 for one contract. A year is 252 trading days.")
+      );
+      const S2 = number(100, 0.01), K = number(100, 0.01), days = number(30, 0), vol = number(30, 0.01), rate = number(0, void 0);
+      const pricingInputs = [S2, K, days, vol, rate];
+      const pricingResults = el("div", { class: "mt2", "aria-live": "polite" });
+      pricer.append(el(
+        "div",
+        { style: gridStyle },
+        field("Stock price ($)", S2),
+        field("Strike ($)", K),
+        field("Trading days to expiry", days),
+        field("Implied volatility (%)", vol),
+        field("Annual rate (%)", rate)
+      ), pricingResults);
+      function updatePricer() {
+        pricingResults.replaceChildren();
+        if (!valid(pricingInputs)) {
+          pricingResults.appendChild(el("p", { class: "sub" }, "Enter positive stock price, strike and volatility, nonnegative days, and a valid annual rate."));
+          return;
+        }
+        const table = el("table", { style: "width:100%" });
+        table.appendChild(el("thead", {}, el("tr", {}, ...["Per share", "Call", "Put"].map((label) => el("th", { scope: "col" }, label)))));
+        const params = { S: S2.valueAsNumber, K: K.valueAsNumber, T: days.valueAsNumber / TRADING_YEAR, v: vol.valueAsNumber / 100, r: rate.valueAsNumber / 100 };
+        const call2 = greeks({ ...params, type: "call" }), put = greeks({ ...params, type: "put" });
+        if (![...Object.values(call2), ...Object.values(put)].every(Number.isFinite)) {
+          pricingResults.appendChild(el("p", { class: "sub" }, "These inputs exceed the pricing model\u2019s numeric range. Reduce their magnitude."));
+          return;
+        }
+        const body = el("tbody", {});
+        for (const [key, label] of [["price", "Price"], ["delta", "Delta"], ["gamma", "Gamma"], ["theta", "Theta / market day"], ["vega", "Vega / 1 volatility point"]]) {
+          body.appendChild(el(
+            "tr",
+            {},
+            el("th", { scope: "row" }, label),
+            ...[call2, put].map((g) => el("td", { class: "num" }, key === "price" ? usd2(g[key]) : g[key].toFixed(4)))
+          ));
+        }
+        table.appendChild(body);
+        pricingResults.appendChild(table);
+        if (days.valueAsNumber === 0) pricingResults.appendChild(el("p", { class: "small muted" }, "At expiry, prices are intrinsic values; Greeks use the engine\u2019s expiry convention."));
+      }
+      pricingInputs.forEach((input) => input.addEventListener("input", updatePricer));
+      root.appendChild(pricer);
+      updatePricer();
+    }
+  };
+
+  // src/ui/views/study-guide.js
+  var PRINT_CSS = `
+.sg-guide { max-width: 100%; min-width: 0; }
+.sg-guide .sg-head { align-items: flex-start; gap: 12px; max-width: 100%; }
+.sg-guide .sg-head > div { min-width: 0; flex: 1 1 18rem; }
+.sg-guide h1, .sg-guide h2, .sg-guide h3,
+.sg-guide .sub, .sg-guide .lt, .sg-guide .lo {
+  text-wrap: wrap; overflow-wrap: break-word; max-width: 100%;
+}
+.sg-guide .lesson-item { align-items: flex-start; cursor: default; max-width: 100%; }
+.sg-guide .lesson-item > span:last-child { min-width: 0; }
+.sg-guide .lesson-item:hover { background: transparent; }
+@media (max-width: 640px) {
+  .sg-guide .sg-head { flex-direction: column; align-items: stretch; }
+}
+.sg-guide .lesson-item .lcheck {
+  color: var(--ink);
+  width: auto; min-width: 28px; height: 28px;
+  flex: 0 0 auto; padding: 0 6px; margin-top: 1px;
+  border-radius: 99px; white-space: nowrap;
+}
+.sg-guide .sg-points,
+.sg-guide .sg-key-list { margin: 4px 0 0; padding-left: 1.25em; }
+.sg-guide .sg-points li,
+.sg-guide .sg-key-list li { margin: 8px 0; }
+.sg-guide .sg-can { list-style: none; margin: 0; padding: 0; }
+.sg-guide .sg-can li { border-bottom: 1px solid var(--hairline); }
+.sg-guide .sg-can label {
+  display: flex; gap: 12px; align-items: flex-start;
+  min-height: 44px; padding: 10px 2px; cursor: pointer;
+}
+.sg-guide .sg-can input {
+  width: 18px; height: 18px; margin-top: 3px; flex: 0 0 auto;
+  accent-color: var(--brass);
+}
+.sg-guide .sg-from { display: block; margin-top: 2px; }
+.sg-guide .quiz-opt { min-height: 44px; }
+.sg-guide .sg-no-print.btn { min-height: 44px; }
+.sg-guide .sg-answer {
+  border-color: var(--brass);
+  background: var(--brass-soft);
+  font-weight: 700;
+}
+.sg-guide .sg-picked { border-color: var(--ink-3); }
+.sg-answer-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
+.sg-key summary {
+  cursor: pointer; font-weight: 600; min-height: 44px;
+  display: flex; align-items: center;
+}
+.sg-guide { overflow-wrap: break-word; }
+@media print {
+  .oa-rail, .oa-tape, .oa-tabbar, .oa-next, .oa-toasts, .oa-sheet-bg, .sg-no-print {
+    display: none !important;
+  }
+  #oa-app, .oa-main { display: block !important; width: 100% !important; min-height: 0 !important; }
+  .oa-main, .oa-content { padding: 0 !important; max-width: none !important; }
+  body, #oa-app, .oa-main, .oa-content, .sg-guide, .sg-guide .card {
+    background: white !important;
+    color: black !important;
+  }
+  .sg-guide, .sg-guide * { color: black !important; }
+  .sg-guide .card, .sg-guide .quiz-opt, .sg-guide .pill, .sg-guide .lesson-item .lcheck {
+    background: white !important;
+    border-color: black !important;
+    box-shadow: none !important;
+  }
+  .sg-guide .sg-reveal { display: block !important; }
+  .sg-guide .quiz-opt[data-answer] { font-weight: 700; border-width: 2px; }
+  .sg-guide .sg-q, .sg-guide .sg-can li, .sg-guide .lesson-item { break-inside: avoid; }
+  .sg-key { break-before: page; }
+  .sg-key > :not(summary) { display: block !important; }
+  .sg-guide .quiz-opt { min-height: 0; }
+}
+@page { margin: 14mm; }
+`;
+  function trackIdFrom(params) {
+    const raw = params && params[0] != null ? String(params[0]) : "";
+    const id = raw.split("?")[0].trim();
+    if (!id) return "";
+    try {
+      return decodeURIComponent(id);
+    } catch {
+      return id;
+    }
+  }
+  function answerIndex(answer, nChoices) {
+    if (answer == null || answer === "" || !nChoices) return -1;
+    const n = typeof answer === "number" ? answer : Number(answer);
+    if (!Number.isInteger(n) || n < 0 || n >= nChoices) return -1;
+    return n;
+  }
+  function linesOf(list2) {
+    if (!Array.isArray(list2)) return [];
+    return list2.map((x) => String(x || "").trim()).filter(Boolean);
+  }
+  function canDo(objective) {
+    let text = String(objective || "").replace(/\s+/g, " ").trim();
+    if (!text) return "";
+    if (/^i can\b/i.test(text)) {
+      text = text.replace(/^i can\b/i, "I can");
+    } else {
+      const word = text.split(" ")[0];
+      const keepCase = word.length > 1 && word === word.toUpperCase() && /[A-Za-z]/.test(word);
+      text = "I can " + (keepCase ? text : text.charAt(0).toLowerCase() + text.slice(1));
+    }
+    if (!/[.!?]$/.test(text)) text += ".";
+    return text;
+  }
+  function collect(track2) {
+    const lessons = [];
+    for (const mod of track2.modules || []) {
+      if (!mod) continue;
+      for (const lesson of mod.lessons || []) {
+        if (!lesson) continue;
+        const quiz2 = [];
+        for (const item of lesson.quiz || []) {
+          if (!item || !item.q) continue;
+          const choices = Array.isArray(item.choices) ? item.choices.map((c) => String(c)) : [];
+          quiz2.push({
+            q: String(item.q),
+            choices,
+            answer: answerIndex(item.answer, choices.length),
+            explain: item.explain ? String(item.explain) : ""
+          });
+        }
+        lessons.push({
+          moduleId: mod.id ? String(mod.id) : "",
+          moduleTitle: mod.title ? String(mod.title) : "",
+          title: lesson.title ? String(lesson.title) : "Untitled lesson",
+          objective: lesson.objective ? String(lesson.objective).trim() : "",
+          takeaways: linesOf(lesson.key_takeaways),
+          quiz: quiz2
+        });
+      }
+    }
+    return lessons;
+  }
+  function bankOf(lessons) {
+    const bank = [];
+    let n = 0;
+    for (const lesson of lessons) {
+      for (const item of lesson.quiz) {
+        n += 1;
+        bank.push({ n, lessonTitle: lesson.title, item });
+      }
+    }
+    return bank;
+  }
+  function section(eyebrow, title, sub) {
+    const card = el("div", { class: "card mt2" });
+    card.appendChild(el("div", { class: "eyebrow" }, eyebrow));
+    card.appendChild(el("h2", {}, title));
+    if (typeof sub === "string" && sub) {
+      card.appendChild(el("p", { class: "sub", style: "margin:0 0 8px" }, sub));
+    } else if (sub) card.appendChild(sub);
+    return card;
+  }
+  function countPill(n, label) {
+    return el(
+      "span",
+      { class: "pill" },
+      el("span", { class: "num" }, String(n)),
+      " " + label
+    );
+  }
+  function renderMap(lessons) {
+    const card = section("Map", "One-screen map", "Each lesson and the objective it teaches.");
+    if (!lessons.length) {
+      card.appendChild(el("p", { class: "sub" }, "This module has no lessons yet."));
+      return card;
+    }
+    let lastMod = null;
+    const list2 = el("div", { class: "lesson-list" });
+    lessons.forEach((lesson, i) => {
+      if (lesson.moduleId !== lastMod) {
+        lastMod = lesson.moduleId;
+        if (lesson.moduleTitle) {
+          list2.appendChild(el("h3", { class: i === 0 ? "mt1" : "mt2" }, lesson.moduleTitle));
+        }
+      }
+      list2.appendChild(el(
+        "div",
+        { class: "lesson-item" },
+        el("span", { class: "lcheck num" }, String(i + 1)),
+        el(
+          "span",
+          {},
+          el("div", { class: "lt" }, lesson.title),
+          el("div", { class: "lo", html: lesson.objective ? mdInline(lesson.objective) : "\u2014" })
+        )
+      ));
+    });
+    card.appendChild(list2);
+    return card;
+  }
+  function renderPoints(lessons) {
+    const card = section("Key points", "Key points", "Every lesson's key takeaways, in one list.");
+    const ul = el("ul", { class: "sg-points" });
+    let last = "";
+    let count = 0;
+    for (const lesson of lessons) {
+      for (const point of lesson.takeaways) {
+        count += 1;
+        const li = el("li", {});
+        if (lesson.title !== last) {
+          li.appendChild(el("div", { class: "small muted" }, lesson.title));
+          last = lesson.title;
+        }
+        li.appendChild(el("div", { html: mdInline(point) }));
+        ul.appendChild(li);
+      }
+    }
+    card.appendChild(count ? ul : el("p", { class: "sub", style: "margin:0" }, "This module has no key points yet."));
+    return card;
+  }
+  function answerLine(item) {
+    const choice = item.answer >= 0 ? item.choices[item.answer] : "";
+    return el(
+      "div",
+      { class: "sg-answer-line" },
+      el("span", { class: "pill brass" }, "Answer"),
+      el("span", { html: mdInline(choice || "Not on file") })
+    );
+  }
+  function questionBlock(entry) {
+    const item = entry.item;
+    const block = el("div", { class: "sg-q" });
+    block.appendChild(el(
+      "div",
+      { class: "quiz-q" },
+      el("span", { class: "num" }, entry.n + "."),
+      " ",
+      el("span", { html: mdInline(item.q) })
+    ));
+    const reveal = el(
+      "div",
+      { class: "quiz-expl sg-reveal", hidden: true, role: "status" },
+      answerLine(item),
+      item.explain ? el("div", { class: "mt1", html: mdInline(item.explain) }) : null
+    );
+    const buttons = [];
+    let open = false;
+    const show = (ev) => {
+      if (open) return;
+      open = true;
+      const picked = ev && ev.currentTarget;
+      buttons.forEach((b, ci) => {
+        b.disabled = true;
+        if (ci === item.answer) b.classList.add("sg-answer");
+      });
+      if (picked && picked.classList && !picked.classList.contains("sg-answer")) {
+        picked.classList.add("sg-picked");
+        picked.disabled = true;
+      }
+      reveal.hidden = false;
+    };
+    if (!item.choices.length) {
+      block.appendChild(el("button", {
+        type: "button",
+        class: "btn sg-no-print",
+        onclick: show
+      }, "Show answer"));
+    } else {
+      item.choices.forEach((choice, ci) => {
+        const attrs = {
+          type: "button",
+          class: "quiz-opt",
+          html: mdInline(choice),
+          onclick: show
+        };
+        if (ci === item.answer) attrs["data-answer"] = "true";
+        const b = el("button", attrs);
+        buttons.push(b);
+        block.appendChild(b);
+      });
+    }
+    block.appendChild(reveal);
+    return block;
+  }
+  function renderChecks(bank) {
+    const card = section(
+      "Check yourself",
+      "Check yourself",
+      el(
+        "p",
+        { class: "sub sg-no-print", style: "margin:0 0 8px" },
+        "Tap a choice to reveal the answer. Printing includes the answers, and the key at the bottom lists them together."
+      )
+    );
+    if (!bank.length) {
+      card.appendChild(el("p", { class: "sub", style: "margin:0" }, "This module has no checks yet."));
+      return card;
+    }
+    let last = "";
+    for (const entry of bank) {
+      if (entry.lessonTitle !== last) {
+        card.appendChild(el("h3", { class: "mt2" }, entry.lessonTitle));
+        last = entry.lessonTitle;
+      }
+      card.appendChild(questionBlock(entry));
+    }
+    return card;
+  }
+  function renderKey(bank) {
+    if (!bank.length) return null;
+    const details = el("details", { class: "card mt2 sg-key" });
+    details.appendChild(el("summary", {}, "Answer key"));
+    details.appendChild(el(
+      "p",
+      { class: "sub", style: "margin:8px 0" },
+      "Correct choice and explanation for every check."
+    ));
+    const ol = el("ol", { class: "sg-key-list" });
+    let last = "";
+    for (const entry of bank) {
+      const li = el("li", {});
+      if (entry.lessonTitle !== last) {
+        li.appendChild(el("div", { class: "small muted" }, entry.lessonTitle));
+        last = entry.lessonTitle;
+      }
+      li.appendChild(el("div", { html: mdInline(entry.item.q) }));
+      li.appendChild(el("div", { class: "mt1" }, answerLine(entry.item)));
+      if (entry.item.explain) {
+        li.appendChild(el("div", { class: "sub", html: mdInline(entry.item.explain) }));
+      }
+      ol.appendChild(li);
+    }
+    details.appendChild(ol);
+    return details;
+  }
+  function renderCanDo(lessons) {
+    const card = section(
+      "Can do",
+      "What you can now do",
+      "Each lesson objective, as a checklist."
+    );
+    const items = lessons.filter((l) => l.objective);
+    if (!items.length) {
+      card.appendChild(el("p", { class: "sub", style: "margin:0" }, "This module has no objectives yet."));
+      return card;
+    }
+    const ul = el("ul", { class: "sg-can" });
+    for (const lesson of items) {
+      ul.appendChild(el(
+        "li",
+        {},
+        el(
+          "label",
+          {},
+          el("input", { type: "checkbox" }),
+          el(
+            "span",
+            {},
+            el("span", { html: mdInline(canDo(lesson.objective)) }),
+            el("span", { class: "small muted sg-from" }, lesson.title)
+          )
+        )
+      ));
+    }
+    card.appendChild(ul);
+    return card;
+  }
+  function renderMissing(root, trackId) {
+    root.appendChild(el(
+      "div",
+      { class: "crumb" },
+      el("a", { href: "#/learn" }, "\u2190 Lessons")
+    ));
+    root.appendChild(viewHeader("Study guide", trackId ? "Track not found" : "Study guide"));
+    root.appendChild(el(
+      "p",
+      { class: "sub" },
+      trackId ? "Nothing in the curriculum uses that id." : "This page needs a track id on the route."
+    ));
+    if (trackId) root.appendChild(el("p", { class: "num" }, trackId));
+  }
+  function plural(n, one, many) {
+    return n === 1 ? one : many;
+  }
+  var view17 = {
+    /**
+     * @param {HTMLElement} root
+     * @param {string[]} [params] params[0] is the track id
+     * @returns {(() => void) | void}
+     */
+    render(root, params) {
+      const trackId = trackIdFrom(params);
+      if (!curriculum || !curriculum.tracks) {
+        root.appendChild(el("p", { class: "sub" }, "Lessons loading\u2026"));
+        return;
+      }
+      const track2 = curriculum.tracks.find((t) => t.id === trackId);
+      if (!track2) {
+        renderMissing(root, trackId);
+        return;
+      }
+      const lessons = collect(track2);
+      const bank = bankOf(lessons);
+      const pointCount = lessons.reduce((n, l) => n + l.takeaways.length, 0);
+      root.appendChild(el("style", {}, PRINT_CSS));
+      const guide = el("div", { class: "sg-guide" });
+      root.appendChild(guide);
+      guide.appendChild(el(
+        "div",
+        { class: "crumb sg-no-print" },
+        el("a", { href: "#/learn/track/" + track2.id }, "\u2190 Lessons")
+      ));
+      const head = el("div", { class: "flex-between sg-head" });
+      const intro = el("div", {});
+      intro.appendChild(viewHeader("Study guide", track2.title));
+      if (track2.audience) {
+        intro.appendChild(el("p", { class: "small muted", style: "margin:0 0 6px" }, String(track2.audience)));
+      }
+      if (track2.description) {
+        intro.appendChild(el("p", { class: "sub", style: "max-width:68ch;margin:0 0 8px" }, String(track2.description)));
+      }
+      intro.appendChild(el(
+        "p",
+        { class: "small muted sg-no-print", style: "margin:0 0 8px" },
+        "Printable study sheet. Printing includes the answers."
+      ));
+      intro.appendChild(el(
+        "div",
+        { class: "btn-row" },
+        countPill(lessons.length, plural(lessons.length, "lesson", "lessons")),
+        countPill(pointCount, plural(pointCount, "key point", "key points")),
+        countPill(bank.length, plural(bank.length, "check", "checks"))
+      ));
+      head.appendChild(intro);
+      head.appendChild(el("button", {
+        type: "button",
+        class: "btn sg-no-print",
+        onclick: () => window.print()
+      }, "Print study guide"));
+      guide.appendChild(head);
+      guide.appendChild(renderMap(lessons));
+      guide.appendChild(renderPoints(lessons));
+      guide.appendChild(renderChecks(bank));
+      const key = renderKey(bank);
+      if (key) guide.appendChild(key);
+      guide.appendChild(renderCanDo(lessons));
+      guide.appendChild(el(
+        "p",
+        { class: "small muted mt2" },
+        "Educational only \u2014 not financial advice."
+      ));
+      let snap = null;
+      const onBeforePrint = () => {
+        if (snap) return;
+        const nodes = [...guide.querySelectorAll(".sg-reveal")];
+        const keyEl = guide.querySelector("details.sg-key");
+        snap = { nodes, hidden: nodes.map((n) => n.hidden), keyEl, keyOpen: keyEl ? keyEl.open : false };
+        nodes.forEach((n) => {
+          n.hidden = false;
+        });
+        if (keyEl) keyEl.open = true;
+      };
+      const onAfterPrint = () => {
+        if (!snap) return;
+        snap.nodes.forEach((n, i) => {
+          n.hidden = snap.hidden[i];
+        });
+        if (snap.keyEl) snap.keyEl.open = snap.keyOpen;
+        snap = null;
+      };
+      window.addEventListener("beforeprint", onBeforePrint);
+      window.addEventListener("afterprint", onAfterPrint);
+      return () => {
+        window.removeEventListener("beforeprint", onBeforePrint);
+        window.removeEventListener("afterprint", onAfterPrint);
+      };
+    }
+  };
+
   // src/main.js
   function start4() {
-    boot({ home: view7, learn: view8, strategy: view9, greeks: view10, vol: view11, market: view12, risk: view13, progress: view14, journal: view15, missions: view6, legal: view4 });
+    boot({ home: view7, learn: view8, strategy: view9, greeks: view10, vol: view11, market: view12, risk: view13, progress: view14, journal: view15, missions: view6, legal: view4, calculator: view16, guide: view17 });
     start3();
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       navigator.serviceWorker.register("./sw.js").catch(() => {
