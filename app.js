@@ -7760,6 +7760,339 @@
     ]
   };
 
+  // src/content/playbook-vol-pricing.js
+  var optionPricing = {
+    "id": "vp-pricing",
+    "program": "vol-pricing",
+    "title": "How Options Are Priced",
+    "audience": "What an option is worth, and why",
+    "description": "The engine under every option price: the two parts of a premium, the cost of time, and how volatility sets the dial.",
+    "modules": [
+      {
+        "id": "vpm-reading",
+        "title": "Reading an Option's Price",
+        "lessons": [
+          {
+            "id": "vp-two-parts-of-price",
+            "title": "The Two Parts of Every Price",
+            "objective": "Split a quoted option price into its intrinsic and extrinsic parts, and explain why the extrinsic part fades to $0 by expiry.",
+            "body": `You have paid a reseller $8 for a concert ticket whose face value is only $5. Part of that $8 is the face value you could always get back, and part is the extra "it might be a hot show" premium. An option price splits the same way, and traders call that hopeful second part **extrinsic value**. On the Greeks Lab's $100 model stock, Maria learns to read both parts inside a single quoted price.
+
+With the $100 model stock at $100, Maria reads the $95 call: it sits $5 above the strike, so $5 is already real \u2014 its intrinsic value. If the lab quotes that call at $8, the other $3 is extrinsic value, which fades to $0 by expiry. A call right at the $100 strike has $0 intrinsic value, so its whole price is pure extrinsic value. In plain words: price minus what the option is worth today leaves the time-and-uncertainty part.
+
+That $3 of extrinsic value is not a gift \u2014 it is the part that drains away while Maria holds the call. The more days and uncertainty baked in, the larger that $3 grows, so a 90-day call costs more than a 1-day call. A concert ticket's face value stays fixed, but an option's intrinsic $5 shifts every time the stock moves a dollar. In plain words: you pay extra for time, and that extra is exactly the part built to disappear.
+
+Reading these two parts tells Maria what she is really buying before she clicks. A $95 call at $8 holds only $5 of real value, so she is paying $3 purely for time. Sam checks the same split so he never mistakes a $3 time charge for a bargain. In plain words: every price is value you own today plus extra you rent for time, and that rented $3 fades to $0 by expiry.`,
+            "example": "The $100 model stock sits at $100. Maria reads the $95 call, quoted at $8.\n\u2022 Intrinsic value = $5, because the stock is $5 above the $95 strike.\n\u2022 Extrinsic value = $8 \u2212 $5 = $3, the part you pay for time and uncertainty.\n\u2022 By expiry that $3 fades to $0, leaving only the $5 that is really there.\n\u2022 A call right at the $100 strike has $0 intrinsic value, so its whole price is extrinsic value.",
+            "key_takeaways": [
+              "Every option price is two parts: intrinsic value (what it is worth today) plus extrinsic value (the extra you pay for time and uncertainty).",
+              "On the $100 model stock, a $95 call priced at $8 holds $5 of intrinsic value and $3 of extrinsic value.",
+              "Extrinsic value fades to $0 by expiry, so that $3 is the part designed to disappear.",
+              "A call right at the $100 strike has $0 intrinsic value, so its entire price is extrinsic value."
+            ],
+            "sim": "greeks",
+            "sim_task": "1) Open the Greeks Lab and leave the model stock at $100. 2) Set the Strike K slider to $95 and read the Call price tile. 3) Note that $5 of that price is intrinsic value, because the stock sits $5 above the $95 strike. 4) Set Days to expiry to 60 and watch the Call price sit above $5 \u2014 that gap is the extrinsic value. 5) Drag Days to expiry down from 60 to 1 and watch the price fall toward $5 as the extrinsic part melts away.",
+            "quiz": [
+              {
+                "q": "On the $100 model stock, a $95 call is quoted at $8. How much of that price is intrinsic value?",
+                "choices": [
+                  "$8",
+                  "$0",
+                  "$5",
+                  "$3"
+                ],
+                "answer": 2,
+                "explain": "The stock sits $5 above the $95 strike, so $5 is intrinsic value and the remaining $3 is extrinsic value."
+              },
+              {
+                "q": "Same $95 call priced at $8. How much of it is extrinsic value?",
+                "choices": [
+                  "$3",
+                  "$5",
+                  "$8",
+                  "$0"
+                ],
+                "answer": 0,
+                "explain": "Extrinsic value is the price minus the intrinsic $5, which leaves $3 you are paying for time."
+              },
+              {
+                "q": "A call sits right at the $100 strike on the $100 model stock. How much of its price is intrinsic value?",
+                "choices": [
+                  "Half of it",
+                  "$5",
+                  "All of it",
+                  "$0"
+                ],
+                "answer": 3,
+                "explain": "With the stock exactly at the $100 strike nothing is in the money, so the whole price is extrinsic value."
+              },
+              {
+                "q": "What happens to the $3 of extrinsic value on the $95 call as expiry arrives?",
+                "choices": [
+                  "It grows larger",
+                  "It fades toward $0",
+                  "It turns into $3 of intrinsic value",
+                  "It stays fixed at $3"
+                ],
+                "answer": 1,
+                "explain": "Extrinsic value is the charge for remaining time, so it melts to $0 by expiry, leaving only the intrinsic part."
+              }
+            ],
+            "tier": "core"
+          },
+          {
+            "id": "vp-why-time-costs",
+            "title": "Why Time Costs Money",
+            "objective": "See why more time makes an option worth more, and read theta as the dollars of time value it loses each day on the $100 model stock.",
+            "body": "Maria once paid extra for a plane ticket she could cancel right up to departure. The longer that cancel-anytime window stayed open, the more the flexibility cost her. An option works the same way: more time until expiry means more chances for the stock to move, so a longer-dated option is worth more. The daily bleed of that time value has a name \u2014 traders call it **theta**.\n\nOn the Greeks Lab's $100 model stock, picture two calls struck right at $100 \u2014 one with 60 days left, one with 10. The 60-day call might be worth about $6, while the 10-day call is worth only about $2.50. Same stock, same strike, so the extra $3.50 is pure time that theta drains a little each day. In plain words: the longer an option has to live, the more it is worth.\n\nTheta is small when expiry is far off and grows as the deadline nears. With 60 days left the $100 call loses only pennies a day, but inside the final two weeks the daily drop can triple. The bleed runs fastest for a call struck right at $100, and slower for ones far above or below. A plane ticket loses its cancel-value on the airline's fixed calendar, but an option's time value drains faster and faster the closer expiry gets.\n\nThis is why Maria never buys a short-dated option expecting it to hold its value. A 10-day $100 call bleeds its $2.50 away quickly, so the stock must move her way soon or that time value melts. Sam uses the same fact in reverse, selling that 10-day call to collect the $2.50 as theta drains quickest \u2014 cash he keeps only if the stock stays below $100. In plain words: time is what you are really paying for, and theta is the meter running down every day.",
+            "example": "Two calls struck at $100 on the model stock, same strike but different clocks:\n\u2022 60 days to expiry \u2192 about $6, because there is lots of time for the stock to move.\n\u2022 10 days to expiry \u2192 about $2.50, because most of that time is already gone.\nThe $3.50 gap is time value, and theta is what drains it a little more each day \u2014 slowly now, fastest in the final stretch.",
+            "key_takeaways": [
+              "More time until expiry means more chances for the stock to move, so a longer-dated option is worth more \u2014 about $6 for a 60-day $100 call versus about $2.50 for the 10-day one.",
+              "Theta is the daily bleed of an option's time value: the dollars it loses with each passing day.",
+              "Theta decay is slow when expiry is far off and speeds up in the final weeks, fastest for options struck right at the $100 stock price.",
+              "A short-dated option is mostly time value, so the stock must move your way before that value melts away."
+            ],
+            "sim": "greeks",
+            "sim_task": "1) Open the Greeks Lab and set Strike K to $100 on the model stock. 2) Click the \u0398 Theta tab so the Theta tile shows the dollars lost per day. 3) Set Days to expiry to 60 and read the Call price tile \u2014 a few dollars \u2014 next to only a small daily Theta. 4) Slowly drag Days to expiry down toward 1 and watch the Call price fall \u2014 gently at first, then faster as expiry nears. 5) Keep an eye on the Theta tile and watch its dollars-per-day grow into the final stretch, biggest just before expiry.",
+            "quiz": [
+              {
+                "q": "On the $100 model stock, why is a 60-day call worth more than a 10-day call at the same strike?",
+                "choices": [
+                  "The 60-day call has more time for the stock to move, so it holds more time value",
+                  "The 60-day call is struck at a lower price",
+                  "The 10-day call pays a dividend",
+                  "Longer options always carry less risk"
+                ],
+                "answer": 0,
+                "explain": "More days to expiry means more chances for the stock to move, so the longer-dated call holds more time value \u2014 about $6 versus $2.50."
+              },
+              {
+                "q": "What does theta measure?",
+                "choices": [
+                  "How far the strike sits from the stock price",
+                  "The dollars of time value an option loses each day",
+                  "The total profit at expiry",
+                  "How many shares the option controls"
+                ],
+                "answer": 1,
+                "explain": "Theta is the daily bleed of time value \u2014 the dollars an option loses with each passing day."
+              },
+              {
+                "q": "When is theta decay fastest?",
+                "choices": [
+                  "Right after the option is bought",
+                  "When expiry is far away",
+                  "In the final weeks before expiry, especially for options struck near the $100 price",
+                  "Only on the very first day"
+                ],
+                "answer": 2,
+                "explain": "Time value melts slowly when expiry is far off and fastest in the last weeks, most of all for options struck right at the $100 price."
+              },
+              {
+                "q": "Maria buys the 10-day $100 call for about $2.50 and the stock sits still for a week. What happens to its value?",
+                "choices": [
+                  "It rises because time is passing",
+                  "It stays exactly $2.50 until expiry",
+                  "It doubles overnight",
+                  "It bleeds lower each day as theta drains the time value"
+                ],
+                "answer": 3,
+                "explain": "With the stock going nowhere, theta keeps draining the $2.50 of time value a little each day until little is left."
+              }
+            ],
+            "tier": "core"
+          },
+          {
+            "id": "vp-iv-the-knob",
+            "title": "Implied Volatility: The Price Knob",
+            "objective": "Read an option's implied volatility as the market's expected-move dial, and explain why turning it from 20% to 40% roughly doubles a $100 stock's option price.",
+            "body": "You have shopped for insurance right before a stormy season and watched the quote jump, though your house never moved. An option carries that same hidden figure, and traders call it **implied volatility** \u2014 the swing size the market expects, baked into the price. You cannot read it off a stock chart; it lives inside what buyers will pay. In plain words: implied volatility is the market's bet on how big the next move will be.\n\nMaria opens the Greeks Lab, sets the $100 model stock, and keeps the strike at $100. At an implied volatility of 20%, the Call price tile reads about $3. She drags the dial to 40%, and the same call roughly doubles to about $6 \u2014 same stock, same strike, same days, only a bigger expected swing. In plain words: a wider expected move makes the option likelier to pay, so its price climbs.\n\nA high implied volatility is a forecast, not a fact, and that storm forecast can be wrong. An IV of 40% can collapse back to 20% if the market calms, and the price falls with it even while the stock holds at $100. No official forecaster sets this number \u2014 it is simply what buyers and sellers will pay today. In plain words: a high IV says the crowd expects a rough stretch, but the crowd can be wrong.\n\nSam checks implied volatility before he buys any option, because it tells him whether he is paying $3 or $6 for the same $100 stock and strike. Buy when IV sits high at 40%, and a simple calm-down to 20% can halve the option's value on its own. That is why the same contract can feel cheap or expensive without the stock moving a cent. In plain words: implied volatility is the price knob \u2014 turn it up and options cost more, turn it down and they cost less.",
+            "example": "$100 model stock, strike at $100, same days to go:\n\u2022 Implied vol at 20% \u2192 the Call price tile reads about $3.\n\u2022 Implied vol at 40% \u2192 the same call roughly doubles to about $6.\n\u2022 Stock price the whole time: still $100 \u2014 only the expected-move dial changed.",
+            "key_takeaways": [
+              "Implied volatility is the size of the move the market expects, baked into an option's price \u2014 you cannot read it off a stock chart.",
+              "On the $100 model stock, raising implied volatility from 20% to 40% roughly doubles an option's price, from about $3 to about $6.",
+              "Nothing else changed \u2014 same stock, same $100 strike, same days \u2014 only the expected-move dial turned.",
+              "A high IV is a forecast, not a fact: if 40% calms back to 20%, the option's price falls even though the stock never moved."
+            ],
+            "sim": "greeks",
+            "sim_task": "Open the Greeks Lab and confirm the model stock sits at $100. Set the Strike to $100. Drag the Implied vol slider from 20% up to 40% and watch the Call price tile roughly double. Drag the Implied vol slider back down to 20% and watch the Call price tile shrink to where it started. Notice the $100 stock price never moved the whole time \u2014 only the expected-move dial changed.",
+            "quiz": [
+              {
+                "q": "What does an option's implied volatility actually measure?",
+                "choices": [
+                  "The size of the move the market expects, baked into the price",
+                  "The exact price the stock will reach",
+                  "How many shares you must buy",
+                  "The number of days until expiration"
+                ],
+                "answer": 0,
+                "explain": "Implied volatility is the market's expected swing size priced into the option, not a guaranteed outcome."
+              },
+              {
+                "q": "On the $100 model stock, Maria raises implied volatility from 20% to 40% while the strike and days stay the same. What happens to the Call price?",
+                "choices": [
+                  "It falls by half",
+                  "It stays exactly the same",
+                  "It roughly doubles, from about $3 to about $6",
+                  "It drops to zero"
+                ],
+                "answer": 2,
+                "explain": "A bigger expected move makes the option likelier to pay off, so doubling IV roughly doubles the price."
+              },
+              {
+                "q": "When Maria turned implied volatility from 20% up to 40%, what else changed on the $100 model stock?",
+                "choices": [
+                  "The stock jumped to $140",
+                  "Nothing else \u2014 same stock, same strike, same days",
+                  "The strike moved to $120",
+                  "The expiration got closer"
+                ],
+                "answer": 1,
+                "explain": "Only the expected-move dial changed; the $100 price, the strike, and the days all stayed put."
+              },
+              {
+                "q": "Sam buys an option when implied volatility is 40%, then the market calms and IV falls to 20% with the stock still at $100. What happens to his option's value?",
+                "choices": [
+                  "It doubles again",
+                  "It is unaffected because the stock held at $100",
+                  "It rises because he already owns it",
+                  "It falls, roughly in half, even though the stock never moved"
+                ],
+                "answer": 3,
+                "explain": "IV is the price knob \u2014 turning it down from 40% to 20% shrinks the option's value even with no stock move."
+              }
+            ],
+            "tier": "core"
+          },
+          {
+            "id": "vp-historical-vs-implied",
+            "title": "Expected vs. Actual: Realized Volatility",
+            "objective": "Tell whether a stock's options are expensive or cheap by comparing the move the market expects to the move the stock actually delivered, and know which to sell and which to buy.",
+            "body": "You have checked a forecast calling for heavy rain, carried an umbrella all day, then watched only a light drizzle fall. Stocks have the same gap between the forecast and what the sky actually does. The move the market expects is the option's implied volatility; the move the stock actually delivers is its **realized volatility**. One is a forecast, the other is the weather that really arrived.\n\nPicture a calm stock that has truly moved about 15% a year \u2014 that 15% is its realized volatility. Yet its options are priced at 30% implied volatility, double the movement the stock actually makes. If Maria sells those options, she collects a premium sized for a 30% storm while the stock only delivers a 15% drizzle. In plain words: options priced at 30% on a stock that moves 15% are expensive versus reality, and good to sell.\n\nSelling rich-looking options is not free money. Where the weather and the option part ways: you cannot sell tomorrow's sky, but you can sell an option whose forecast runs richer than reality. That power cuts both ways, because a drizzly week can still end in a real downpour with no warning. If that calm stock suddenly swings 40% a year, the 30% premium Maria collected no longer covers the move, and she pays out.\n\nThe whole edge is comparing the forecast to the record. Sam sells when implied volatility towers over realized \u2014 30% against 15% \u2014 and buys when implied sits below it, say 15% against a real 30%. Either way he is trading the gap between the expected move and the real one. In plain words: check what the stock actually did against what its options charge, then sell the overpriced forecasts and buy the underpriced ones.",
+            "example": "A calm stock that has actually moved about 15% a year (realized volatility):\n\u2022 Its options are priced at 30% implied volatility \u2014 double the real movement.\n\u2022 Sell them: you collect a premium sized for a 30% storm while the stock delivers only a 15% drizzle, so on average you keep the gap.\n\u2022 Flip the numbers \u2014 implied 15%, realized 30% \u2014 and the options are now cheap, so buying them pays.\nRule of thumb: sell when implied towers over realized; buy when implied sits below it.",
+            "key_takeaways": [
+              "Implied volatility is the move the market expects; realized volatility is the move the stock actually delivered.",
+              "When options are priced at 30% implied but the stock only moves 15% realized, they are expensive versus reality and good to sell.",
+              "When implied sits far below realized \u2014 say 15% implied against 30% realized \u2014 options are cheap and good to buy.",
+              "The edge is the gap between the forecast and the record, not a guess about direction; a calm stock can still storm and burn a seller."
+            ],
+            "sim": "vol",
+            "sim_task": "Open the Volatility Lab and find the Gamma scalping simulator card. 1) Drag the IV you pay slider to 30%. 2) Drag the Realized vol slider to 15%. 3) Click Run 60 trials. Watch the Option P&L, Hedging P&L, and Total tiles: because the option was priced at 30% but the stock only moved 15%, the seller comes out ahead on average.",
+            "quiz": [
+              {
+                "q": "A stock has actually moved about 15% a year, but its options are priced at 30% implied volatility. For a seller, those options are:",
+                "choices": [
+                  "cheap versus reality",
+                  "priced exactly right",
+                  "expensive versus reality, and good to sell",
+                  "impossible to trade"
+                ],
+                "answer": 2,
+                "explain": "The 30% price bakes in twice the movement the stock really delivers at 15%, so the seller collects more than the stock is likely to cost."
+              },
+              {
+                "q": "What does realized volatility measure?",
+                "choices": [
+                  "how much the stock actually moved",
+                  "how much the market expects it to move",
+                  "the option's strike price",
+                  "the broker's commission"
+                ],
+                "answer": 0,
+                "explain": "Realized volatility is the past, actual swing the stock delivered, while implied volatility is the forecast the market is pricing in."
+              },
+              {
+                "q": "Implied volatility sits at 15% while the stock is actually swinging around 30% realized. What fits best?",
+                "choices": [
+                  "sell the options, they are expensive",
+                  "avoid options entirely",
+                  "nothing can be done",
+                  "buy the options, they are cheap versus reality"
+                ],
+                "answer": 3,
+                "explain": "When the forecast (15%) is far below the real move (30%), the options undercharge for the swings, so buying them is the edge."
+              },
+              {
+                "q": "Maria sells 30%-implied options on a stock delivering only 15% realized, then the stock suddenly starts moving 40% a year. What happens?",
+                "choices": [
+                  "she keeps winning no matter what",
+                  "the rich-looking options can now cost her, because the real move passed the 30% she collected",
+                  "realized volatility cannot change",
+                  "her premium automatically doubles"
+                ],
+                "answer": 1,
+                "explain": "A calm stock can storm for real; once realized runs past the 30% she priced in, the premium no longer covers the move and she pays out."
+              }
+            ],
+            "tier": "core"
+          },
+          {
+            "id": "vp-expected-move",
+            "title": "Turning Volatility into a Dollar Range",
+            "objective": "Turn an implied-volatility percentage into a dollar range \u2014 the expected move \u2014 and read how far a stock is likely to swing, in either direction, over a day or a month.",
+            "body": "You have looked at a stock and wondered how big a swing to expect by Friday \u2014 not up or down, just how far. The market already prints an answer, hidden inside the option prices as implied volatility. Turn that percentage into dollars and you get the **expected move**: the typical distance the stock is likely to travel, in either direction. Maria reads it to size a trade; Sam reads it to know if a move is ordinary or a shock.\n\nDivide the annual implied volatility by 16 to get the typical one-day move in percent. At 32% implied volatility that is about 2% a day, and on a $500 index 2% is about $10 a day. Over a month the range grows with the square root of time \u2014 not 30 times a day but only about 5 to 6 times, near $55. In plain words: one dial sets the daily swing, and time widens it by its square root, not in a straight line.\n\nThink of it like the arrival window your GPS shows. A wider window does not tell you which way traffic will break, only that the spread of likely arrival times is bigger. That window is the expected move's blind spot too: it sizes the swing, never the direction, and the stock lands outside it about 1 in 3 times. So Maria treats a $10 daily move as a rough fence, not a guarantee.\n\nThis one number quietly shapes what every option is worth. When the expected move is wide, the market is pricing a bigger swing, so option premiums swell to cover it; when it is narrow, they shrink. Sam checks it before earnings: if a stock usually moves $10 but options now price a $25 swing, the market expects fireworks. In plain words: the expected move turns a volatility percentage into a dollar range, telling you how far \u2014 never which way \u2014 a stock is likely to go.",
+            "example": "A $500 index priced at 32% implied volatility:\n\u2022 One-day move \u2248 32 \xF7 16 = 2%, so about $10 a day.\n\u2022 One week (5 trading days) \u2248 \u221A5 \xD7 $10 \u2248 $22.\n\u2022 One month \u2248 5 to 6 \xD7 $10 \u2248 $50 to $60 \u2014 not 30 \xD7 $10.\nRaise the dial, widen the window \u2014 but still no direction.",
+            "key_takeaways": [
+              "The expected move turns an implied-volatility percentage into a dollar range \u2014 how far a stock is likely to swing, in either direction.",
+              "Quick shortcut: divide the annual IV by 16 for the typical one-day move; 32% IV is about 2% a day, or about $10 on a $500 index.",
+              "The range grows with the square root of time, so a month is only about 5 to 6 times a day, not 30 times.",
+              "It sizes the swing but never names the direction, and the stock finishes outside it about 1 in 3 times."
+            ],
+            "sim": "vol",
+            "sim_task": "1) Open the Volatility Lab and find the Volatility smile card. 2) Raise the ATM vol slider from 22% to 32% and watch the whole implied-volatility curve lift \u2014 a higher dial prices a bigger swing in both directions, a wider expected move. 3) Nudge Skew (fear) and Smile (tails) to see only the edges bend while the center still sets the typical move. 4) Set ATM vol back to 22% and watch the curve drop as the expected move shrinks.",
+            "quiz": [
+              {
+                "q": "A stock trades at 32% implied volatility. Using the divide-by-16 shortcut, what is the typical one-day move?",
+                "choices": [
+                  "About 2%",
+                  "About 32%",
+                  "About 16%",
+                  "About 0.5%"
+                ],
+                "answer": 0,
+                "explain": "Dividing the 32% annual implied volatility by 16 gives about a 2% typical move in a single day."
+              },
+              {
+                "q": "On a $500 index at 32% implied volatility, roughly how large is the expected one-day move in dollars?",
+                "choices": [
+                  "About $160",
+                  "About $32",
+                  "About $10",
+                  "About $100"
+                ],
+                "answer": 2,
+                "explain": "A 2% daily move on a $500 index is about $10, since 2% of $500 equals $10."
+              },
+              {
+                "q": "If one day's expected move is $10, about how large is one month's expected move?",
+                "choices": [
+                  "About $300, or 30 times a day",
+                  "About $10, the same as a day",
+                  "About $150, or 15 times a day",
+                  "About $50 to $60, since the range grows with the square root of time"
+                ],
+                "answer": 3,
+                "explain": "The range grows with the square root of time, so a month is only about 5 to 6 times a day, near $50 to $60, not 30 times."
+              },
+              {
+                "q": "What does the expected move actually tell you?",
+                "choices": [
+                  "Which direction the stock will move next",
+                  "How far the stock is likely to swing, but not which way",
+                  "That the stock will definitely stay inside the range",
+                  "The exact closing price one month out"
+                ],
+                "answer": 1,
+                "explain": "The expected move sizes the likely swing in either direction; it never names the direction, and the stock can finish outside it."
+              }
+            ],
+            "tier": "core"
+          }
+        ]
+      }
+    ]
+  };
+
   // src/content/curriculum.js
   var curriculum = {
     "tracks": [
@@ -9758,6 +10091,7 @@
   curriculum.tracks.push(premiumIncome);
   curriculum.tracks.push(definedRiskSpreads);
   curriculum.tracks.push(protectionSynthetics);
+  curriculum.tracks.push(optionPricing);
 
   // src/ui/shell.js
   var contentEl;
@@ -10819,6 +11153,11 @@
       order: 1,
       title: "The Strategy Playbook",
       blurb: "A guided tour of options strategies \u2014 how each one is built, when to use it, and the exact shape of its payoff."
+    },
+    "vol-pricing": {
+      order: 2,
+      title: "Volatility & Pricing",
+      blurb: "The engine under every option price \u2014 what a premium is really made of, the cost of time, and how volatility sets the dial."
     }
   };
   function allLessons() {
