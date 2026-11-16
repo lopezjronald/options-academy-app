@@ -957,6 +957,17 @@
   function loadMarketSnapshot() {
     return db.market || null;
   }
+  function resetMarketAndAccount() {
+    db.market = null;
+    const p = active();
+    if (p) {
+      p.cash = 1e5;
+      p.positions = [];
+      p.marks = [];
+      p.reserved = {};
+    }
+    save();
+  }
   function exportJson() {
     return JSON.stringify({ ...db, exportedAt: (/* @__PURE__ */ new Date()).toISOString() }, null, 1);
   }
@@ -11724,6 +11735,33 @@
 
   // src/ui/views/market.js
   var viewState2 = {};
+  function confirmResetMarket() {
+    const box = el("div", {});
+    box.appendChild(el("h2", {}, "Reset the market?"));
+    box.appendChild(el(
+      "p",
+      { class: "sub", style: "max-width:48ch" },
+      "This restarts the simulated market at Day 1 with fresh prices and closes all your open paper positions, resetting your paper balance to $100,000. Your lessons, XP, and journal are kept. This cannot be undone."
+    ));
+    const m = modal(box);
+    box.appendChild(el(
+      "div",
+      { class: "btn-row mt2" },
+      el("button", { type: "button", class: "btn", onclick: () => m.close() }, "Cancel"),
+      el("button", { type: "button", class: "btn primary", onclick: () => {
+        market.pause();
+        market.reset({ seed: Math.floor(Math.random() * 2 ** 31) });
+        resetMarketAndAccount();
+        saveMarketSnapshot(market.snapshot());
+        m.close();
+        toast("Market reset to Day 1 \u2014 fresh $100,000 paper account.", "gain");
+        location.hash = "#/home";
+        setTimeout(() => {
+          location.hash = "#/market";
+        }, 30);
+      } }, "Reset market")
+    ));
+  }
   var THESIS_DIRS = [
     ["up", "Up"],
     ["down", "Down"],
@@ -11982,7 +12020,13 @@
           toast("\u23ED Jumped to the next trading day.");
         }
       }, "\u23ED Next day");
-      head.appendChild(el("div", { class: "btn-row" }, clockBig, speedSeg, nextDayBtn));
+      const resetBtn = el("button", {
+        type: "button",
+        class: "btn sm",
+        title: "Restart the simulated market at Day 1 with fresh prices",
+        onclick: () => confirmResetMarket()
+      }, "Reset market");
+      head.appendChild(el("div", { class: "btn-row" }, clockBig, speedSeg, nextDayBtn, resetBtn));
       root.appendChild(head);
       root.appendChild(el(
         "p",
