@@ -1059,6 +1059,20 @@
   function pnlAtExpiry(legs, S2) {
     return valueAtExpiry(legs, S2) - entryCost(legs);
   }
+  function breakevens(legs, lo, hi, steps = 240) {
+    const out = [];
+    let prev = pnlAtExpiry(legs, lo);
+    for (let i = 1; i <= steps; i++) {
+      const x = lo + (hi - lo) * i / steps;
+      const y = pnlAtExpiry(legs, x);
+      if (prev <= 0 && y > 0 || prev >= 0 && y < 0) {
+        const x0 = lo + (hi - lo) * (i - 1) / steps;
+        out.push(x0 + (0 - prev) / (y - prev) * (x - x0));
+      }
+      prev = y;
+    }
+    return out;
+  }
   function tailSlopes(legs) {
     let up = 0, down = 0;
     for (const l of legs) {
@@ -6759,6 +6773,578 @@
     }
   };
 
+  // src/content/playbook-spreads.js
+  var coveredCallMgmt = {
+    "id": "spm-covered",
+    "title": "Working Your Covered Calls",
+    "lessons": [
+      {
+        "id": "sp-rolling-covered-call",
+        "title": "Rolling a Covered Call",
+        "objective": "Roll a covered call to collect more premium and lift your sell-price cap, and weigh the cost of buying back the old call before you do it.",
+        "body": "You have renewed a magazine subscription early, paying again to keep it coming on better terms. Maria does the same with a covered call she already sold. She owns 100 shares of Burgess ($67) and earlier sold a $70 call for $2 ($200). With the stock climbing toward $70, she closes that call and opens a fresh one \u2014 traders call the move a **roll**.\n\nHere is the roll in dollars. Maria buys back her $70 call for $4 ($400), a $2 loss on that leg since she first sold it for $2. Then she sells a later-dated $72 call for $5 ($500), so the close-and-reopen nets her $1 more a share \u2014 another $100 in hand. The new call also lifts her sell-price cap from $70 up to $72, giving the shares $2 more room to climb. In plain words: she paid to end the old promise and opened a better-paying one.\n\nThe roll is not free. Maria spends $4 ($400) to buy back the old call, and the $72 call ties up her shares longer before they can be called away. Where the magazine renewal and the roll part ways: a renewal only costs the new fee, while rolling also makes her hold the stock through a longer wait. A roll is optional: if Burgess slips instead of climbing, the $70 call just fades to nothing and she keeps the original $200 free and clear.\n\nSam rolls a call for two plain reasons. He rolls up to a higher strike when his stock is climbing and he wants more upside room \u2014 Maria lifted her cap from $70 to $72. He rolls out to a later date to collect more premium and keep the position alive, as her roll added $100. Either way, he rolls only when the new call pays enough to justify holding the shares longer. In plain words: a roll closes the call you sold and opens a later or higher one, buying more premium or upside for a longer wait.",
+        "example": "Maria owns 100 Burgess shares bought at $67 and earlier sold a $70 call for $2 (+$200); the stock nears $70 and that call now costs $4 to buy back.\n\u2022 Buy back the $70 call \u2192 \u2212$4 ($400), a $2 loss on that leg.\n\u2022 Sell a later-dated $72 call \u2192 +$5 ($500).\n\u2022 Net on the roll \u2192 +$1 a share (+$100), and the cap rises from $70 to $72.\n\u2022 If Burgess falls instead \u2192 the $70 call decays, she keeps the $200, no roll needed.\nBreakeven after the roll = share cost \u2212 net premium kept = $67 \u2212 ($2 \u2212 $4 + $5) = $64.",
+        "key_takeaways": [
+          "A roll closes the covered call you already sold and opens a new one later in time or at a higher strike.",
+          "Maria bought back her $70 call for $4 and sold a $72 call for $5, netting $1 more a share ($100) and lifting her cap from $70 to $72.",
+          "The tradeoff is the $4 cost to close the old call plus committing to hold the shares longer.",
+          "You never have to roll \u2014 if the stock falls, the old call simply decays and you keep the premium you already collected."
+        ],
+        "sim_task": "Open the Strategy Lab and choose BRGR under Underlying. Choose Covered Call under Preset strategy and read the Net credit and Breakeven tiles \u2014 this is the call Maria already sold. Raise the leg's Strike by a step and push its Expiry to a later date to mimic a roll, then watch the Net credit and breakeven shift. Compare the new credit against the cost of buying back the first call to see whether the roll pays enough to be worth it.",
+        "quiz": [
+          {
+            "q": "What does it mean to roll a covered call?",
+            "choices": [
+              "Sell the shares and buy them back later",
+              "Close the call you already sold and open a new one later in time or at a higher strike",
+              "Buy a put to protect the shares",
+              "Let the call expire and do nothing"
+            ],
+            "answer": 1,
+            "explain": "A roll closes your current short call and opens a new one further out in time and/or at a higher strike to collect more premium or lift the cap."
+          },
+          {
+            "q": "Maria buys back her $70 call for $4 (first sold for $2) and sells a $72 call for $5. What does the roll net her in credit?",
+            "choices": [
+              "$5 a share",
+              "$1 more a share ($100)",
+              "$4 a share",
+              "Nothing \u2014 it only costs her money"
+            ],
+            "answer": 1,
+            "explain": "Buying back at $4 and selling at $5 nets $1 more a share, about $100, on top of lifting her cap."
+          },
+          {
+            "q": "What happened to Maria's sell-price cap after the roll?",
+            "choices": [
+              "It fell from $70 to $67",
+              "It rose from $70 to $72",
+              "It stayed at $70",
+              "It was removed entirely"
+            ],
+            "answer": 1,
+            "explain": "Selling the later-dated $72 call in place of the $70 call raises the price at which her shares can be called away from $70 to $72."
+          },
+          {
+            "q": "Burgess falls instead of climbing after Maria sold the $70 call. What is the sensible move?",
+            "choices": [
+              "Roll immediately to a lower strike",
+              "Nothing \u2014 the $70 call decays and she keeps the $200",
+              "Sell her shares at a loss",
+              "Buy back the call for $4"
+            ],
+            "answer": 1,
+            "explain": "A roll is optional; if the stock falls the $70 call simply loses value and she keeps the original $200 with no need to roll."
+          }
+        ],
+        "tier": "core",
+        "sim": "strategy",
+        "diagram": {
+          "legs": [
+            {
+              "kind": "stock",
+              "side": 1,
+              "qty": 100,
+              "entry": 67
+            },
+            {
+              "kind": "call",
+              "side": -1,
+              "qty": 1,
+              "strike": 70,
+              "entry": 2
+            }
+          ],
+          "S": 67,
+          "title": "Covered call you are managing \u2014 payoff at the deadline",
+          "caption": "The call caps your gain above the strike; a roll lifts that cap and collects more premium for a longer hold."
+        }
+      }
+    ]
+  };
+  var definedRiskSpreads = {
+    "id": "sp-defined-risk",
+    "program": "strategy-playbook",
+    "title": "Defined-Risk Spreads",
+    "audience": "Capped cost, capped risk",
+    "description": "Two-legged strategies where you know your worst case in dollars before you place the trade.",
+    "modules": [
+      {
+        "id": "drm-vertical",
+        "title": "Vertical Spreads",
+        "lessons": [
+          {
+            "id": "sp-bull-call-spread",
+            "title": "The Bull Call Spread",
+            "objective": "Buy a bull call spread to bet on a modest rise for a fraction of a single call's cost, and state its breakeven, max loss, and max profit in dollars before you place it.",
+            "body": "You buy concert tickets you expect to resell high, and a friend pays you cash now for the right to buy them off you at a set price. That caps your profit, but it also shrinks what the tickets cost you today. On a stock, that paired move is a **bull call spread**. Sam buys one call and sells a higher one on Burgess ($67) to bet on a gentle rise.\n\nHere is the trade in dollars. Sam buys the $65 call for $4 ($400) and sells the $70 call for $2 ($200), so his real outlay is the $2-a-share gap, or $200. If Burgess reaches $70 or higher, the two strikes are $5 apart, so the spread is worth $500 and Sam clears $300 after his cost. If Burgess sits at or below $65, both calls expire worthless and the $200 is gone. In plain words: $200 is the most he can lose and $300 the most he can make.\n\nThe catch is that cap. If Burgess rockets to $80, Sam still makes only $300, because the $70 call he sold hands those extra gains away. Where the ticket deal and the spread part ways: a friend might never come collect, but the call Sam sold is exercised against him the moment Burgess tops $70. And if the stock stalls below $65, the whole $200 is gone, same as a bet that simply did not pay. In plain words: he swaps unlimited upside for a cheaper, strictly capped wager.\n\nSam reaches for a bull call spread when he is mildly bullish, not wildly so. He expects Burgess to drift toward $70, not to skyrocket, so capping the top is a fair trade for spending $200 instead of $400. The spread costs less than buying the $65 call alone, and it loses less if he is wrong. His line in the sand is $67: above it he profits, below it he does not. In plain words: a bull call spread is a cheaper, capped way to bet a stock rises to a target you name.",
+            "example": "Burgess trades at $67. Sam buys the $65 call for $4 ($400 out) and sells the $70 call for $2 ($200 in).\n\u2022 Net cost = $400 \u2212 $200 = $200, which is also his max loss.\n\u2022 Burgess ends at or below $65 \u2192 both calls expire worthless, Sam loses the $200.\n\u2022 Burgess ends at or above $70 \u2192 the spread is worth $5 \xD7 100 = $500; after the $200 cost, max profit is $300.\nBreakeven = lower strike + net cost = $65 + $2 = $67.",
+            "key_takeaways": [
+              "A bull call spread buys a lower-strike call and sells a higher-strike call at the same expiry, cutting the cost of a bullish bet.",
+              "Your net cost is the most you can lose: Sam pays $4 and collects $2, risking $200 if Burgess ends at or below $65.",
+              "Max profit is the strike gap minus your cost \u2014 ($70 \u2212 $65) \xD7 100 \u2212 $200 = $300 \u2014 reached at or above $70.",
+              "Breakeven is the lower strike plus your net cost ($65 + $2 = $67); use it when you expect a modest rise, not a huge one."
+            ],
+            "sim_task": "Open the Strategy Lab and choose BRGR under Underlying. Choose Bull Call Spread under Preset strategy. Set both legs to the nearest expiry, the lower Strike a step below today's price and the upper Strike a step or two above it. Read the Net debit, Breakeven, Max loss, and Max profit tiles. Widen the gap between the two strikes and watch Max profit grow as the Net debit climbs.",
+            "quiz": [
+              {
+                "q": "Sam buys the $65 call for $4 and sells the $70 call for $2 on Burgess. What is his net cost and worst case?",
+                "choices": [
+                  "$600, because he paid for both calls",
+                  "$200, the difference he paid out",
+                  "$0, the two calls cancel out",
+                  "$500, the gap between the strikes"
+                ],
+                "answer": 1,
+                "explain": "He pays $4 and collects $2, so his net cost \u2014 and the most he can lose \u2014 is $2 a share, or $200."
+              },
+              {
+                "q": "Burgess finishes at $72 at expiry. How much does Sam's spread make?",
+                "choices": [
+                  "$700",
+                  "$300",
+                  "$500",
+                  "Unlimited, since the stock kept rising"
+                ],
+                "answer": 1,
+                "explain": "Above $70 the spread is worth its full $500 ($5 \xD7 100), and after the $200 cost his profit is capped at $300."
+              },
+              {
+                "q": "Burgess drifts down to $63 by expiry. What happens to Sam's spread?",
+                "choices": [
+                  "He keeps a $200 premium",
+                  "Both calls expire worthless and he loses his $200",
+                  "He must buy 100 shares at $65",
+                  "He still makes $300"
+                ],
+                "answer": 1,
+                "explain": "At or below the $65 strike both calls expire worthless, so Sam loses his full $200 net cost."
+              },
+              {
+                "q": "Where does Sam's spread start to turn a profit?",
+                "choices": [
+                  "At $65, the lower strike",
+                  "At $67, the lower strike plus his $2 cost",
+                  "At $70, the upper strike",
+                  "At $63, his cost below the strike"
+                ],
+                "answer": 1,
+                "explain": "Breakeven is the lower strike plus the net cost, $65 + $2 = $67, so Burgess must clear $67 for him to profit."
+              }
+            ],
+            "tier": "core",
+            "sim": "strategy",
+            "diagram": {
+              "legs": [
+                {
+                  "kind": "call",
+                  "side": 1,
+                  "qty": 1,
+                  "strike": 65,
+                  "entry": 4
+                },
+                {
+                  "kind": "call",
+                  "side": -1,
+                  "qty": 1,
+                  "strike": 70,
+                  "entry": 2
+                }
+              ],
+              "S": 67,
+              "title": "Bull call spread \u2014 payoff at the deadline",
+              "caption": "Both the cost and the gain are capped: max loss below $65, max profit above $70, breakeven $67."
+            }
+          },
+          {
+            "id": "sp-bear-put-spread",
+            "title": "The Bear Put Spread",
+            "objective": "Buy a bear put spread to bet on a limited fall for a capped cost, and state its breakeven, max profit, and max loss in dollars before you place it.",
+            "body": "You live near a river and buy flood insurance, but you pick the cheaper plan that caps what it ever pays out. A **bear put spread** works like that when you expect a stock to slide: you accept a lower ceiling in exchange for a lower price. Maria buys a higher-strike put and sells a lower-strike put on Burgess ($67), same deadline, to bet on a fall with cost and reward both capped. She pays $4 for the $70 put, takes in $2 for the $65 put, and is out $2 a share \u2014 $200 in all.\n\nHere is the trade in dollars. If Burgess sinks to $65 or lower by the deadline, the spread is worth its full $5 width \u2014 $500 \u2014 so Maria keeps $300 after her $200 cost. If Burgess sits at $70 or above, both puts expire worthless and she loses the whole $200. In plain words: her best case is $300, her worst case is the $200 she paid.\n\nThe ceiling is the real catch. Even if Burgess craters to $40, Maria still collects only $500 on the spread \u2014 the same $300 as at $65. She also needs Burgess under $68 just to break even, the $70 strike minus her $2 cost. Where the flood policy and the spread part ways: you hope you never use the policy, but Maria is betting the drop arrives and wants it.\n\nSam reaches for a bear put spread when he expects a clear but limited drop, not a crash. A plain $70 put would cost him $4; selling the $65 put trims that to $2, so a smaller move still pays him. He gives up any profit below $65, but he expected a floor there anyway. In plain words: a bear put spread is a cheaper, capped way to bet a stock falls to a level you can name.",
+            "example": "Burgess trades at $67. Maria buys the $70 put ($4) and sells the $65 put ($2), paying $2 a share \u2014 $200 in all.\n\u2022 Burgess at $70 or higher \u2192 both puts expire worthless; she loses the full $200.\n\u2022 Burgess at $65 or lower \u2192 the spread is worth its $5 width ($500); after the $200 cost she keeps $300.\n\u2022 Burgess at $68 \u2192 the spread is worth $2 ($200), exactly her cost, so she breaks even.\nBreakeven = higher strike \u2212 net cost = $70 \u2212 $2 = $68.",
+            "key_takeaways": [
+              "A bear put spread buys a higher-strike put and sells a lower-strike put at the same expiry, betting on a fall for a small, fixed cost.",
+              "Your most-you-can-lose is the net cost you paid \u2014 $200 \u2014 and it happens if the stock stays at or above the higher strike.",
+              "Your most-you-can-make is the gap between the strikes minus that cost \u2014 $300 \u2014 reached at or below the lower strike.",
+              "Breakeven is the higher strike minus the net cost ($70 \u2212 $2 = $68); selling the lower put is what trades away any reward below it."
+            ],
+            "sim_task": "Open the Strategy Lab and choose BRGR under Underlying. Choose Bear Put Spread under Preset strategy. Set the long put's Strike a step above today's price and the short put's Strike a step below it, both on the nearest expiry. Read the Net debit, Breakeven, and Max profit tiles. Widen the gap between the two strikes and watch both the cost and the max profit grow.",
+            "quiz": [
+              {
+                "q": "Maria buys the $70 put ($4) and sells the $65 put ($2) on Burgess. What did the spread cost her up front?",
+                "choices": [
+                  "$600",
+                  "$200",
+                  "$400",
+                  "$500"
+                ],
+                "answer": 1,
+                "explain": "She pays $4 for the $70 put and collects $2 for the $65 put, a net $2 a share, or $200 for 100 shares."
+              },
+              {
+                "q": "At the deadline Burgess is $72. What happens to Maria's spread?",
+                "choices": [
+                  "She makes the full $300",
+                  "Both puts expire worthless and she loses her $200",
+                  "She breaks even",
+                  "She collects $500"
+                ],
+                "answer": 1,
+                "explain": "Above the $70 strike both puts are worthless, so Maria loses the entire $200 she paid \u2014 her max loss."
+              },
+              {
+                "q": "Burgess falls to $60 by the deadline. What is Maria's profit?",
+                "choices": [
+                  "$500",
+                  "$800",
+                  "$300",
+                  "$200"
+                ],
+                "answer": 2,
+                "explain": "At or below $65 the spread is worth its $5 width ($500); after her $200 cost she keeps $300, the capped max profit."
+              },
+              {
+                "q": "What is the breakeven price on this spread?",
+                "choices": [
+                  "$65",
+                  "$67",
+                  "$68",
+                  "$70"
+                ],
+                "answer": 2,
+                "explain": "Breakeven is the higher strike minus the net cost, $70 \u2212 $2 = $68; below that the spread is worth more than it cost."
+              }
+            ],
+            "tier": "core",
+            "sim": "strategy",
+            "diagram": {
+              "legs": [
+                {
+                  "kind": "put",
+                  "side": 1,
+                  "qty": 1,
+                  "strike": 70,
+                  "entry": 4
+                },
+                {
+                  "kind": "put",
+                  "side": -1,
+                  "qty": 1,
+                  "strike": 65,
+                  "entry": 2
+                }
+              ],
+              "S": 67,
+              "title": "Bear put spread \u2014 payoff at the deadline",
+              "caption": "A capped bet on a fall: max profit below $65, max loss above $70, breakeven $68."
+            }
+          }
+        ]
+      },
+      {
+        "id": "drm-range",
+        "title": "Range Plays",
+        "lessons": [
+          {
+            "id": "sp-iron-condor",
+            "title": "The Iron Condor",
+            "objective": "Sell an iron condor to collect a small credit when a stock should stay in a range, and state its two breakevens and capped loss in dollars before you place it.",
+            "body": "You have rented out a lakeside cabin only for the quiet off-season weeks, taking a little rent as long as no storm sends guests packing. An **iron condor** earns income the same calm way on a stock. Sam bets Burgess ($67) will drift in a quiet range. He sells a $63 put and a $71 call to collect cash, buys a $60 put and a $74 call as backstops, and keeps $2 a share.\n\nHere is the trade in dollars. Sam collects $1 a share on the put side and $1 on the call side, so $200 lands in his account now ($2 \xD7 100 shares). If Burgess finishes anywhere between $63 and $71, every option expires worthless and he keeps the whole $200. That $200 net credit is the most he can ever make. In plain words: he gets paid up front to bet the stock stays calm.\n\nThe risk shows up if Burgess makes a big move. Say it slides to $58: the put side swells to its full $3, a $300 loss cushioned by the $200 he kept, leaving him down $100. A jump above $74 does the same $100 damage on the call side, and his two breakevens sit at $61 below and $73 above. Where the cabin and the condor part ways: an owner can block off a stormy week, but Sam's range is locked until the deadline.\n\nSam reaches for an iron condor when he expects a sleepy, sideways stretch, not a big swing. He keeps the full $200 as long as Burgess stays between $63 and $71, and his worst case is a known $100 on either side. Maria likes that the loss is capped before she ever places it \u2014 no nasty surprise if a storm blows through. In plain words: an iron condor pays you a small credit now to bet a stock stays in a range, with profit and loss both fixed up front.",
+            "example": "Burgess trades at $67. Sam sells the $63/$60 put side and the $71/$74 call side, collecting $200 today.\n\u2022 Burgess finishes at $67 (between $63 and $71) \u2192 all four options expire worthless; he keeps the full $200.\n\u2022 Burgess slides to $58 \u2192 the put side costs its full $3 ($300); the $200 kept leaves him down $100, his max loss.\n\u2022 Burgess spikes to $76 \u2192 the call side does the same $100 damage.\nBreakeven = $63 \u2212 $2 = $61 (lower) and $71 + $2 = $73 (upper).",
+            "key_takeaways": [
+              "An iron condor pairs a sold put side with a sold call side; you collect a credit now, betting the stock stays in a range.",
+              "Finish between the two sold strikes ($63\u2013$71 here) and you keep the full credit \u2014 the $200 is your max profit.",
+              "Each side is capped: the most you lose is the $3 width minus the credit, about $100 on the put or the call side.",
+              "Breakevens are the sold put minus the credit ($61) and the sold call plus the credit ($73); profit and loss are both fixed up front."
+            ],
+            "sim_task": "Open the Strategy Lab and choose BRGR under Underlying. Choose Iron Condor under Preset strategy. Read the Net credit, Max loss, and both Breakeven tiles \u2014 the credit is your max profit. Set the nearest expiry, then nudge the two sold strikes to sit a step below and a step above today's price. Widen the range and watch the credit shrink while the max loss climbs too.",
+            "quiz": [
+              {
+                "q": "Sam sells an iron condor on Burgess ($67) for $200. At the deadline Burgess is $67, between the sold strikes. What happens?",
+                "choices": [
+                  "He owes $300",
+                  "He keeps the full $200 and owns no shares",
+                  "He loses the $200",
+                  "He must buy 100 shares at $63"
+                ],
+                "answer": 1,
+                "explain": "Between $63 and $71 all four options expire worthless, so Sam keeps the entire $200 credit \u2014 his max profit."
+              },
+              {
+                "q": "Same trade, but Burgess crashes to $58. What is Sam's result?",
+                "choices": [
+                  "He keeps the full $200",
+                  "He loses $100 \u2014 the $300 put-side cost minus the $200 he kept",
+                  "He loses $300",
+                  "He loses $200"
+                ],
+                "answer": 1,
+                "explain": "A move past the sold put makes the put side worth its full $3 ($300); the $200 credit caps the loss at $100."
+              },
+              {
+                "q": "What are the two breakevens on this iron condor?",
+                "choices": [
+                  "$60 and $74",
+                  "$63 and $71",
+                  "$61 and $73",
+                  "$67 and $67"
+                ],
+                "answer": 2,
+                "explain": "Lower breakeven is the $63 sold put minus the $2 credit ($61); upper is the $71 sold call plus the $2 credit ($73)."
+              },
+              {
+                "q": "When is an iron condor a good fit?",
+                "choices": [
+                  "When you expect a huge move either way",
+                  "When you expect the stock to stay in a quiet range",
+                  "When you want unlimited upside",
+                  "When you refuse to cap your loss"
+                ],
+                "answer": 1,
+                "explain": "The condor keeps its full credit only if the stock drifts sideways between the sold strikes, so it suits a calm, rangebound outlook."
+              }
+            ],
+            "tier": "core",
+            "sim": "strategy",
+            "diagram": {
+              "legs": [
+                {
+                  "kind": "put",
+                  "side": 1,
+                  "qty": 1,
+                  "strike": 60,
+                  "entry": 1
+                },
+                {
+                  "kind": "put",
+                  "side": -1,
+                  "qty": 1,
+                  "strike": 63,
+                  "entry": 2
+                },
+                {
+                  "kind": "call",
+                  "side": -1,
+                  "qty": 1,
+                  "strike": 71,
+                  "entry": 2
+                },
+                {
+                  "kind": "call",
+                  "side": 1,
+                  "qty": 1,
+                  "strike": 74,
+                  "entry": 1
+                }
+              ],
+              "S": 67,
+              "title": "Iron condor \u2014 payoff at the deadline",
+              "caption": "Keep the full $200 while Burgess stays between $63 and $71; losses cap at $100 past either breakeven ($61, $73)."
+            }
+          },
+          {
+            "id": "sp-butterfly",
+            "title": "The Butterfly",
+            "objective": "Build a butterfly to bet cheaply that a stock stays near one price, and state its max loss, best case, and two breakevens in dollars before you place it.",
+            "body": "You have handed over a dollar at a carnival to toss a dart, hoping it lands dead center for the top prize. A **butterfly** is that same cheap ticket, but on a stock. Maria bets Burgess ($67) will barely budge, so she builds one. She buys one $62 call, sells two $67 calls, and buys one $72 call for the same expiry \u2014 a $1-a-share ticket, or $100.\n\nHere is the trade in dollars: if Burgess finishes right at $67, Maria hits the center. Her $62 call is worth $5 a share, the other three expire worthless, and $5 \xD7 100 = $500 comes back. Take off the $100 she paid, and she keeps $400 \u2014 her best case; at $62 or lower, or $72 or higher, she loses only the $100 ticket. In plain words: dead center pays $400, and a miss costs just the $100.\n\nThe honest catch: the dart must land in a narrow band \u2014 Maria only comes out ahead if Burgess finishes between $63 and $71, her two breakevens. Outside that band she is down, and the full $400 needs Burgess at exactly $67, which rarely lands on the nose. Where the carnival dart and the butterfly part ways: a dart is one instant throw, but Maria can close the butterfly early for whatever it is worth. Still, a big move either way leaves her out just the $100.\n\nMaria reaches for a butterfly when she expects a quiet stock and wants a cheap, defined bet. She risks only the $100 she paid, and she knows her best case is $400 before she places it. Sam likes that the math is fixed on day one \u2014 no surprise losses if Burgess gaps, and it suits a sleepy market, not a chase for a big swing. In plain words: a butterfly is a low-cost bet that a stock stays put, paying its most at the middle strike and costing only the small ticket otherwise.",
+            "example": "Burgess trades at $67. Maria buys one $62 call ($6), sells two $67 calls ($3 each), and buys one $72 call ($1) \u2014 net cost $1 a share, or $100.\n\u2022 Burgess finishes exactly at $67 \u2192 the $62 call is worth $5; $5 \xD7 100 = $500, minus the $100 paid = $400, her best case.\n\u2022 Burgess ends at $62 or lower, or at $72 or higher \u2192 every call cancels out and she loses the $100 she paid.\nBreakevens = $62 + $1 = $63 and $72 \u2212 $1 = $71.",
+            "key_takeaways": [
+              "A butterfly buys one lower call, sells two middle calls, and buys one higher call at the same expiry \u2014 a cheap bet the stock pins the middle strike.",
+              "The most you can lose is the small net cost you paid \u2014 $100 here \u2014 if the stock ends at or past either outer strike ($62 or $72).",
+              "The best case pays $400, but only if the stock finishes exactly at the middle $67 strike; between the $63 and $71 breakevens she makes something.",
+              "Use it when you expect a quiet, barely-moving stock, not when you are chasing a big swing."
+            ],
+            "sim_task": "Open the Strategy Lab and choose BRGR under Underlying. Choose Long Call Butterfly under Preset strategy. Read the Net debit, Max profit, and the two Breakeven tiles. Set the middle legs near today's price, with the outer legs an equal step above and below. Watch the Net debit stay small and the Max profit peak when today's price sits right on the middle strike.",
+            "quiz": [
+              {
+                "q": "What does a butterfly consist of?",
+                "choices": [
+                  "Buy one lower call, sell two middle calls, buy one higher call, all same expiry",
+                  "Buy two calls and sell two puts at different expiries",
+                  "Sell one call and buy 100 shares",
+                  "Buy one call and one put at the same strike"
+                ],
+                "answer": 0,
+                "explain": "A butterfly buys one lower-strike call, sells two middle-strike calls, and buys one higher-strike call, all expiring together."
+              },
+              {
+                "q": "Maria pays $100 for a butterfly on Burgess with strikes $62/$67/$72. Where does she make her full $400?",
+                "choices": [
+                  "If Burgess climbs above $72",
+                  "If Burgess finishes exactly at $67, the middle strike",
+                  "If Burgess falls below $62",
+                  "If Burgess finishes anywhere between $62 and $72"
+                ],
+                "answer": 1,
+                "explain": "The $400 best case comes only when Burgess ends right at the middle $67 strike; the $62 call is worth $5 and the rest expire worthless."
+              },
+              {
+                "q": "Same butterfly. What is the most Maria can lose?",
+                "choices": [
+                  "$5,000, the cost of the shares",
+                  "The $100 she paid",
+                  "$400",
+                  "There is no limit to the loss"
+                ],
+                "answer": 1,
+                "explain": "The butterfly's worst case is just the $100 net cost, lost if Burgess ends at or beyond either outer strike ($62 or $72)."
+              },
+              {
+                "q": "When is a butterfly a good fit?",
+                "choices": [
+                  "When you expect a big, fast move in either direction",
+                  "When you expect the stock to stay quiet and pin near one price",
+                  "When you want unlimited upside",
+                  "When you never want to risk any money"
+                ],
+                "answer": 1,
+                "explain": "A butterfly pays most when the stock barely moves and finishes near the middle strike, so it fits a quiet, range-bound market."
+              }
+            ],
+            "tier": "core",
+            "sim": "strategy",
+            "diagram": {
+              "legs": [
+                {
+                  "kind": "call",
+                  "side": 1,
+                  "qty": 1,
+                  "strike": 62,
+                  "entry": 6
+                },
+                {
+                  "kind": "call",
+                  "side": -1,
+                  "qty": 2,
+                  "strike": 67,
+                  "entry": 3
+                },
+                {
+                  "kind": "call",
+                  "side": 1,
+                  "qty": 1,
+                  "strike": 72,
+                  "entry": 1
+                }
+              ],
+              "S": 67,
+              "title": "Butterfly \u2014 payoff at the deadline",
+              "caption": "A cheap bet on Burgess pinning $67: peak $400 at the center, capped $100 loss on the wings."
+            }
+          }
+        ]
+      }
+    ]
+  };
+
+  // src/content/strategy-playbook.js
+  var premiumIncome = {
+    id: "sp-premium-income",
+    program: "strategy-playbook",
+    title: "Premium-Selling Income",
+    audience: "Getting paid to wait",
+    description: "Strategies that collect cash up front \u2014 you sell a promise you would be happy to keep.",
+    modules: [
+      {
+        id: "spm-selling",
+        title: "Selling Puts for Income",
+        lessons: [
+          {
+            id: "sp-cash-secured-put",
+            title: "The Cash-Secured Put",
+            objective: "Sell a cash-secured put to get paid for promising to buy shares lower, and state its breakeven and worst case in dollars before you place it.",
+            tier: "core",
+            body: "You have told a neighbor you would gladly buy their barely-used kayak for $300 whenever they decide to sell, and they hand you $20 now just to keep that offer open. Selling a **cash-secured put** works the same way on a stock. Maria promises to buy 100 shares of Burgess ($67) at $65 if the price falls there, she is paid cash today for making the promise, and she sets the full $6,500 aside so she can always keep her word.\n\nHere is the trade in dollars. Burgess trades at $67, and Maria sells the $65 put for $2 a share, so $200 lands in her account right now ($2 \xD7 100 shares). If Burgess stays above $65 at the deadline, the promise expires and she simply keeps the $200. If Burgess finishes below $65, she buys the 100 shares at $65 as promised, and the $200 she already pocketed lowers her real cost to $63 a share. In plain words: she gets paid to wait for a price she already liked.\n\nThe risk shows up if Burgess falls hard. A slide to $55 still forces Maria to buy at $65, a $10-a-share drop softened only by the $200 she kept, leaving her about $800 underwater. Where the kayak offer and the option part ways: a neighbor can change their mind and sell to someone else, but Maria's promise is locked in until the deadline. So she only sells a put at a price she would be genuinely happy to own the shares at.\n\nSam runs the same play purely for income, on a stock he would not mind owning. He sells a put a little below the price, pockets the premium, and repeats; if he is finally assigned, he owns a stock he wanted at a discount. In plain words: a cash-secured put pays you now to name a buy price you would be glad to get, as long as you keep the cash ready to honor it.",
+            example: "Burgess trades at $67. Maria sells one $65 put and collects $200 today.\n\u2022 Burgess stays above $65 \u2192 she keeps the $200, free and clear.\n\u2022 Burgess drops to $60 \u2192 she buys 100 shares at $65 ($6,500); the $200 kept makes her true cost $63 a share, so she is about $300 down on paper.\nBreakeven = strike \u2212 premium = $65 \u2212 $2 = $63.",
+            diagram: {
+              legs: [{ kind: "put", side: -1, qty: 1, strike: 65, entry: 2 }],
+              S: 67,
+              title: "Cash-secured put \u2014 profit and loss at the deadline",
+              caption: "You keep the full $200 anywhere above $65. Below the $63 breakeven you are buying the shares at a loss, cushioned by the premium you kept."
+            },
+            key_takeaways: [
+              "A cash-secured put pays you cash now to promise to buy 100 shares at a strike you pick, with the full cash set aside to honor it.",
+              "Stay above the strike and you keep the premium; fall below and you buy the shares \u2014 the premium lowers your real cost.",
+              "Breakeven is the strike minus the premium; your worst case is owning the shares after a deep drop.",
+              "Only sell a put at a price you would be genuinely happy to own the stock at."
+            ],
+            sim: "strategy",
+            sim_task: "Open the Strategy Lab and choose BRGR under Underlying. Choose Cash-Secured Put under Preset strategy. Read the Net credit, Breakeven, and Max loss tiles. Change the leg's Strike to a step or two below today's price and watch the credit shrink as the breakeven drops.",
+            quiz: [
+              {
+                q: "Maria sells a $65 cash-secured put on Burgess ($67) and collects $200. At the deadline Burgess is $70. What happens?",
+                choices: ["She must buy 100 shares at $65", "She keeps the $200 and owns no shares", "She loses the $200", "She buys 100 shares at $70"],
+                answer: 1,
+                explain: "Above the $65 strike the put expires worthless, so Maria simply keeps the $200 premium and is not assigned any shares."
+              },
+              {
+                q: "Same trade, but Burgess finishes at $60. What is Maria's situation?",
+                choices: ["She keeps $200 and owns nothing", "She buys 100 shares at $65; with the $200 kept, her real cost is $63 a share", "She buys 100 shares at $60", "She loses exactly $200"],
+                answer: 1,
+                explain: "Below $65 she is assigned and buys at $65 ($6,500). The $200 premium lowers her effective cost to $63 a share, so at $60 she is about $300 down on paper."
+              },
+              {
+                q: 'What does the "cash-secured" part mean?',
+                choices: ["She borrows the money to buy the shares", "She sets aside the full cash to buy the shares if she is assigned", "The broker guarantees she cannot lose", "She must sell the shares immediately"],
+                answer: 1,
+                explain: "Cash-secured means the full purchase amount is set aside up front, so she can always honor the promise to buy without borrowing."
+              },
+              {
+                q: "When is a cash-secured put a good fit?",
+                choices: ["When you never want to own the stock", "When you would be happy to own the stock at the strike price", "When you expect the stock to crash", "Only when the market is closed"],
+                answer: 1,
+                explain: "Because assignment means you buy the shares, only sell puts on a stock you would be glad to own at that strike \u2014 the premium is a bonus for waiting."
+              }
+            ]
+          },
+          {
+            id: "sp-the-wheel",
+            title: "The Wheel",
+            objective: "Turn selling puts and selling calls into a repeating income loop on a stock you would not mind owning.",
+            tier: "core",
+            body: "You have run a lemonade stand that sells its batch, restocks, and sells again, pocketing a little each cycle. The **wheel** turns two trades you already know into that kind of loop. Maria keeps selling cash-secured puts on Burgess ($67) for income; the day one is assigned, she owns 100 shares and simply switches to selling covered calls against them.\n\nFollow one full turn in dollars. Maria sells a $65 put and collects $200, and after a dip she is assigned 100 shares at $65. Now holding the shares, she sells a $70 covered call and collects another $150. If Burgess climbs past $70, her shares are called away at $70 and she is back to cash \u2014 having banked the $200 put premium, the $150 call premium, and the $500 gain from $65 to $70 ($5 \xD7 100 shares). In plain words: she gets paid on the way in and again on the way out.\n\nWhere the lemonade stand and the wheel part ways: a stand restocks at the same cost every time, but the wheel can leave Maria holding shares that keep falling. If Burgess slides to $55 after she is assigned at $65, she is down on the stock while she sells calls to chip the loss back. So she only spins the wheel on a company she is content to own through a rough patch.\n\nSam likes the wheel because it keeps him doing one calm thing at a time \u2014 sell a put, or sell a call, never guess direction. In plain words: the wheel is a steady income loop for a stock you would happily own, paying you a premium at each turn while you wait.",
+            example: "One full turn of the wheel on Burgess ($67):\n1) Sell a $65 put \u2192 +$200.\n2) Assigned \u2014 buy 100 shares at $65.\n3) Sell a $70 covered call \u2192 +$150.\n4) Called away at $70 \u2192 +$500 gain ($5 \xD7 100).\nLoop total \u2248 $850, then Maria starts again.",
+            key_takeaways: [
+              "The wheel loops two familiar trades: sell cash-secured puts until assigned, then sell covered calls on the shares until they are called away.",
+              "You collect a premium at each turn, plus any gain between your buy strike and your call strike.",
+              "The risk is being left holding shares that keep falling, so only wheel a stock you would be glad to own.",
+              "It keeps you doing one simple thing at a time \u2014 sell a put, or sell a call \u2014 never guessing direction."
+            ],
+            sim: "strategy",
+            sim_task: "Open the Strategy Lab and choose BRGR under Underlying. Choose Cash-Secured Put under Preset strategy and read the Net credit \u2014 that is step one of the wheel. Then switch Preset strategy to Covered Call to see step two, the trade you sell once you own the shares.",
+            quiz: [
+              {
+                q: "What are the two trades the wheel loops between?",
+                choices: ["Buying calls and buying puts", "Selling cash-secured puts, then selling covered calls once assigned", "Day trading and swing trading", "Buying and holding forever"],
+                answer: 1,
+                explain: "The wheel sells cash-secured puts for income until you are assigned shares, then sells covered calls on those shares until they are called away \u2014 then repeats."
+              },
+              {
+                q: "Maria sells a $65 put (+$200), is assigned at $65, sells a $70 call (+$150), and the shares are called away at $70. Roughly how much did the full loop pay?",
+                choices: ["$350", "$850", "$500", "$200"],
+                answer: 1,
+                explain: "$200 put premium + $150 call premium + $500 gain from $65 to $70 ($5 \xD7 100 shares) = about $850 for the loop."
+              },
+              {
+                q: "What is the main risk of the wheel?",
+                choices: ["Unlimited losses to the upside", "Being left holding shares that keep falling after assignment", "The broker closing your account", "Missing a dividend"],
+                answer: 1,
+                explain: "Once assigned you own the shares; if the stock keeps dropping you are down on the stock while you sell calls to claw it back. So only wheel stocks you would be glad to own."
+              },
+              {
+                q: "Why do some traders like the wheel?",
+                choices: ["It guarantees a profit", "It lets them do one simple thing at a time without guessing direction", "It needs no cash", "It only works on crashing stocks"],
+                answer: 1,
+                explain: "Each step is one calm decision \u2014 sell a put, or sell a call \u2014 so the wheel avoids having to predict which way the stock moves."
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  };
+  premiumIncome.modules.push(coveredCallMgmt);
+
   // src/content/curriculum.js
   var curriculum = {
     "tracks": [
@@ -8754,6 +9340,8 @@
       }
     ]
   };
+  curriculum.tracks.push(premiumIncome);
+  curriculum.tracks.push(definedRiskSpreads);
 
   // src/ui/shell.js
   var contentEl;
@@ -9383,6 +9971,75 @@
     }
   };
 
+  // src/ui/payoff-diagram.js
+  var usd = (n) => (n < 0 ? "-$" : "$") + Math.abs(Math.round(n)).toLocaleString("en-US");
+  var esc2 = (s2) => String(s2).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  function payoffDiagram(spec) {
+    const { legs, S: S2 } = spec;
+    const W = 640, H = 290, padL = 58, padR = 18, padT = 20, padB = 40;
+    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const strikes = legs.filter((l) => l.strike != null).map((l) => l.strike);
+    const refs = [S2, ...strikes].filter((v) => v != null && isFinite(v));
+    const center = refs.length ? refs.reduce((a, b) => a + b, 0) / refs.length : S2;
+    const spread = Math.max(center * 0.28, (Math.max(...refs) - Math.min(...refs)) * 1.6, 4);
+    const lo = Math.max(0, Math.min(...refs) - spread * 0.55);
+    const hi = Math.max(...refs) + spread * 0.55;
+    const N = 160;
+    const pts = [];
+    let yMin = 0, yMax = 0;
+    for (let i = 0; i <= N; i++) {
+      const x = lo + (hi - lo) * i / N;
+      const y = pnlAtExpiry(legs, x);
+      pts.push([x, y]);
+      if (y < yMin) yMin = y;
+      if (y > yMax) yMax = y;
+    }
+    const yPad = Math.max((yMax - yMin) * 0.14, 1);
+    yMin -= yPad;
+    yMax += yPad;
+    const xPx = (x) => padL + (x - lo) / (hi - lo) * plotW;
+    const yPx = (y) => padT + (yMax - y) / (yMax - yMin) * plotH;
+    const zeroY = yPx(0);
+    const line2 = pts.map(([x, y], i) => (i ? "L" : "M") + xPx(x).toFixed(1) + " " + yPx(y).toFixed(1)).join(" ");
+    const area = "M" + xPx(pts[0][0]).toFixed(1) + " " + zeroY.toFixed(1) + " " + pts.map(([x, y]) => "L" + xPx(x).toFixed(1) + " " + yPx(y).toFixed(1)).join(" ") + " L" + xPx(pts[pts.length - 1][0]).toFixed(1) + " " + zeroY.toFixed(1) + " Z";
+    const bes = breakevens(legs, lo, hi).filter((b) => b > lo && b < hi);
+    const ml = maxLossAtExpiry(legs, S2);
+    const maxProfit = Math.max(...pts.map((p) => p[1]));
+    const edgeDx = pts[N][0] - pts[N - 1][0];
+    const unboundedUp = edgeDx ? (pts[N][1] - pts[N - 1][1]) / edgeDx > 1 : false;
+    const profitLabel = unboundedUp ? "Upside rises with the stock" : "Max profit " + usd(maxProfit);
+    const lossLabel = ml.bounded ? "Worst case " + usd(ml.amount) : "Loss: unlimited";
+    const uid = "pd" + Math.abs(Math.round(center * 1e3 + (strikes[0] || 0))).toString(36);
+    const xticks = [...new Set([lo, ...strikes, S2, hi].map((v) => Math.round(v)))].filter((v) => v >= lo - 0.5 && v <= hi + 0.5).sort((a, b) => a - b);
+    const svg = `
+<svg viewBox="0 0 ${W} ${H}" width="100%" height="auto" role="img"
+     aria-label="${esc2(spec.title || "Profit and loss at the deadline")}"
+     style="display:block;font:12px ui-monospace,SFMono-Regular,Menlo,monospace">
+  <defs>
+    <clipPath id="${uid}-up"><rect x="0" y="0" width="${W}" height="${zeroY.toFixed(1)}"/></clipPath>
+    <clipPath id="${uid}-dn"><rect x="0" y="${zeroY.toFixed(1)}" width="${W}" height="${(H - zeroY).toFixed(1)}"/></clipPath>
+  </defs>
+  <path d="${area}" fill="var(--gain-mark)" opacity="0.16" clip-path="url(#${uid}-up)"/>
+  <path d="${area}" fill="var(--loss)" opacity="0.16" clip-path="url(#${uid}-dn)"/>
+  <line x1="${padL}" y1="${zeroY.toFixed(1)}" x2="${W - padR}" y2="${zeroY.toFixed(1)}"
+        stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="4 4"/>
+  <text x="${W - padR}" y="${(zeroY - 5).toFixed(1)}" text-anchor="end" fill="var(--ink-3)">break even ($0)</text>
+  ${xticks.map((t) => `<text x="${xPx(t).toFixed(1)}" y="${H - padB + 18}" text-anchor="middle" fill="var(--ink-3)">$${t}</text>`).join("")}
+  ${bes.map((b) => `<line x1="${xPx(b).toFixed(1)}" y1="${padT}" x2="${xPx(b).toFixed(1)}" y2="${H - padB}" stroke="var(--brass)" stroke-width="1" stroke-dasharray="2 3" opacity="0.8"/>
+    <text x="${xPx(b).toFixed(1)}" y="${padT - 6}" text-anchor="middle" fill="var(--brass)">BE $${Math.round(b)}</text>`).join("")}
+  <line x1="${xPx(S2).toFixed(1)}" y1="${padT}" x2="${xPx(S2).toFixed(1)}" y2="${H - padB}" stroke="var(--ink-2)" stroke-width="1" stroke-dasharray="1 3" opacity="0.7"/>
+  <text x="${xPx(S2).toFixed(1)}" y="${H - padB + 32}" text-anchor="middle" fill="var(--ink-2)">now $${Math.round(S2)}</text>
+  <path d="${line2}" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
+  <text x="${padL}" y="${(yPx(maxProfit) - 7).toFixed(1)}" fill="var(--gain-mark)" font-weight="700">Max profit ${usd(maxProfit)}</text>
+  <text x="${padL}" y="${(H - padB - 6).toFixed(1)}" fill="var(--loss)" font-weight="700">${ml.bounded ? "Worst case " + usd(ml.amount) : "Loss: unlimited"}</text>
+</svg>`;
+    const wrap = document.createElement("div");
+    wrap.className = "payoff-diagram card";
+    wrap.style.cssText = "max-width:68ch;padding:14px 16px;margin-top:16px";
+    wrap.innerHTML = `<div class="eyebrow" style="margin-bottom:6px">${esc2(spec.title || "Payoff at the deadline")}</div>` + svg + (spec.caption ? `<p class="small muted" style="margin:8px 0 0">${esc2(spec.caption)}</p>` : "");
+    return wrap;
+  }
+
   // src/content/placement.js
   var PLACEMENT = {
     core: {
@@ -9736,6 +10393,18 @@
   function simSteps(text) {
     return String(text || "").split(/\.\s+/).map((s2) => s2.replace(/\s*\.\s*$/, "").trim()).filter(Boolean);
   }
+  var PROGRAM_META = {
+    essentials: {
+      order: 0,
+      title: "Options Essentials",
+      blurb: "The core craft \u2014 money and risk foundations, the main strategies, the Greeks, and a pro desk. Start here and work module by module."
+    },
+    "strategy-playbook": {
+      order: 1,
+      title: "The Strategy Playbook",
+      blurb: "A guided tour of options strategies \u2014 how each one is built, when to use it, and the exact shape of its payoff."
+    }
+  };
   function allLessons() {
     return curriculum.tracks.flatMap((t) => t.modules.flatMap((m) => m.lessons.map((l) => ({ ...l, trackId: t.id, trackTitle: t.title, moduleTitle: m.title }))));
   }
@@ -9766,37 +10435,47 @@
     });
   }
   function renderIndex(root) {
-    root.appendChild(viewHeader("Lessons", "Learn the craft, then trade it"));
-    root.appendChild(el(
-      "p",
-      { class: "sub", style: "max-width:68ch" },
-      "Four tracks, built on the desk reference library \u2014 the McMillan topic arc plus the Volcube series on gamma, volatility, market making, and the Greeks. Every lesson ends with a task on the live simulator: learn it, then do it."
-    ));
-    const wrap = el("div", { class: "grid2 mt2" });
+    root.appendChild(viewHeader("Programs", "Pick a program, then work through it module by module"));
+    const byProg = /* @__PURE__ */ new Map();
     for (const t of curriculum.tracks) {
-      const pr = trackProgress(t);
-      const pct = pr.total ? Math.round(pr.done / pr.total * 100) : 0;
-      const ov = trackOverview(t.id);
-      wrap.appendChild(el(
-        "a",
-        { class: "card track-card", href: "#/learn/track/" + t.id, style: "text-decoration:none;color:inherit" },
-        el(
-          "div",
-          { class: "track-head" },
-          el("h2", {}, t.title),
-          el("span", { class: "pill " + (pct === 100 ? "gain" : "brass") }, pct === 100 ? "\u2713 Complete" : pct + "%")
-        ),
-        el("div", { class: "small muted" }, t.audience),
-        el("p", { class: "sub", style: "margin:4px 0 8px" }, t.description || ""),
-        el("div", { class: "prog-bar" + (pct === 100 ? " green" : "") }, el("div", { style: "width:" + pct + "%" })),
-        el(
-          "div",
-          { class: "small muted num" },
-          `${pr.done}/${pr.total} lessons \xB7 ${ov.unlockedCount}/${t.modules.length} modules unlocked`
-        )
-      ));
+      const pid2 = t.program || "essentials";
+      if (!byProg.has(pid2)) byProg.set(pid2, []);
+      byProg.get(pid2).push(t);
     }
-    root.appendChild(wrap);
+    const pids = [...byProg.keys()].sort((a, b) => (PROGRAM_META[a]?.order ?? 99) - (PROGRAM_META[b]?.order ?? 99));
+    for (const pid2 of pids) {
+      const meta = PROGRAM_META[pid2] || { title: pid2, blurb: "" };
+      const section = el("div", { class: "program-section", style: "margin-top:28px" });
+      section.appendChild(el("div", { class: "eyebrow" }, "Program"));
+      section.appendChild(el("h2", { style: "margin:2px 0 4px" }, meta.title));
+      if (meta.blurb) section.appendChild(el("p", { class: "sub", style: "max-width:68ch;margin:0 0 12px" }, meta.blurb));
+      const wrap = el("div", { class: "grid2" });
+      for (const t of byProg.get(pid2)) {
+        const pr = trackProgress(t);
+        const pct = pr.total ? Math.round(pr.done / pr.total * 100) : 0;
+        wrap.appendChild(el(
+          "a",
+          { class: "card track-card", href: "#/learn/track/" + t.id, style: "text-decoration:none;color:inherit" },
+          el(
+            "div",
+            { class: "track-head" },
+            el(
+              "div",
+              {},
+              el("div", { class: "eyebrow", style: "font-size:10px;opacity:0.7" }, "Module"),
+              el("h3", { style: "margin:2px 0 0" }, t.title)
+            ),
+            el("span", { class: "pill " + (pct === 100 ? "gain" : "brass") }, pct === 100 ? "\u2713 Complete" : pct + "%")
+          ),
+          el("div", { class: "small muted" }, t.audience),
+          el("p", { class: "sub", style: "margin:4px 0 8px" }, t.description || ""),
+          el("div", { class: "prog-bar" + (pct === 100 ? " green" : "") }, el("div", { style: "width:" + pct + "%" })),
+          el("div", { class: "small muted num" }, `${pr.done}/${pr.total} lessons`)
+        ));
+      }
+      section.appendChild(wrap);
+      root.appendChild(section);
+    }
   }
   function renderTrack(root, tid) {
     const t = curriculum.tracks.find((x) => x.id === tid);
@@ -9976,6 +10655,15 @@
       ));
     }
     root.appendChild(prose);
+    if (l.example) {
+      root.appendChild(el(
+        "div",
+        { class: "card", style: "max-width:68ch;margin-top:16px;border-left:3px solid var(--brass);padding:12px 16px" },
+        el("div", { class: "eyebrow", style: "color:var(--brass)" }, "Simple example"),
+        el("div", { class: "sub", style: "white-space:pre-line;margin-top:6px" }, l.example)
+      ));
+    }
+    if (l.diagram && l.diagram.legs) root.appendChild(payoffDiagram(l.diagram));
     const demosFor = DEMOS.filter((d) => d.lessonId === l.id);
     const sim = l.sim && SIM_LINKS[l.sim];
     if (sim || demosFor.length) {
