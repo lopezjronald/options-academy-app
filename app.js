@@ -4657,7 +4657,7 @@
     const build2 = isFamilyBuild() ? "founder" : "commercial";
     const hash = (
       /** @type {any} */
-      "2026-11-15"
+      "2026-11-16"
     );
     return `${hash} \xB7 ${build2}`;
   }
@@ -6773,7 +6773,7 @@
                   "Keep every bet small enough in dollars that a routine losing streak cannot wipe you out."
                 ],
                 "sim": "market",
-                "sim_task": "Open Practice (Live Market), click LMND in the Watchlist, and click Buy 10 sh, then Place order. Click \u23ED Next day five times and watch how daily gains and losses streak even in a calm week.",
+                "sim_task": "Open Practice (Live Market) and click LMND in the Watchlist. Click Buy 10 sh, then Place order. Click \u23ED Next day five times. Watch in Open positions how your gain and loss streak up and down even in a calm week.",
                 "quiz": [
                   {
                     "q": "Maria sees a trade on Lumend Brands ($42) with a 30% chance, or 3 in 10, of paying off at the deadline. What does that 30% number mean?",
@@ -6822,7 +6822,7 @@
                   "Keep each trade small in dollars so five normal losses in a row never empty your account."
                 ],
                 "sim": "market",
-                "sim_task": "Open Practice (Live Market), click BRGR in the Watchlist, and look at the Option chain. Compare the Ask price on a call near $67 with a call far above $67, then click Ask on the near-$67 call and click Place order to paper-trade one contract.",
+                "sim_task": "Open Practice (Live Market) and click BRGR in the Watchlist. Scroll to the Option chain and find the call row nearest today's price. Compare its Ask with the Ask on a call several strikes higher. Click the higher call's Ask, then Place order, to paper-trade one cheaper, longer-shot contract.",
                 "quiz": [
                   {
                     "q": "Maria pays $200 for a trade on Burgess Restaurant Group ($67). It has a 25% chance, or 1 in 4, of paying $600 and a 75% chance, or 3 in 4, of paying $0. What is her average profit or loss per trade?",
@@ -6871,7 +6871,7 @@
                   "Anyone promising high, steady returns with zero risk is either lying or hiding a rare crash loss."
                 ],
                 "sim": "market",
-                "sim_task": "Open Practice (Live Market), click GLXY in the Watchlist, and click Buy 100 sh (~$2,350), then Place order. Then click RCKT, click Buy 10 sh (~$1,820), then Place order, and click \u23ED Next day five times to compare how much each stock swings in dollars.",
+                "sim_task": "Open Practice (Live Market) and click GLXY in the Watchlist. Click Buy 100 sh, then Place order. Click RCKT, click Buy 10 sh, then Place order. Click \u23ED Next day five times and compare how many dollars each position swings.",
                 "quiz": [
                   {
                     "q": "Sam runs a strategy that wins $100 on 90% of trades (9 in 10) and loses $2,000 on the other 10% (1 in 10). Across 100 trades, what is his net result?",
@@ -6926,7 +6926,7 @@
                   "If you pay $4,200 for 100 shares at $42, your upside is uncapped and your worst-case loss is the full $4,200."
                 ],
                 "sim": "market",
-                "sim_task": "Open Practice (Live Market), click BRGR in the Watchlist, and click Buy 10 sh, then Place order. Check the Bid and Ask columns in the Option chain below, then click \u23ED Next day three times to watch news move your 10 shares in dollars.",
+                "sim_task": "Open Practice (Live Market) and click BRGR in the Watchlist. Click Buy 10 sh, then Place order. Click \u23ED Next day three times. Watch the headlines move the dollar value of your 10 shares in Open positions.",
                 "quiz": [
                   {
                     "q": "Maria pays $6,700 for 100 shares of Burgess Restaurant Group at $67 a share. What does she own?",
@@ -6975,7 +6975,7 @@
                   "In a market-wide panic, almost all stocks fall together\u2014only direct insurance puts a hard dollar floor under a crash."
                 ],
                 "sim": "market",
-                "sim_task": "Open Practice (Live Market), click PWRS in the Watchlist, and click Buy 10 sh (~$950), then Place order. Then click BRGR, click Buy 10 sh (~$670), then Place order. Click \u23ED Next day five times and compare how the two positions offset each other in Open positions.",
+                "sim_task": "Open Practice (Live Market) and click PWRS in the Watchlist. Click Buy 10 sh, then Place order. Click BRGR, click Buy 10 sh, then Place order. Click \u23ED Next day five times and watch in Open positions how the two holdings often move on different days.",
                 "quiz": [
                   {
                     "q": "Maria has $9,000 to invest. Which mix gives her the strongest protection against a single industry slump?",
@@ -7030,7 +7030,7 @@
                   "When the stock rises and protection goes unused, the fee you paid was still worth the floor it gave you."
                 ],
                 "sim": "market",
-                "sim_task": "Open Practice (Live Market), click PWRS in the Watchlist (~$95), and scroll to the Option chain. Look at the Put side on the right and compare the Ask price on the $90 strike versus the $85 strike to see how a bigger deductible lowers your upfront fee.",
+                "sim_task": "Open Practice (Live Market) and click PWRS in the Watchlist. Scroll to the Option chain and look at the Put side on the right. Find the put one strike below today's price and the put two strikes below. Compare their Ask prices \u2014 the lower strike is a bigger deductible you absorb yourself, so it costs less up front.",
                 "quiz": [
                   {
                     "q": "Maria pays Sam $300 up front for a contract that protects her 100 shares of PowerSun Energy ($95). What is that $300 fee called?",
@@ -7079,7 +7079,7 @@
                   "Option prices rise before big news or stormy markets because sellers demand higher fees to take on bigger jump risk."
                 ],
                 "sim": "market",
-                "sim_task": "Open Practice (Live Market), click LMND in the Watchlist (~$42), and click Buy 100 sh. In the Option chain, click the Ask price on the Put side at the $40 strike, then click Place order and Trade anyway. Click \u23ED Next day five times and watch how the put cushions down days.",
+                "sim_task": "Open Practice (Live Market) and click LMND in the Watchlist. Click Buy 100 sh. In the Option chain, click the Ask on a Put a strike or two below today's price, then Place order and Trade anyway. Click \u23ED Next day five times and watch the put cushion your shares on down days.",
                 "quiz": [
                   {
                     "q": "Maria owns 100 shares of Lumend Brands at $42 and buys one 60-day $40 put option for $200. What is this trade doing for her?",
@@ -7143,7 +7143,7 @@
                 ],
                 "source": "Options Core \xB7 Contract Basics",
                 "sim": "strategy",
-                "sim_task": "Open Strategy Lab, select LMND in Underlying, and choose Long Call in Preset strategy. Change the Strike dropdown to a strike just above today's price, read the Net debit, Max loss, and Breakeven tiles, and hover across the At expiration line on the chart.",
+                "sim_task": "Open the Strategy Lab and choose LMND under Underlying. Choose Long Call under Preset strategy. Set the leg's Strike to the first one above today's price. Read the Net debit, Max loss, and Breakeven tiles, then hover along the At expiration line on the chart.",
                 "quiz": [
                   {
                     "q": "Maria buys one $40 put on Lumend Brands ($42) for $3.00 per share ($300 total). What is the most money she can possibly lose on this trade?",
@@ -7204,7 +7204,7 @@
                 ],
                 "source": "Options Core \xB7 Pricing Intuition",
                 "sim": "greeks",
-                "sim_task": "Open Greeks Lab and look at the Call price tile for the $100 model stock. Drag Strike K to $95 so the call has $5 of right-now value, then drag Days to expiry from 60 down to 1 to watch the extra time value melt away, and drag the third slider from 20% to 40% to watch the price swell.",
+                "sim_task": "Open the Greeks Lab and look at the Call price tile for the $100 model stock. Drag Strike K to $95 so the call has about $5 of right-now value. Drag Days to expiry from 60 down to 1 and watch the extra time value melt away. Drag Implied vol from 20% up to 40% and watch the price swell.",
                 "quiz": [
                   {
                     "q": "Burgess Restaurant Group trades at $68 today, and Maria sees the $65 call priced at $5.10 per share ($510 total). How does that $5.10 price split?",
@@ -7271,7 +7271,7 @@
                 ],
                 "source": "Options Core \xB7 Buying Calls",
                 "sim": "strategy",
-                "sim_task": "Open Strategy Lab, select LMND in Underlying (~$42), and choose Long Call in Preset strategy. Compare the Max loss, Breakeven, and Model-implied win odds tiles for a strike near $42 versus a strike $5 higher by changing the Strike dropdown.",
+                "sim_task": "Open the Strategy Lab and choose LMND under Underlying. Choose Long Call under Preset strategy. Note the Max loss, Breakeven, and Model-implied win odds tiles for a strike near today's price. Change the leg's Strike to one a couple of steps higher and watch the cost fall while the win odds drop.",
                 "quiz": [
                   {
                     "q": "Maria buys one $45 call on Lumend Brands ($42) for $2.00 per share ($200 total). At the deadline, Lumend finishes at $46. What is Maria's net profit or loss?",
@@ -7321,7 +7321,7 @@
                 ],
                 "source": "Options Core \xB7 Protective Puts",
                 "sim": "strategy",
-                "sim_task": "Open Strategy Lab, select PWRS in Underlying (~$95), and choose Protective Put in Preset strategy. Read the Max loss and Max profit tiles, then compare that curve to choosing Long Put in Preset strategy.",
+                "sim_task": "Open the Strategy Lab and choose PWRS under Underlying. Choose Protective Put under Preset strategy. Read the Max loss and Max profit tiles and the At expiration line. Switch Preset strategy to Long Put and compare how owning the shares changes the shape.",
                 "quiz": [
                   {
                     "q": "Maria owns 100 shares of PowerSun Energy at $95 ($9,500) and buys one $90 put for $2.50 per share ($250 total). PowerSun crashes to $70 by the deadline. What is Maria's total dollar loss?",
@@ -7371,7 +7371,7 @@
                 ],
                 "source": "Options Core \xB7 Covered Calls",
                 "sim": "strategy",
-                "sim_task": "Open Strategy Lab, select BRGR in Underlying (~$67), and choose Covered Call in Preset strategy. Check the Net credit, Max profit, Max loss, and Breakeven tiles, then click Send to Live Market to place the paper trade.",
+                "sim_task": "Open the Strategy Lab and choose BRGR under Underlying. Choose Covered Call under Preset strategy. Read the Net credit, Max profit, Max loss, and Breakeven tiles. Click Send to Live Market to place the paper trade.",
                 "quiz": [
                   {
                     "q": "Maria buys 100 shares of Burgess Restaurant Group at $67 ($6,700) and sells one $70 call for $2.00 per share ($200 cash). At the deadline, Burgess finishes at $80. What is Maria's total dollar profit?",
@@ -7438,7 +7438,7 @@
                 ],
                 "source": "OASI 5e ch. 7 (Bull Spreads) and ch. 8 (Bear Spreads)",
                 "sim": "strategy",
-                "sim_task": "Open Strategy Lab, select LMND in Underlying (~$42), and choose Bull Call Spread in Preset strategy. Read the Net debit, Max profit, Max loss, and Breakeven tiles, then switch Preset strategy to Bear Put Spread to compare the mirror-image payoff.",
+                "sim_task": "Open the Strategy Lab and choose LMND under Underlying. Choose Bull Call Spread under Preset strategy. Read the Net debit, Max profit, Max loss, and Breakeven tiles. Switch Preset strategy to Bear Put Spread to see the mirror-image payoff.",
                 "quiz": [
                   {
                     "q": "Maria buys a $40 call and sells a $50 call on Lumend Brands ($42) in the same expiration for a net cost of $3.00 per share ($300 total). At the deadline, Lumend finishes at $48. What is Maria's net profit or loss?",
@@ -7488,7 +7488,7 @@
                 ],
                 "source": "OASI 5e straddle and strangle (combination) buying chapters",
                 "sim": "strategy",
-                "sim_task": "Open Strategy Lab, select BRGR in Underlying (~$67), and choose Long Straddle in Preset strategy. Read the Net debit, Max loss, and Breakevens tiles, then switch Preset strategy to Long Strangle to see how the upfront cost shrinks while the breakeven gap widens.",
+                "sim_task": "Open the Strategy Lab and choose BRGR under Underlying. Choose Long Straddle under Preset strategy \u2014 it builds the call and put for you at the nearest strike. Read the Net debit, Max loss, and Breakevens tiles. Switch Preset strategy to Long Strangle to watch the cost shrink while the breakeven gap widens.",
                 "quiz": [
                   {
                     "q": "Maria buys a $67 straddle ($67 call + $67 put) on Burgess Restaurant Group ($67) for $4.80 per share ($480 total). At the deadline, Burgess finishes at $70. What is Maria's net profit or loss?",
@@ -7538,7 +7538,7 @@
                 ],
                 "source": "OASI 5e ch. 9 (Calendar Spreads)",
                 "sim": "strategy",
-                "sim_task": "Open Strategy Lab, select LMND in Underlying (~$42), and choose Long Call in Preset strategy with a near Expiration. Note the Mid now price and \u0398 Theta in Position Greeks, then switch Expiration to the farthest date to see how the longer call costs more up front but loses fewer dollars per day.",
+                "sim_task": "Open the Strategy Lab and choose LMND under Underlying. Choose Long Call under Preset strategy and set Expiration to the nearest date. Note the Mid now price and the \u0398 Theta in Position Greeks. Switch Expiration to the farthest date to see the longer call cost more up front but lose fewer dollars a day.",
                 "quiz": [
                   {
                     "q": "Maria opens a $42 call calendar spread on Lumend Brands ($42) by selling the 30-day $42 call and buying the 60-day $42 call. Where does she want Lumend's share price to sit when the 30-day deadline arrives?",
@@ -7594,7 +7594,7 @@
                 ],
                 "source": "OASI 5e volatility chapters (Part VI, The Basics of Volatility Trading); Volcube Trading Implied Volatility",
                 "sim": "vol",
-                "sim_task": "Open Volatility Lab and look at the Gamma scalping simulator card. Drag the IV you pay slider to 32% and the Realized vol slider to 18%. Then click Run another path and Run 60 trials to see what happens when actual daily swings stay smaller than the IV forecast you paid for.",
+                "sim_task": "Open the Volatility Lab and find the Gamma scalping simulator card. Set IV you pay to 32% and Realized vol to 18%. Click Run another path, then Run 60 trials. See what happens when the real daily swings stay smaller than the IV you paid for.",
                 "quiz": [
                   {
                     "q": "The Academy 500 index trades at $500 with an annual implied volatility (IV) of 32%. Using the divide-by-16 rule, roughly what typical 1-day dollar move are its options pricing in?",
@@ -7644,7 +7644,7 @@
                 ],
                 "source": "OASI 5e volatility chapters; Volcube Trading Implied Volatility",
                 "sim": "market",
-                "sim_task": "Open Practice (Live Market), click LMND in the Watchlist (~$42), and check the IV column in the Option chain. Then click RCKT (~$182) to compare its higher IV numbers, and open Strategy Lab to see how each stock's IV widens its \xB11\u03C3 / \xB12\u03C3 model cone.",
+                "sim_task": "Open Practice (Live Market) and click LMND in the Watchlist. Check the IV column in its Option chain. Click RCKT and compare its higher IV numbers. Open the Strategy Lab and add a position on each to see how a higher-IV stock widens its \xB11\u03C3 / \xB12\u03C3 model cone.",
                 "quiz": [
                   {
                     "q": "Lumend Brands ($42) has an IV of 35% (1-year range: 20% to 40%). Rocket Robotics ($182) has an IV of 55% (1-year range: 50% to 110%). Whose options are cheap relative to their own normal behavior?",
@@ -7708,7 +7708,7 @@
                 ],
                 "source": "Volcube Option Greeks for Traders Part I (Delta)",
                 "sim": "greeks",
-                "sim_task": "Open Greeks Lab and click the \u0394 Delta tab. Drag Implied vol from 40% down to 10% and Days to expiry from 60 down to 2 to watch the Call delta and Put delta curves sharpen into a cliff near the $100 strike.",
+                "sim_task": "Open the Greeks Lab and click the \u0394 Delta tab. Drag Implied vol from 40% down to 10%. Drag Days to expiry from 60 down to 2. Watch the Call delta and Put delta curves sharpen into a cliff at the $100 strike.",
                 "quiz": [
                   {
                     "q": "Maria owns 10 calls on Lumend Brands ($42) at +0.40 delta and has sold 20 puts at \u22120.25 delta (100 shares per contract). What is her combined share-equivalent position?",
@@ -7769,7 +7769,7 @@
                 ],
                 "source": "Volcube Option Greeks for Traders Part I (Theta)",
                 "sim": "greeks",
-                "sim_task": "Open Greeks Lab and click the \u0398 Theta tab. Compare the At-the-money ($100 strike) curve against the Out-of-the-money ($110 strike) curve as days count down from 60d to 1d, and read the Theta tile below.",
+                "sim_task": "Open the Greeks Lab and click the \u0398 Theta tab. Keep Strike K at $100 and drag Days to expiry from 60 down to 1, reading the Theta tile. Change Strike K to $110 and compare how an out-of-the-money option decays. The at-the-money option loses the most near the end.",
                 "quiz": [
                   {
                     "q": "All else equal, which call option on Burgess Restaurant Group ($67) loses the MOST dollars per day to theta?",
@@ -7818,8 +7818,8 @@
                   "Never add raw vega across different expiration months: near-term IV jumps much harder in a shock, and shares of stock have zero vega."
                 ],
                 "source": "Volcube Option Greeks for Traders Part I (Vega)",
-                "sim": "vol",
-                "sim_task": "Open Greeks Lab and click the \u03BD Vega tab to compare the 60-day, 20-day, and 5-day vega curves across strikes. Drag Implied vol from 25% to 30% and check how much the Call price tile rises relative to the Vega tile.",
+                "sim": "greeks",
+                "sim_task": "Open the Greeks Lab and click the \u03BD Vega tab. Compare the vega curves as you set Days to expiry to 60, then 20, then 5. Drag Implied vol from 25% to 30%. Watch the Call price tile rise more than the Vega tile.",
                 "quiz": [
                   {
                     "q": "Sam holds an option portfolio with \u2212$800 of vega per 1-point move in IV. If implied volatility drops by 0.5 percentage points (say from 28.0% to 27.5%) with the stock price flat, what is his approximate P&L?",
@@ -7886,7 +7886,7 @@
                 ],
                 "source": "Volcube Option Gamma Trading",
                 "sim": "greeks",
-                "sim_task": "Open Greeks Lab and click the \u0393 Gamma tab to compare the 30-day, 10-day, and 2-day gamma curves across strikes. Drag Implied vol from 40% down to 15% and watch the 2-day gamma spike sharpen right at the $100 strike.",
+                "sim_task": "Open the Greeks Lab and click the \u0393 Gamma tab. Keep Strike K at $100 and drag Days to expiry between 30, 10, and 2 days to compare the gamma curves. Drag Implied vol from 40% down to 15%. Watch the 2-day gamma spike sharpen right at the $100 strike.",
                 "quiz": [
                   {
                     "q": "Maria owns a call on Rocket Robotics ($200) with 50 delta and 8 gamma. After the stock rallies $2 to $202, what is the call's new approximate delta?",
@@ -7946,8 +7946,8 @@
                   "Short-gamma hedgers are forced to buy after rallies and sell after drops\u2014the price they pay for collecting daily theta."
                 ],
                 "source": "Volcube Option Gamma Trading",
-                "sim": "greeks",
-                "sim_task": "Open Volatility Lab and look at the Gamma scalping simulator card. Set IV you pay to 25% and Realized vol to 35%, then drag Hedge every from 1 day to 5 days and click Run another path to see how re-hedging turns stock swings into Hedging P&L.",
+                "sim": "vol",
+                "sim_task": "Open the Volatility Lab and find the Gamma scalping simulator card. Set IV you pay to 25% and Realized vol to 35%. Drag Hedge every from 1 day to 5 days. Click Run another path and watch re-hedging turn stock swings into Hedging P&L.",
                 "quiz": [
                   {
                     "q": "Maria holds a delta-neutral option book with +50 combined gamma per $1 move. The stock jumps $2 and she re-hedges back to neutral. Roughly how much profit did she lock in from that move?",
@@ -8008,7 +8008,7 @@
                 ],
                 "source": "Volcube Option Gamma Trading",
                 "sim": "vol",
-                "sim_task": "Open Volatility Lab and look at the Gamma scalping simulator card. Drag IV you pay to 25% and Realized vol to 40%, check the Option P&L (mostly \u2212theta) and Hedging P&L (gamma scalps) tiles, and click Run 60 trials to see the average profit.",
+                "sim_task": "Open the Volatility Lab and find the Gamma scalping simulator card. Set IV you pay to 25% and Realized vol to 40%. Read the Option P&L (mostly \u2212theta) and Hedging P&L (gamma scalps) tiles. Click Run 60 trials to see the average profit.",
                 "quiz": [
                   {
                     "q": "Maria's delta-hedged option book on PowerSun Energy ($95) pays $100 per day in theta and holds 50 gamma. What single daily dollar move breaks even on her overnight theta bill?",
@@ -8075,7 +8075,7 @@
                 ],
                 "source": "Volcube Trading Implied Volatility",
                 "sim": "vol",
-                "sim_task": "Open Volatility Lab and look at the Gamma scalping simulator card. Set IV you pay to 25% and Realized vol to 25%, click Run 60 trials to see the near-$0 average, then drag Realized vol down to 18% and click Run 60 trials again.",
+                "sim_task": "Open the Volatility Lab and find the Gamma scalping simulator card. Set IV you pay to 25% and Realized vol to 25%, then click Run 60 trials to see the near-zero average. Drag Realized vol down to 18% and click Run 60 trials again. Compare how buying cheap realized vol pays off.",
                 "quiz": [
                   {
                     "q": "Why does an option's market price on Lumend Brands ($42) correspond to one exact implied volatility number?",
@@ -8135,8 +8135,8 @@
                   "A resting dollar limit order is a floating vol quote whose real IV price changes whenever the stock price or market IV moves."
                 ],
                 "source": "Volcube Trading Implied Volatility; Option Market Making",
-                "sim": "vol",
-                "sim_task": "Open Greeks Lab and click the \u03BD Vega tab. At Strike K = $100 and Implied vol = 25%, read the Call price and Vega tiles, then drag Implied vol down to 22% to see how a 3-point IV drop changes the dollar price.",
+                "sim": "greeks",
+                "sim_task": "Open the Greeks Lab and click the \u03BD Vega tab. Set Strike K to $100 and Implied vol to 25%, and read the Call price and Vega tiles. Drag Implied vol down to 22%. See how a 3-point drop in implied volatility lowers the option's dollar price.",
                 "quiz": [
                   {
                     "q": "Lumend Brands ($42) rallies $0.40, and a 50-delta call rises from $2.00 ($200) to $2.20 ($220). In implied-volatility terms, how did the option's price change?",
@@ -8186,7 +8186,7 @@
                 ],
                 "source": "Volcube Option Volatility Trading: Strategies and Risk",
                 "sim": "vol",
-                "sim_task": "Open Volatility Lab and scroll down to The volatility smile card. Drag ATM vol from 22% to 30% to watch the whole curve shift up, then drag Skew (fear) to 0.40 and Smile (tails) to 1.20 to watch the downside put wing steepen.",
+                "sim_task": "Open the Volatility Lab and scroll to The volatility smile card. Drag ATM vol from 22% to 30% and watch the whole curve lift. Drag Skew (fear) to 0.40 and Smile (tails) to 1.20. Watch the downside put wing steepen above the calls.",
                 "quiz": [
                   {
                     "q": "In stock and index option markets, which strikes almost always trade at the highest implied volatility?",
@@ -8261,7 +8261,7 @@
                 ],
                 "source": "Volcube Option Gamma Trading",
                 "sim": "vol",
-                "sim_task": "Open the Volatility Lab and find the Gamma scalping simulator card. Set IV you pay to 25% and Realized vol to 28%, then drag the Hedge every slider from 1 day to 5 days and click Run 60 trials at each setting to compare Hedging P&L (gamma scalps) and Total.",
+                "sim_task": "Open the Volatility Lab and find the Gamma scalping simulator card. Set IV you pay to 25% and Realized vol to 28%. Drag Hedge every from 1 day to 5 days, clicking Run 60 trials at each setting. Compare the Hedging P&L (gamma scalps) and Total tiles across the settings.",
                 "quiz": [
                   {
                     "q": "Why do resting limit orders beat manual reactions when managing a long-gamma straddle?",
@@ -8322,7 +8322,7 @@
                 ],
                 "source": "Volcube Trading Implied Volatility; Option Gamma Trading",
                 "sim": "vol",
-                "sim_task": "Open the Volatility Lab and go to the Gamma scalping simulator card. Keep IV you pay at 25% and Realized vol at 25%, click Run another path several times while switching Hedge every between 1 day and 5 days, and watch how Total P&L flips from positive to negative across different paths.",
+                "sim_task": "Open the Volatility Lab and find the Gamma scalping simulator card. Keep IV you pay at 25% and Realized vol at 25%. Click Run another path several times, switching Hedge every between 1 day and 5 days. Watch the Total flip between profit and loss from path to path.",
                 "quiz": [
                   {
                     "q": "How can Maria (who bought the $42 LMND straddle) and Sam (who sold her that exact straddle) both finish the week with a profit?",
@@ -8372,7 +8372,7 @@
                 ],
                 "source": "Volcube Option Gamma Trading; Option Volatility Trading: Strategies and Risk",
                 "sim": "vol",
-                "sim_task": "Open the Volatility Lab and compare both cards: in Gamma scalping simulator, set IV you pay to 35% and Realized vol to 20% to see what happens when implied volatility is overpriced, then scroll to The volatility smile and raise Skew (fear) to see how downside wings become expensive relative to ATM vol.",
+                "sim_task": "Open the Volatility Lab. In the Gamma scalping simulator, set IV you pay to 35% and Realized vol to 20% to see overpriced implied vol pay the seller. Scroll to The volatility smile and raise Skew (fear). Watch the downside wings grow expensive relative to ATM vol.",
                 "quiz": [
                   {
                     "q": "Why does an at-the-money option's gamma become huge in the final hours before Friday expiration?",
@@ -8439,7 +8439,7 @@
                 ],
                 "source": "Volcube Trading Implied Volatility",
                 "sim": "greeks",
-                "sim_task": "Open the Greeks Lab and select the \u03BD Vega tab. Set Strike K to 100 and Days to expiry to 45, note the Vega tile when spot S is $100 on the chart, then read the curve at $85 and $115 to see how vega slips away when the stock drifts off the strike.",
+                "sim_task": "Open the Greeks Lab and click the \u03BD Vega tab. Set Strike K to $100 and Days to expiry to 45. Read the Vega tile and the curve where spot is $100. Compare the curve at spot $85 and $115 to see vega slip away as the stock drifts off the strike.",
                 "quiz": [
                   {
                     "q": "Maria bought a $42 LMND straddle for its vega, and LMND slowly drifted up to $49 over three weeks. When implied volatility finally jumps, why is her vega profit much smaller than she expected?",
@@ -8500,7 +8500,7 @@
                 ],
                 "source": "Volcube Trading Implied Volatility; Option Greeks for Traders Part I",
                 "sim": "strategy",
-                "sim_task": "Open the Strategy Lab, select PWRS, and compare Expiration set to 14d versus 45d by adding a single ATM call in each and checking Position Greeks (live) to see how raw vega and daily theta change across the calendar.",
+                "sim_task": "Open the Strategy Lab and choose PWRS under Underlying. Choose Long Call under Preset strategy and set Expiration to the nearest date, noting the vega and daily \u0398 Theta in Position Greeks (live). Switch Expiration to a far date and compare. The longer-dated call carries more vega and a smaller daily theta.",
                 "quiz": [
                   {
                     "q": "A sudden market shock pushes 30-day LMND implied volatility up by 8 points. How much would 180-day LMND implied volatility typically rise at the same time?",
@@ -8567,7 +8567,7 @@
                 ],
                 "source": "Volcube Option Market Making",
                 "sim": "market",
-                "sim_task": "Open Practice, select LMND in the Watchlist, and inspect the Option chain columns: compare the Bid and Ask spread across near-the-money and far out-of-the-money strikes, then switch to GLXY to see how lower stock prices and different IV levels change the dollar spread.",
+                "sim_task": "Open Practice (Live Market) and click LMND in the Watchlist. In the Option chain, compare the Bid-to-Ask gap on strikes near today's price versus strikes far out of the money. Click GLXY and compare again. See how a lower-priced stock and different IV change the dollar spread.",
                 "quiz": [
                   {
                     "q": "An option has $0.16 of vega per 1-point IV move, and Maria quotes a $0.08 bid-ask spread. How wide is her quote in volatility units?",
@@ -8628,7 +8628,7 @@
                 ],
                 "source": "Volcube Option Volatility Trading: Strategies and Risk",
                 "sim": "market",
-                "sim_task": "Open Practice, place a multi-leg trade on BRGR from the Option chain, then scroll down to the Risk Desk card: inspect the Time decay row across Today, +1d, +3d, and +5d, and read the Spot \xD7 IV shock matrix and Worst scenario tile to find your book's weakest cell.",
+                "sim_task": "Open Practice (Live Market) and click BRGR. From the Option chain, build a multi-leg trade by clicking two or three Bid or Ask prices, then Place order. Open the Risk Desk from the menu and step the Time decay control across Today, +1d, +3d, and +5d. Read the spot-and-volatility shock matrix to find the cell where your book loses the most.",
                 "quiz": [
                   {
                     "q": "A call butterfly's legs have vegas of 12.0 (long $40 call), 10.5 each (two short $42 calls), and 9.5 (long $44 call). What is the butterfly's net vega?",
@@ -8689,7 +8689,7 @@
                 ],
                 "source": "Volcube Option Volatility Trading: Strategies and Risk; Option Market Making",
                 "sim": "greeks",
-                "sim_task": "Open the Greeks Lab and switch between the \u0394 Delta and \u03BD Vega tabs: set Strike K to 100 and Days to expiry to 30, then drag the Implied vol slider from 20% to 45% and watch how delta and vega at spot $88 and $112 change compared to spot $100.",
+                "sim_task": "Open the Greeks Lab and set Strike K to $100 with Days to expiry at 30. Click the \u0394 Delta tab and note the delta at spot $88 and $112. Drag Implied vol from 20% to 45% and watch those points move. Switch to the \u03BD Vega tab and watch how vega at $88, $100, and $112 changes too.",
                 "quiz": [
                   {
                     "q": "Sam is short vega and short vomma via out-of-the-money options, and implied volatility drops sharply\u2014his hoped-for move. Why might his profit stall partway through the drop?",
@@ -9722,6 +9722,9 @@
     vol: { href: "#/vol", label: "Open the Volatility Lab", icon: "\u{1F30A}" },
     market: { href: "#/market", label: "Open the Live Market", icon: "\u{1F4FA}" }
   };
+  function simSteps(text) {
+    return String(text || "").split(/\.\s+/).map((s2) => s2.replace(/\s*\.\s*$/, "").trim()).filter(Boolean);
+  }
   function allLessons() {
     return curriculum.tracks.flatMap((t) => t.modules.flatMap((m) => m.lessons.map((l) => ({ ...l, trackId: t.id, trackTitle: t.title, moduleTitle: m.title }))));
   }
@@ -9972,16 +9975,33 @@
         actions.appendChild(el("a", { class: "btn" + (sim || n > 0 ? "" : " primary"), href: "#/demo/" + d.id + "/watch" }, tag + "Watch the demo"));
         actions.appendChild(el("a", { class: "btn", href: "#/demo/" + d.id + "/do" }, tag + "Do it guided"));
       });
+      const steps = l.sim_task ? simSteps(l.sim_task) : [];
+      const applyBody = el(
+        "div",
+        { style: "flex:1;min-width:220px" },
+        el("div", { style: "font-weight:700" }, demosFor.length ? "Watch it, then try it" : "Apply it on the simulator")
+      );
+      if (steps.length > 1) {
+        applyBody.appendChild(el(
+          "ol",
+          { class: "sim-steps", style: "margin:8px 0 0;padding-left:22px;line-height:1.55" },
+          ...steps.map((s2) => el("li", { class: "sub", style: "margin-bottom:5px" }, s2))
+        ));
+      } else {
+        applyBody.appendChild(el("div", { class: "sub" }, l.sim_task || (demosFor.length ? demosFor[0].intro : "Try what you just learned.")));
+      }
+      if (l.sim === "market" || l.sim === "strategy") {
+        applyBody.appendChild(el(
+          "div",
+          { class: "small muted", style: "margin-top:8px" },
+          "The simulator is a live market \u2014 its prices move, so they will not match the exact numbers in the lesson. Follow the steps using whatever price the simulator shows."
+        ));
+      }
       root.appendChild(el(
         "div",
         { class: "apply-card", style: "max-width:68ch" },
         iconFor(sim ? sim.icon : "book", "book", { cls: "ic" }),
-        el(
-          "div",
-          { style: "flex:1;min-width:220px" },
-          el("div", { style: "font-weight:700" }, demosFor.length ? "Watch it, then try it" : "Apply it on the simulator"),
-          el("div", { class: "sub" }, l.sim_task || (demosFor.length ? demosFor[0].intro : "Try what you just learned."))
-        ),
+        applyBody,
         actions
       ));
     }
