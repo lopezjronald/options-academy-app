@@ -1,5 +1,5 @@
-/* generated — precache v0ea17f6b9d */
-const CACHE = 'oa-0ea17f6b9d';
+/* generated — precache v7efd1644ef */
+const CACHE = 'oa-7efd1644ef';
 const ASSETS = ['./', './index.html', './app.js', './styles.css', './manifest.webmanifest', './icon.svg'];
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

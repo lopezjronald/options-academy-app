@@ -11332,6 +11332,37 @@ Reading these two parts tells Maria what she is really buying before she clicks.
         )
       );
       root.appendChild(nextCard);
+      root.appendChild(el(
+        "div",
+        { class: "card mt2 home-reference" },
+        el("div", { class: "eyebrow" }, "Reference"),
+        el(
+          "div",
+          { class: "home-ref-grid mt1" },
+          el(
+            "a",
+            { class: "home-ref-btn", href: "#/glossary" },
+            icon("bookOpen", { size: 22 }),
+            el(
+              "span",
+              {},
+              el("b", {}, "Glossary"),
+              el("span", { class: "small muted" }, "Every term, defined")
+            )
+          ),
+          el(
+            "a",
+            { class: "home-ref-btn", href: "#/calculator" },
+            icon("grid", { size: 22 }),
+            el(
+              "span",
+              {},
+              el("b", {}, "Calculator"),
+              el("span", { class: "small muted" }, "Price & payoff math")
+            )
+          )
+        )
+      ));
       if (p) {
         const lv = levelOf(p.xp);
         const avg = avgScore(10);
@@ -16561,6 +16592,14 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     boot({ home: view7, learn: view8, strategy: view9, greeks: view10, vol: view11, market: view12, risk: view13, progress: view14, journal: view15, missions: view6, legal: view4, calculator: view16, guide: view17, glossary: view18 });
     start3();
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+      const hadController = !!navigator.serviceWorker.controller;
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener("controllerchange", () => {
+        if (hadController && !reloaded) {
+          reloaded = true;
+          location.reload();
+        }
+      });
       navigator.serviceWorker.register("./sw.js").catch(() => {
       });
     }

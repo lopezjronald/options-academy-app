@@ -391,6 +391,20 @@ a.card:hover, .card.interactive:hover, a.card.track-card:hover {
 .tier-legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 11.5px; color: var(--ink-3); margin: 10px 0 2px; }
 .tier-legend b { color: var(--ink-2); font-weight: 700; }
 
+/* Home reference tools (glossary / calculator) */
+.home-ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+@media (max-width: 520px) { .home-ref-grid { grid-template-columns: 1fr; } }
+.home-ref-btn {
+  display: flex; align-items: center; gap: 12px; min-height: 56px;
+  padding: 12px 14px; border: 1px solid var(--hairline); border-radius: 10px;
+  background: var(--card-2); color: inherit; text-decoration: none;
+  transition: border-color 0.15s, background 0.15s;
+}
+.home-ref-btn:hover { border-color: var(--brass-ring); background: var(--card); }
+.home-ref-btn svg { color: var(--brass); flex: none; }
+.home-ref-btn b { display: block; font-size: 15px; }
+.home-ref-btn .small { display: block; }
+
 /* ---------- tables ---------- */
 table.oa { width: 100%; border-collapse: collapse; font-size: 13px; }
 table.oa th {
