@@ -297,12 +297,12 @@
       st.events.unshift({ icon: icon2, text, day: st.day, minute: st.minute });
       if (st.events.length > 80) st.events.pop();
     }
-    function setRegime(nextRegime, cfg = {}) {
+    function setRegime(nextRegime, cfg2 = {}) {
       if (!REGIME_PARAMS[nextRegime]) return;
-      if (typeof cfg.lock === "boolean") st.regimeLocked = cfg.lock;
+      if (typeof cfg2.lock === "boolean") st.regimeLocked = cfg2.lock;
       const prev = st.regime;
       st.regime = nextRegime;
-      if (!cfg.silent && prev !== nextRegime) {
+      if (!cfg2.silent && prev !== nextRegime) {
         const [icon2, text] = REGIME_HEADLINES[nextRegime];
         pushEvent(icon2, text);
         emit("regime", st.regime);
@@ -372,7 +372,7 @@
         }
       }
     }
-    function init2(saved2) {
+    function init3(saved2) {
       if (saved2 && saved2.tickers && saved2.day) {
         Object.assign(st, {
           seed: saved2.seed ?? st.seed,
@@ -440,7 +440,7 @@
       st.forcedEarnings = {};
       st.tickers = {};
       st.events = [];
-      init2(null);
+      init3(null);
       emit("state", null);
       emit("tick", null);
     }
@@ -675,7 +675,7 @@
       const t = st.tickers[sym];
       return { ...t, chg: t.S - t.prevClose, chgPct: (t.S - t.prevClose) / t.prevClose };
     }
-    init2(opts.saved);
+    init3(opts.saved);
     return {
       start: start5,
       pause,
@@ -811,6 +811,10 @@
   );
   var db = loadDb(storage);
   var saveT = null;
+  var persistCb = null;
+  function onPersist(cb) {
+    persistCb = cb;
+  }
   function save() {
     const p = db.profiles.find((x) => x.id === db.activeId);
     if (p) p.lastActiveAt = Date.now();
@@ -822,6 +826,12 @@
         console.warn("save failed", e);
       }
     }, 250);
+    if (persistCb) {
+      try {
+        persistCb();
+      } catch {
+      }
+    }
   }
   function subStatus() {
     return db.subStatus || "none";
@@ -925,6 +935,17 @@
     db.activeId = p.id;
     save();
     return p;
+  }
+  function upsertOwnerProfile(serverProfile, ownerId) {
+    if (!serverProfile || typeof serverProfile !== "object") return null;
+    serverProfile.ownerId = ownerId;
+    if (!serverProfile.id) serverProfile.id = "p" + Math.random().toString(36).slice(2, 8);
+    const i = db.profiles.findIndex((p) => p.ownerId === ownerId);
+    if (i >= 0) db.profiles[i] = serverProfile;
+    else db.profiles.push(serverProfile);
+    db.activeId = serverProfile.id;
+    save();
+    return serverProfile;
   }
   var active = () => db.profiles.find((p) => p.id === db.activeId) || null;
   function setActive(id) {
@@ -1412,6 +1433,124 @@
     markEquity();
     saveMarketSnapshot(market.snapshot());
   });
+
+  // src/state/scholars-sync.js
+  var cfg = null;
+  var owner = null;
+  var enabled = false;
+  var timer = null;
+  var retryTimer = null;
+  var lastContent = null;
+  var syncing = false;
+  function ownerProfile() {
+    return profiles().find((p) => p.ownerId === owner) || null;
+  }
+  function hasKeys(o) {
+    return !!o && typeof o === "object" && Object.keys(o).length > 0;
+  }
+  function isEmpty(p) {
+    if (!p) return true;
+    return !p.xp && !hasKeys(p.lessons) && !hasKeys(p.quizzes) && !hasKeys(p.badges) && !hasKeys(p.games) && !hasKeys(p.days) && !(p.trades && p.trades.length) && !(p.journal && p.journal.length) && !(p.positions && p.positions.length) && (p.cash == null || p.cash === 1e5);
+  }
+  function localStamp(p) {
+    return p && (p.savedAt || p.lastActiveAt || p.created) || 0;
+  }
+  function contentOf(p) {
+    return JSON.stringify({ ...p, savedAt: 0, lastActiveAt: 0 });
+  }
+  function init2() {
+    const w = (
+      /** @type {any} */
+      typeof window !== "undefined" ? window : null
+    );
+    cfg = w && w.__OA_SYNC__;
+    const user2 = w && w.__OA_USER__;
+    if (!cfg || !cfg.url || !user2 || user2.id == null) return;
+    owner = "hh:" + user2.id;
+    const beforeStamp = localStamp(ownerProfile());
+    pull(beforeStamp, w);
+  }
+  async function fetchState(tries) {
+    for (let i = 0; i <= tries; i++) {
+      try {
+        const res = await fetch(cfg.url, { headers: { Accept: "application/json" }, credentials: "same-origin" });
+        if (res.ok) return { ok: true, data: await res.json() };
+      } catch {
+      }
+      if (i < tries) await new Promise((r) => setTimeout(r, 400 * (i + 1)));
+    }
+    return { ok: false, data: null };
+  }
+  async function pull(beforeStamp, w) {
+    const got = await fetchState(2);
+    if (!got.ok) return;
+    const server = got.data;
+    const sv = server && server.profile ? server : null;
+    const local = ownerProfile();
+    const touchedDuringPull = localStamp(local) > beforeStamp;
+    if (!sv) {
+      if (local) pushNow(false);
+    } else {
+      const takeServer = !local || isEmpty(local) && !isEmpty(sv.profile) || !touchedDuringPull && (sv.savedAt || 0) > localStamp(local);
+      if (takeServer) {
+        upsertOwnerProfile(sv.profile, owner);
+        lastContent = contentOf(ownerProfile());
+        bus.emit("resync");
+      } else {
+        pushNow(false);
+      }
+    }
+    enable(w);
+  }
+  function enable(w) {
+    if (enabled) return;
+    enabled = true;
+    onPersist(schedule);
+    if (w) w.addEventListener("visibilitychange", () => {
+      if (w.document.visibilityState === "hidden") flush(true);
+    });
+  }
+  function schedule() {
+    if (syncing || !enabled) return;
+    clearTimeout(timer);
+    timer = setTimeout(() => flush(false), 2e3);
+  }
+  function flush(keepalive) {
+    if (enabled) pushNow(keepalive);
+  }
+  function pushNow(keepalive) {
+    const p = ownerProfile();
+    if (!p) return;
+    const content = contentOf(p);
+    if (content === lastContent) return;
+    syncing = true;
+    p.savedAt = Date.now();
+    save();
+    syncing = false;
+    const body = JSON.stringify({ profile: p, savedAt: p.savedAt });
+    try {
+      const req = fetch(cfg.url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": cfg.csrf },
+        credentials: "same-origin",
+        body,
+        keepalive: !!keepalive
+      });
+      if (!keepalive && req && typeof req.then === "function") {
+        req.then((res) => {
+          if (res && res.ok) lastContent = content;
+          else scheduleRetry();
+        }).catch(() => scheduleRetry());
+      }
+    } catch {
+      scheduleRetry();
+    }
+  }
+  function scheduleRetry() {
+    if (!enabled) return;
+    clearTimeout(retryTimer);
+    retryTimer = setTimeout(() => flush(false), 8e3);
+  }
 
   // src/ui/components.js
   function el(tag, attrs = {}, ...kids) {
@@ -3107,7 +3246,7 @@
     clearPushTimer();
     pushTimer = setTimeout(() => {
       pushTimer = null;
-      pushNow().catch(() => {
+      pushNow2().catch(() => {
       });
     }, DEBOUNCE_MS);
   }
@@ -3302,7 +3441,7 @@
       return subStatus();
     }
   }
-  async function pushNow() {
+  async function pushNow2() {
     clearPushTimer();
     const u = user();
     if (!configured() || !u) {
@@ -3376,7 +3515,7 @@
       } finally {
         applyingRemote = false;
       }
-      return await pushNow();
+      return await pushNow2();
     } catch {
       setStatus("error");
       return { ok: false, err: "Network error during sync." };
@@ -3411,7 +3550,7 @@
         pullMergePush().catch(() => {
         });
       } else if (document.visibilityState === "hidden" && pushTimer !== null) {
-        pushNow().catch(() => {
+        pushNow2().catch(() => {
         });
       }
     };
@@ -4358,7 +4497,7 @@
     let paused = false;
     let error = "";
     let anchorMissing = false;
-    let timer = null;
+    let timer2 = null;
     let poll = null;
     const ran = /* @__PURE__ */ new Set();
     const skipped = /* @__PURE__ */ new Set();
@@ -4389,9 +4528,9 @@
     document.body.appendChild(ring);
     document.body.appendChild(bar);
     function clearTimer() {
-      if (timer) {
-        clearTimeout(timer);
-        timer = null;
+      if (timer2) {
+        clearTimeout(timer2);
+        timer2 = null;
       }
     }
     function step() {
@@ -4436,7 +4575,7 @@
       if (!node) {
         ring.style.display = "none";
         paintBar();
-        if (!manual && !paused && !timer && canLeave()) arm(AUTO_MS);
+        if (!manual && !paused && !timer2 && canLeave()) arm(AUTO_MS);
         return;
       }
       if (scrolledFor !== (s2.id || String(i))) {
@@ -4454,13 +4593,13 @@
       ring.style.width = Math.max(0, r.width + pad * 2) + "px";
       ring.style.height = Math.max(0, r.height + pad * 2) + "px";
       paintBar();
-      if (!manual && !paused && !timer && canLeave()) arm(AUTO_MS);
+      if (!manual && !paused && !timer2 && canLeave()) arm(AUTO_MS);
     }
     function arm(ms) {
       clearTimer();
       if (manual || paused || dead) return;
       if (!canLeave()) return;
-      timer = setTimeout(() => forward(), ms == null ? AUTO_MS : ms);
+      timer2 = setTimeout(() => forward(), ms == null ? AUTO_MS : ms);
     }
     function enter() {
       clearTimer();
@@ -11253,6 +11392,11 @@ Reading these two parts tells Maria what she is really buying before she clicks.
       refreshProfile();
       renderNext();
     });
+    bus.on("resync", () => {
+      refreshProfile();
+      renderNext();
+      route();
+    });
     bus.on("mission", renderNext);
     bus.on("profile-picker", () => profilePicker());
     bus.on("add-profile", (opts) => addProfileModal(opts && typeof opts === "object" ? opts : {}));
@@ -12492,9 +12636,9 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     root.appendChild(quizBox);
     const doneBtn = el("button", { class: "btn primary", disabled: !(p && p.lessons[l.id]) ? true : false }, "");
     const already = p && p.lessons[l.id];
-    function refreshDoneBtn(enabled) {
+    function refreshDoneBtn(enabled2) {
       doneBtn.textContent = p && p.lessons[l.id] ? "\u2713 Lesson complete" : "Mark lesson complete (+50 XP)";
-      doneBtn.disabled = !enabled && !(p && p.lessons[l.id]);
+      doneBtn.disabled = !enabled2 && !(p && p.lessons[l.id]);
       if (p && p.lessons[l.id]) doneBtn.disabled = true;
     }
     quiz(quizBox, l.quiz || [], {
@@ -13379,19 +13523,19 @@ Reading these two parts tells Maria what she is really buying before she clicks.
         tryEl.innerHTML = "";
         tryEl.appendChild(icon("search", { cls: "ic" }));
         tryEl.appendChild(el("div", {}, el("div", { style: "font-weight:700" }, "Try this"), el("div", { class: "sub" }, t.tryIt)));
-        const cfg = seriesFor();
+        const cfg2 = seriesFor();
         const opts = {
           height: 300,
-          series: cfg.series,
-          zeroLine: cfg.zeroLine,
-          fmtX: cfg.fmtX || ((x) => F.usd(x, 0)),
-          fmtY: cfg.fmtY,
+          series: cfg2.series,
+          zeroLine: cfg2.zeroLine,
+          fmtX: cfg2.fmtX || ((x) => F.usd(x, 0)),
+          fmtY: cfg2.fmtY,
           vlines: tab === "theta" ? [] : [{ x: P2.K, label: "strike", color: "--s4" }, { x: 100, label: "spot $100", color: "--ink-3" }],
           tipLabel: tab === "theta" ? "T\u2212" : "XYZ @ "
         };
         if (!chart) chart = line(chartBox, opts);
         else chart.update(opts);
-        legend(legendBox, cfg.series.map((s2) => ({ name: s2.name, color: s2.color })));
+        legend(legendBox, cfg2.series.map((s2) => ({ name: s2.name, color: s2.color })));
         const g = greeks({ S: 100, K: P2.K, T: T2(P2.dte), v: P2.iv, r: 0.04, type: "call" });
         tiles.innerHTML = "";
         const tile = (k, v, d) => el("div", { class: "stat" }, el("div", { class: "k" }, k), el("div", { class: "v" }, v), el("div", { class: "d muted" }, d));
@@ -16664,6 +16808,10 @@ Reading these two parts tells Maria what she is really buying before she clicks.
       }
     }
     boot({ home: view7, learn: view8, strategy: view9, greeks: view10, vol: view11, market: view12, risk: view13, progress: view14, journal: view15, missions: view6, legal: view4, calculator: view16, guide: view17, glossary: view18 });
+    try {
+      init2();
+    } catch {
+    }
     start3();
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       const hadController = !!navigator.serviceWorker.controller;
