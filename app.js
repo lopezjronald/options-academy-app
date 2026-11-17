@@ -11,33 +11,33 @@
   }
   function d1d2(p) {
     const r = p.r ?? 0.04, q = p.q ?? 0;
-    const v = Math.max(p.v, 1e-6), T = Math.max(p.T, 1e-6);
-    const d1 = (Math.log(p.S / p.K) + (r - q + 0.5 * v * v) * T) / (v * Math.sqrt(T));
-    return { d1, d2: d1 - v * Math.sqrt(T), r, q, v, T };
+    const v = Math.max(p.v, 1e-6), T2 = Math.max(p.T, 1e-6);
+    const d1 = (Math.log(p.S / p.K) + (r - q + 0.5 * v * v) * T2) / (v * Math.sqrt(T2));
+    return { d1, d2: d1 - v * Math.sqrt(T2), r, q, v, T: T2 };
   }
   function price(p) {
     if (p.T <= 0) {
       return p.type === "call" ? Math.max(0, p.S - p.K) : Math.max(0, p.K - p.S);
     }
-    const { d1, d2, r, q, T } = d1d2(p);
+    const { d1, d2, r, q, T: T2 } = d1d2(p);
     if (p.type === "call") {
-      return p.S * Math.exp(-q * T) * ncdf(d1) - p.K * Math.exp(-r * T) * ncdf(d2);
+      return p.S * Math.exp(-q * T2) * ncdf(d1) - p.K * Math.exp(-r * T2) * ncdf(d2);
     }
-    return p.K * Math.exp(-r * T) * ncdf(-d2) - p.S * Math.exp(-q * T) * ncdf(-d1);
+    return p.K * Math.exp(-r * T2) * ncdf(-d2) - p.S * Math.exp(-q * T2) * ncdf(-d1);
   }
   function greeks(p) {
     if (p.T <= 0) {
       const itm = p.type === "call" ? p.S > p.K : p.S < p.K;
       return { price: price(p), delta: itm ? p.type === "call" ? 1 : -1 : 0, gamma: 0, theta: 0, vega: 0, rho: 0 };
     }
-    const { d1, d2, r, q, v, T } = d1d2(p);
-    const eqT = Math.exp(-q * T), erT = Math.exp(-r * T);
+    const { d1, d2, r, q, v, T: T2 } = d1d2(p);
+    const eqT = Math.exp(-q * T2), erT = Math.exp(-r * T2);
     const pdf1 = npdf(d1);
     const delta = p.type === "call" ? eqT * ncdf(d1) : eqT * (ncdf(d1) - 1);
-    const gamma = eqT * pdf1 / (p.S * v * Math.sqrt(T));
-    const vega = p.S * eqT * pdf1 * Math.sqrt(T) / 100;
-    const thetaYr = p.type === "call" ? -p.S * eqT * pdf1 * v / (2 * Math.sqrt(T)) - r * p.K * erT * ncdf(d2) + q * p.S * eqT * ncdf(d1) : -p.S * eqT * pdf1 * v / (2 * Math.sqrt(T)) + r * p.K * erT * ncdf(-d2) - q * p.S * eqT * ncdf(-d1);
-    const rho = p.type === "call" ? p.K * T * erT * ncdf(d2) / 100 : -p.K * T * erT * ncdf(-d2) / 100;
+    const gamma = eqT * pdf1 / (p.S * v * Math.sqrt(T2));
+    const vega = p.S * eqT * pdf1 * Math.sqrt(T2) / 100;
+    const thetaYr = p.type === "call" ? -p.S * eqT * pdf1 * v / (2 * Math.sqrt(T2)) - r * p.K * erT * ncdf(d2) + q * p.S * eqT * ncdf(d1) : -p.S * eqT * pdf1 * v / (2 * Math.sqrt(T2)) + r * p.K * erT * ncdf(-d2) - q * p.S * eqT * ncdf(-d1);
+    const rho = p.type === "call" ? p.K * T2 * erT * ncdf(d2) / 100 : -p.K * T2 * erT * ncdf(-d2) / 100;
     return { price: price(p), delta, gamma, theta: thetaYr / TRADING_YEAR, vega, rho };
   }
 
@@ -643,23 +643,23 @@
       return out.filter((k) => k > 0);
     }
     function smileIV(t, K, dte) {
-      const T = Math.max(dte, 0.3) / TRADING_YEAR2;
-      const m = Math.log(K / t.S) / Math.max(0.35, Math.sqrt(T * 4));
+      const T2 = Math.max(dte, 0.3) / TRADING_YEAR2;
+      const m = Math.log(K / t.S) / Math.max(0.35, Math.sqrt(T2 * 4));
       let iv = t.vol * (1 - (t.skew || 0.25) * m + 0.45 * m * m);
       const rp = REGIME_PARAMS[st.regime] || REGIME_PARAMS.calm;
       iv *= 1 + (rp.volTargetMult - 1) * 0.5 * Math.exp(-dte / 8);
       if (t.nextEarnings && t.nextEarnings <= Math.ceil(st.day + dte) && t.nextEarnings > st.day) {
         const earnVar = 25e-4 * (t.beta || 1);
-        iv = Math.sqrt(iv * iv + earnVar / Math.max(T, 1 / TRADING_YEAR2));
+        iv = Math.sqrt(iv * iv + earnVar / Math.max(T2, 1 / TRADING_YEAR2));
       }
       return Math.max(0.05, Math.min(2.5, iv));
     }
     function optQuote(sym, strike, expDay, type) {
       const t = st.tickers[sym];
       const dte = Math.max(0, expDay - st.day - st.minute / DAY_MIN);
-      const T = dte / TRADING_YEAR2;
+      const T2 = dte / TRADING_YEAR2;
       const iv = smileIV(t, strike, dte);
-      const g = greeks({ S: t.S, K: strike, T, v: iv, r: 0.04, type });
+      const g = greeks({ S: t.S, K: strike, T: T2, v: iv, r: 0.04, type });
       const mid = Math.max(0.01, g.price);
       const half = Math.max(0.02, mid * 0.025) / 2;
       return {
@@ -1164,11 +1164,11 @@
     return posValue(pos) - posCost(pos) + (pos.settledLegs || []).reduce((sum, l) => sum + l.settled.pnlContribution, 0);
   }
   function snapshot(sym, leg) {
-    const S0 = feed.quote(sym).S, day0 = feed.day;
-    if (leg.kind === "stock") return { ...leg, g0: { S0, day0 }, slip: 0 };
+    const S02 = feed.quote(sym).S, day0 = feed.day;
+    if (leg.kind === "stock") return { ...leg, g0: { S0: S02, day0 }, slip: 0 };
     const q = feed.optQuote(sym, leg.strike, leg.expDay, leg.kind);
     return { ...leg, g0: {
-      S0,
+      S0: S02,
       day0,
       iv0: q.iv,
       delta0: q.delta,
@@ -3949,9 +3949,9 @@
         const ptsTheta = [];
         const ptsIv = [];
         for (let dte = 45; dte >= 1; dte--) {
-          const T = dte / 252;
-          ptsTheta.push({ x: dte, y: price({ S: S2, K, T, r, v: iv, type: "call" }) });
-          ptsIv.push({ x: dte, y: price({ S: S2, K, T, r, v: iv * 0.7, type: "call" }) });
+          const T2 = dte / 252;
+          ptsTheta.push({ x: dte, y: price({ S: S2, K, T: T2, r, v: iv, type: "call" }) });
+          ptsIv.push({ x: dte, y: price({ S: S2, K, T: T2, r, v: iv * 0.7, type: "call" }) });
         }
         chart = line(chartBox, {
           height: 200,
@@ -4682,7 +4682,7 @@
     const build2 = isFamilyBuild() ? "founder" : "commercial";
     const hash = (
       /** @type {any} */
-      "2026-11-16"
+      "2026-11-17"
     );
     return `${hash} \xB7 ${build2}`;
   }
@@ -10754,6 +10754,9 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     { id: "progress", ic: "trophy", label: "Progress" },
     { sect: "Labs" },
     { id: "labs", ic: "layers", label: "Labs", sheet: "labs" },
+    { id: "calculator", ic: "grid", label: "Calculator" },
+    { sect: "Reference" },
+    { id: "glossary", ic: "bookOpen", label: "Glossary" },
     { sect: "You" },
     { id: "settings", ic: "gear", label: "Settings" },
     { id: "legal", ic: "scale", label: "Disclosures" }
@@ -10835,6 +10838,12 @@ Reading these two parts tells Maria what she is really buying before she clicks.
         location.hash = "#/progress";
       } },
       { ic: "layers", label: "Labs", onClick: () => openLabsSheet() },
+      { ic: "grid", label: "Calculator", onClick: () => {
+        location.hash = "#/calculator";
+      } },
+      { ic: "bookOpen", label: "Glossary", onClick: () => {
+        location.hash = "#/glossary";
+      } },
       { ic: "gear", label: "Settings", onClick: () => {
         location.hash = "#/settings";
       } },
@@ -11123,7 +11132,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     }
     const landing = name === "start";
     document.body.classList.toggle("oa-landing", landing);
-    const view18 = VIEWS[name] || VIEWS.home;
+    const view19 = VIEWS[name] || VIEWS.home;
     if (currentCleanup) {
       try {
         currentCleanup();
@@ -11138,7 +11147,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     refreshTabActive(name);
     contentEl.innerHTML = "";
     window.scrollTo(0, 0);
-    currentCleanup = view18.render(contentEl, parts.slice(1)) || null;
+    currentCleanup = view19.render(contentEl, parts.slice(1)) || null;
     renderNext();
   }
   function renderNext() {
@@ -11363,8 +11372,8 @@ Reading these two parts tells Maria what she is really buying before she clicks.
   var esc2 = (s2) => String(s2).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   function payoffDiagram(spec) {
     const { legs, S: S2 } = spec;
-    const W = 640, H = 290, padL = 58, padR = 18, padT = 20, padB = 40;
-    const plotW = W - padL - padR, plotH = H - padT - padB;
+    const W2 = 640, H2 = 290, padL2 = 58, padR2 = 18, padT2 = 20, padB2 = 40;
+    const plotW2 = W2 - padL2 - padR2, plotH2 = H2 - padT2 - padB2;
     const strikes = legs.filter((l) => l.strike != null).map((l) => l.strike);
     const refs = [S2, ...strikes].filter((v) => v != null && isFinite(v));
     const center = refs.length ? refs.reduce((a, b) => a + b, 0) / refs.length : S2;
@@ -11384,8 +11393,8 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     const yPad = Math.max((yMax - yMin) * 0.14, 1);
     yMin -= yPad;
     yMax += yPad;
-    const xPx = (x) => padL + (x - lo) / (hi - lo) * plotW;
-    const yPx = (y) => padT + (yMax - y) / (yMax - yMin) * plotH;
+    const xPx = (x) => padL2 + (x - lo) / (hi - lo) * plotW2;
+    const yPx = (y) => padT2 + (yMax - y) / (yMax - yMin) * plotH2;
     const zeroY = yPx(0);
     const line2 = pts.map(([x, y], i) => (i ? "L" : "M") + xPx(x).toFixed(1) + " " + yPx(y).toFixed(1)).join(" ");
     const area = "M" + xPx(pts[0][0]).toFixed(1) + " " + zeroY.toFixed(1) + " " + pts.map(([x, y]) => "L" + xPx(x).toFixed(1) + " " + yPx(y).toFixed(1)).join(" ") + " L" + xPx(pts[pts.length - 1][0]).toFixed(1) + " " + zeroY.toFixed(1) + " Z";
@@ -11399,31 +11408,175 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     const uid = "pd" + Math.abs(Math.round(center * 1e3 + (strikes[0] || 0))).toString(36);
     const xticks = [...new Set([lo, ...strikes, S2, hi].map((v) => Math.round(v)))].filter((v) => v >= lo - 0.5 && v <= hi + 0.5).sort((a, b) => a - b);
     const svg = `
-<svg viewBox="0 0 ${W} ${H}" width="100%" height="auto" role="img"
+<svg viewBox="0 0 ${W2} ${H2}" width="100%" height="auto" role="img"
      aria-label="${esc2(spec.title || "Profit and loss at the deadline")}"
      style="display:block;font:12px ui-monospace,SFMono-Regular,Menlo,monospace">
   <defs>
-    <clipPath id="${uid}-up"><rect x="0" y="0" width="${W}" height="${zeroY.toFixed(1)}"/></clipPath>
-    <clipPath id="${uid}-dn"><rect x="0" y="${zeroY.toFixed(1)}" width="${W}" height="${(H - zeroY).toFixed(1)}"/></clipPath>
+    <clipPath id="${uid}-up"><rect x="0" y="0" width="${W2}" height="${zeroY.toFixed(1)}"/></clipPath>
+    <clipPath id="${uid}-dn"><rect x="0" y="${zeroY.toFixed(1)}" width="${W2}" height="${(H2 - zeroY).toFixed(1)}"/></clipPath>
   </defs>
   <path d="${area}" fill="var(--gain-mark)" opacity="0.16" clip-path="url(#${uid}-up)"/>
   <path d="${area}" fill="var(--loss)" opacity="0.16" clip-path="url(#${uid}-dn)"/>
-  <line x1="${padL}" y1="${zeroY.toFixed(1)}" x2="${W - padR}" y2="${zeroY.toFixed(1)}"
+  <line x1="${padL2}" y1="${zeroY.toFixed(1)}" x2="${W2 - padR2}" y2="${zeroY.toFixed(1)}"
         stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="4 4"/>
-  <text x="${W - padR}" y="${(zeroY - 5).toFixed(1)}" text-anchor="end" fill="var(--ink-3)">break even ($0)</text>
-  ${xticks.map((t) => `<text x="${xPx(t).toFixed(1)}" y="${H - padB + 18}" text-anchor="middle" fill="var(--ink-3)">$${t}</text>`).join("")}
-  ${bes.map((b) => `<line x1="${xPx(b).toFixed(1)}" y1="${padT}" x2="${xPx(b).toFixed(1)}" y2="${H - padB}" stroke="var(--brass)" stroke-width="1" stroke-dasharray="2 3" opacity="0.8"/>
-    <text x="${xPx(b).toFixed(1)}" y="${padT - 6}" text-anchor="middle" fill="var(--brass)">BE $${Math.round(b)}</text>`).join("")}
-  <line x1="${xPx(S2).toFixed(1)}" y1="${padT}" x2="${xPx(S2).toFixed(1)}" y2="${H - padB}" stroke="var(--ink-2)" stroke-width="1" stroke-dasharray="1 3" opacity="0.7"/>
-  <text x="${xPx(S2).toFixed(1)}" y="${H - padB + 32}" text-anchor="middle" fill="var(--ink-2)">now $${Math.round(S2)}</text>
+  <text x="${W2 - padR2}" y="${(zeroY - 5).toFixed(1)}" text-anchor="end" fill="var(--ink-3)">break even ($0)</text>
+  ${xticks.map((t) => `<text x="${xPx(t).toFixed(1)}" y="${H2 - padB2 + 18}" text-anchor="middle" fill="var(--ink-3)">$${t}</text>`).join("")}
+  ${bes.map((b) => `<line x1="${xPx(b).toFixed(1)}" y1="${padT2}" x2="${xPx(b).toFixed(1)}" y2="${H2 - padB2}" stroke="var(--brass)" stroke-width="1" stroke-dasharray="2 3" opacity="0.8"/>
+    <text x="${xPx(b).toFixed(1)}" y="${padT2 - 6}" text-anchor="middle" fill="var(--brass)">BE $${Math.round(b)}</text>`).join("")}
+  <line x1="${xPx(S2).toFixed(1)}" y1="${padT2}" x2="${xPx(S2).toFixed(1)}" y2="${H2 - padB2}" stroke="var(--ink-2)" stroke-width="1" stroke-dasharray="1 3" opacity="0.7"/>
+  <text x="${xPx(S2).toFixed(1)}" y="${H2 - padB2 + 32}" text-anchor="middle" fill="var(--ink-2)">now $${Math.round(S2)}</text>
   <path d="${line2}" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round"/>
-  <text x="${padL}" y="${(yPx(maxProfit) - 7).toFixed(1)}" fill="var(--gain-mark)" font-weight="700">Max profit ${usd(maxProfit)}</text>
-  <text x="${padL}" y="${(H - padB - 6).toFixed(1)}" fill="var(--loss)" font-weight="700">${ml.bounded ? "Worst case " + usd(ml.amount) : "Loss: unlimited"}</text>
+  <text x="${padL2}" y="${(yPx(maxProfit) - 7).toFixed(1)}" fill="var(--gain-mark)" font-weight="700">Max profit ${usd(maxProfit)}</text>
+  <text x="${padL2}" y="${(H2 - padB2 - 6).toFixed(1)}" fill="var(--loss)" font-weight="700">${ml.bounded ? "Worst case " + usd(ml.amount) : "Loss: unlimited"}</text>
 </svg>`;
     const wrap = document.createElement("div");
     wrap.className = "payoff-diagram card";
     wrap.style.cssText = "max-width:68ch;padding:14px 16px;margin-top:16px";
     wrap.innerHTML = `<div class="eyebrow" style="margin-bottom:6px">${esc2(spec.title || "Payoff at the deadline")}</div>` + svg + (spec.caption ? `<p class="small muted" style="margin:8px 0 0">${esc2(spec.caption)}</p>` : "");
+    return wrap;
+  }
+
+  // src/ui/curve-diagram.js
+  var esc3 = (s2) => String(s2).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  var T = (days) => Math.max(days, 0.01) / 365;
+  var R = 0.04;
+  var S0 = 100;
+  var W = 640;
+  var H = 290;
+  var padL = 58;
+  var padR = 18;
+  var padT = 22;
+  var padB = 42;
+  var plotW = W - padL - padR;
+  var plotH = H - padT - padB;
+  function buildCurve(spec) {
+    const K = spec.strike ?? 100;
+    const days = spec.days ?? 30;
+    const iv = spec.iv ?? 0.3;
+    if (spec.type === "theta") {
+      const pts = [];
+      for (let d = 60; d >= 0; d--) pts.push({ x: d, y: price({ S: S0, K, T: T(d), v: iv, r: R, type: "call" }) });
+      return {
+        title: spec.title || "What time is worth as expiry nears",
+        caption: spec.caption || "A $100-strike call on a $100 stock. The drop steepens toward the right \u2014 each of the last days costs more than the first.",
+        xLabel: "days to expiry",
+        yLabel: "option value",
+        xMin: 60,
+        xMax: 0,
+        // reversed: 60 days on the left, expiry on the right
+        series: [{ name: "value", color: "var(--ink)", pts }],
+        xticks: [60, 45, 30, 15, 0],
+        fmtX: (v) => Math.round(v) + "d",
+        fmtY: (v) => "$" + v.toFixed(1),
+        markers: []
+      };
+    }
+    if (spec.type === "vega") {
+      const pts = [];
+      for (let i = 0; i <= 50; i++) {
+        const v = 0.1 + (0.6 - 0.1) * i / 50;
+        pts.push({ x: v, y: price({ S: S0, K, T: T(days), v, r: R, type: "call" }) });
+      }
+      return {
+        title: spec.title || "Price climbs with implied volatility",
+        caption: spec.caption || `A ${days}-day $${Math.round(K)}-strike call. Nothing about the stock changed \u2014 only the volatility priced in. That slope is vega.`,
+        xLabel: "implied volatility",
+        yLabel: "option value",
+        xMin: 0.1,
+        xMax: 0.6,
+        series: [{ name: "price", color: "var(--ink)", pts }],
+        xticks: [0.1, 0.2, 0.3, 0.4, 0.5, 0.6],
+        fmtX: (v) => Math.round(v * 100) + "%",
+        fmtY: (v) => "$" + v.toFixed(1),
+        markers: []
+      };
+    }
+    if (spec.type === "smile") {
+      const atm = spec.atm ?? 0.22, skew = spec.skew ?? 0.25, curv = spec.curv ?? 0.6;
+      const pts = [];
+      for (let k = 80; k <= 120; k++) {
+        const m = (k - 100) / 100;
+        const v = atm + skew * -m + curv * m * m;
+        pts.push({ x: k, y: Math.max(0.05, v) });
+      }
+      return {
+        title: spec.title || "The volatility smile (and its downside tilt)",
+        caption: spec.caption || "Each strike trades at its own implied vol. Downside puts cost extra vol \u2014 crash insurance carries a premium \u2014 so the left wing sits higher than the right.",
+        xLabel: "strike",
+        yLabel: "implied vol",
+        xMin: 80,
+        xMax: 120,
+        series: [{ name: "iv", color: "var(--ink)", pts }],
+        xticks: [80, 90, 100, 110, 120],
+        fmtX: (v) => "$" + Math.round(v),
+        fmtY: (v) => Math.round(v * 100) + "%",
+        markers: [{ x: 100, label: "ATM $100" }]
+      };
+    }
+    const callPts = [], putPts = [];
+    for (let s2 = 70; s2 <= 130; s2 += 0.5) {
+      callPts.push({ x: s2, y: greeks({ S: s2, K, T: T(days), v: iv, r: R, type: "call" }).delta });
+      putPts.push({ x: s2, y: greeks({ S: s2, K, T: T(days), v: iv, r: R, type: "put" }).delta });
+    }
+    return {
+      title: spec.title || "Delta: how much the option tracks the stock",
+      caption: spec.caption || `A ${days}-day $${Math.round(K)}-strike option. Deep in the money the call moves almost dollar-for-dollar (delta near 1); far out, barely at all. The put mirrors it below zero.`,
+      xLabel: "stock price",
+      yLabel: "delta",
+      xMin: 70,
+      xMax: 130,
+      series: [
+        { name: "call delta", color: "var(--ink)", pts: callPts },
+        { name: "put delta", color: "var(--brass)", pts: putPts }
+      ],
+      xticks: [70, 85, 100, 115, 130],
+      fmtX: (v) => "$" + Math.round(v),
+      fmtY: (v) => v.toFixed(1),
+      markers: [{ x: K, label: "strike $" + Math.round(K) }],
+      zeroLine: true
+    };
+  }
+  function curveDiagram(spec) {
+    const c = buildCurve(spec || {});
+    const allY = c.series.flatMap((s2) => s2.pts.map((p) => p.y));
+    let yMin = Math.min(...allY), yMax = Math.max(...allY);
+    if (c.zeroLine) {
+      yMin = Math.min(yMin, 0);
+      yMax = Math.max(yMax, 0);
+    }
+    const yPad = Math.max((yMax - yMin) * 0.12, 1e-6);
+    yMin -= yPad;
+    yMax += yPad;
+    const xPx = (x) => padL + (x - c.xMin) / (c.xMax - c.xMin) * plotW;
+    const yPx = (y) => padT + (yMax - y) / (yMax - yMin) * plotH;
+    const lines = c.series.map((s2) => {
+      const d = s2.pts.map((p, i) => (i ? "L" : "M") + xPx(p.x).toFixed(1) + " " + yPx(p.y).toFixed(1)).join(" ");
+      return `<path d="${d}" fill="none" stroke="${s2.color}" stroke-width="2.4" stroke-linejoin="round"/>`;
+    }).join("");
+    const yGrid = [yMin + yPad, (yMin + yMax) / 2, yMax - yPad];
+    const yAxis = yGrid.map((v) => `<line x1="${padL}" y1="${yPx(v).toFixed(1)}" x2="${W - padR}" y2="${yPx(v).toFixed(1)}" stroke="var(--hairline)" stroke-width="1"/>
+     <text x="${padL - 6}" y="${(yPx(v) + 3).toFixed(1)}" text-anchor="end" fill="var(--ink-3)">${esc3(c.fmtY(v))}</text>`).join("");
+    const zero = c.zeroLine ? `<line x1="${padL}" y1="${yPx(0).toFixed(1)}" x2="${W - padR}" y2="${yPx(0).toFixed(1)}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="4 4"/>` : "";
+    const xAxis = c.xticks.map((t) => `<text x="${xPx(t).toFixed(1)}" y="${H - padB + 18}" text-anchor="middle" fill="var(--ink-3)">${esc3(c.fmtX(t))}</text>`).join("");
+    const marks = (c.markers || []).map((m) => `<line x1="${xPx(m.x).toFixed(1)}" y1="${padT}" x2="${xPx(m.x).toFixed(1)}" y2="${H - padB}" stroke="var(--ink-2)" stroke-width="1" stroke-dasharray="1 3" opacity="0.7"/>
+     <text x="${xPx(m.x).toFixed(1)}" y="${padT - 7}" text-anchor="middle" fill="var(--ink-2)">${esc3(m.label)}</text>`).join("");
+    const legend2 = c.series.length > 1 ? c.series.map((s2, i) => `<text x="${W - padR}" y="${padT + 6 + i * 16}" text-anchor="end" fill="${s2.color}" font-weight="700">${esc3(s2.name)}</text>`).join("") : "";
+    const svg = `
+<svg viewBox="0 0 ${W} ${H}" width="100%" height="auto" role="img" aria-label="${esc3(c.title)}"
+     style="display:block;font:12px ui-monospace,SFMono-Regular,Menlo,monospace">
+  ${yAxis}
+  ${zero}
+  ${marks}
+  <text x="14" y="${padT + 4}" fill="var(--ink-3)" transform="rotate(-90 14 ${padT + 4})" style="font-size:11px">${esc3(c.yLabel)}</text>
+  <text x="${padL + plotW / 2}" y="${H - 6}" text-anchor="middle" fill="var(--ink-3)" style="font-size:11px">${esc3(c.xLabel)}</text>
+  ${lines}
+  ${xAxis}
+  ${legend2}
+</svg>`;
+    const wrap = document.createElement("div");
+    wrap.className = "curve-diagram card";
+    wrap.style.cssText = "max-width:68ch;padding:14px 16px;margin-top:16px";
+    wrap.innerHTML = `<div class="eyebrow" style="margin-bottom:6px">${esc3(c.title)}</div>` + svg + (c.caption ? `<p class="small muted" style="margin:8px 0 0">${esc3(c.caption)}</p>` : "");
     return wrap;
   }
 
@@ -11777,6 +11930,64 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     vol: { href: "#/vol", label: "Open the Volatility Lab", icon: "\u{1F30A}" },
     market: { href: "#/market", label: "Open the Live Market", icon: "\u{1F4FA}" }
   };
+  var LAB_PARAMS = {
+    // Greeks Lab
+    "c-pricing-intuition": { K: 95, dte: 30, tab: "delta" },
+    "g-delta": { tab: "delta", K: 100, dte: 60, iv: 40 },
+    "g-theta": { tab: "theta", K: 100, dte: 60 },
+    "g-vega": { tab: "vega", K: 100, dte: 60, iv: 25 },
+    "g-gamma-intro": { tab: "gamma", K: 100, dte: 30 },
+    "g-iv-as-price": { tab: "vega", K: 100, iv: 25 },
+    "p-outright-vol": { tab: "vega", K: 100, dte: 45 },
+    "p-higher-order": { tab: "delta", K: 100, dte: 30, iv: 20 },
+    "vp-two-parts-of-price": { K: 95, dte: 30, tab: "delta" },
+    "vp-why-time-costs": { tab: "theta", K: 100, dte: 30 },
+    "vp-iv-the-knob": { K: 100, dte: 30, iv: 20 },
+    "vg-delta": { tab: "delta", K: 100, dte: 30, iv: 30 },
+    "vg-gamma": { tab: "gamma", K: 100, dte: 30, iv: 30 },
+    "vg-vega": { tab: "vega", K: 100, dte: 30, iv: 30 },
+    "vg-greeks-dashboard": { tab: "delta", K: 100, dte: 30, iv: 30 },
+    // Volatility Lab — gamma-scalp card
+    "c-what-is-volatility": { ivpay: 32, rv: 18 },
+    "g-hedging-stale": { ivpay: 25, rv: 35, hedge: 1 },
+    "g-gamma-theta-tradeoff": { ivpay: 25, rv: 40, hedge: 1 },
+    "g-implied-vs-realized": { ivpay: 25, rv: 25 },
+    "p-scalping-craft": { ivpay: 25, rv: 28, hedge: 1 },
+    "p-quadratic-frequency": { ivpay: 25, rv: 25 },
+    "p-expiry-vega-shocks": { ivpay: 35, rv: 20 },
+    "vp-historical-vs-implied": { ivpay: 30, rv: 15 },
+    "vd-delta-hedging": { ivpay: 25, rv: 25, hedge: 1 },
+    "vd-gamma-scalping": { ivpay: 20, rv: 35, hedge: 1 },
+    "vd-cheap-vs-rich-vol": { ivpay: 20, rv: 35, hedge: 1 },
+    // Volatility Lab — smile card
+    "g-skew-smile": { atm: 22, skew: 0.3, smile: 1 },
+    "vp-expected-move": { atm: 32, skew: 0.15, smile: 0.5 },
+    "vs-why-puts-cost-more": { atm: 22, skew: 0.3, smile: 0 },
+    "vs-the-smile": { atm: 22, skew: 0, smile: 1 },
+    "vs-term-structure": { atm: 24, skew: 0.15, smile: 0.5 },
+    "vs-trading-the-skew": { atm: 22, skew: 0.3, smile: 0.2 },
+    "vd-the-vix": { atm: 20, skew: 0.15, smile: 0.5 }
+  };
+  var CURVE_SPECS = {
+    // delta vs stock price
+    "g-delta": { type: "delta", strike: 100, days: 60, iv: 0.4 },
+    "vg-delta": { type: "delta", strike: 100, days: 30, iv: 0.3 },
+    "vp-two-parts-of-price": { type: "delta", strike: 95, days: 30, iv: 0.3 },
+    // time decay
+    "g-theta": { type: "theta", strike: 100, iv: 0.3 },
+    "vp-why-time-costs": { type: "theta", strike: 100, iv: 0.3 },
+    // price vs implied vol
+    "g-vega": { type: "vega", strike: 100, days: 60 },
+    "vg-vega": { type: "vega", strike: 100, days: 30 },
+    "g-iv-as-price": { type: "vega", strike: 100, days: 30 },
+    "vp-iv-the-knob": { type: "vega", strike: 100, days: 30 },
+    // the volatility smile / skew
+    "g-skew-smile": { type: "smile", atm: 0.22, skew: 0.25, curv: 0.8 },
+    "vs-the-smile": { type: "smile", atm: 0.22, skew: 0.12, curv: 0.9 },
+    "vs-why-puts-cost-more": { type: "smile", atm: 0.22, skew: 0.35, curv: 0.3 },
+    "vs-trading-the-skew": { type: "smile", atm: 0.22, skew: 0.35, curv: 0.5 },
+    "vd-the-vix": { type: "smile", atm: 0.2, skew: 0.25, curv: 0.6 }
+  };
   function simSteps(text) {
     return String(text || "").split(/\.\s+/).map((s2) => s2.replace(/\s*\.\s*$/, "").trim()).filter(Boolean);
   }
@@ -11797,8 +12008,49 @@ Reading these two parts tells Maria what she is really buying before she clicks.
       blurb: "The engine under every option price \u2014 what a premium is really made of, the cost of time, and how volatility sets the dial."
     }
   };
+  var MODULE_TIER = {
+    // Options Essentials
+    "f-chance": "core",
+    "f-markets": "core",
+    "f-insurance": "core",
+    "c-language": "core",
+    "c-first-strategies": "core",
+    "c-spreads": "stretch",
+    "c-volatility-basics": "stretch",
+    "g-first-order": "stretch",
+    "g-gamma-dynamics": "stretch",
+    "g-volatility": "stretch",
+    "p-gamma-scalping": "pro",
+    "p-trading-iv": "pro",
+    "p-market-making": "pro",
+    // Strategy Playbook
+    "spm-selling": "core",
+    "spm-covered": "core",
+    "drm-vertical": "core",
+    "drm-range": "stretch",
+    "psm-collars": "stretch",
+    "psm-synth": "stretch",
+    // Volatility & Pricing
+    "vpm-reading": "core",
+    "vgm-risk": "stretch",
+    "vsm-shape": "stretch",
+    "vdm-hedge": "pro"
+  };
+  var TIER_META = {
+    core: { label: "Core", hint: "Foundational \u2014 everyone should do these." },
+    stretch: { label: "Stretch", hint: "Builds past the basics \u2014 worth the reach." },
+    pro: { label: "Pro", hint: "Advanced desk craft \u2014 optional deep dive." }
+  };
+  function lessonTier(lesson, moduleId) {
+    const t = lesson && lesson.tier || MODULE_TIER[moduleId] || "core";
+    return TIER_META[t] ? t : "core";
+  }
+  function tierBadge(tier2) {
+    const m = TIER_META[tier2] || TIER_META.core;
+    return el("span", { class: "pill tier-badge " + tier2, title: m.hint }, m.label);
+  }
   function allLessons() {
-    return curriculum.tracks.flatMap((t) => t.modules.flatMap((m) => m.lessons.map((l) => ({ ...l, trackId: t.id, trackTitle: t.title, moduleTitle: m.title }))));
+    return curriculum.tracks.flatMap((t) => t.modules.flatMap((m) => m.lessons.map((l) => ({ ...l, trackId: t.id, trackTitle: t.title, moduleTitle: m.title, moduleId: m.id }))));
   }
   function trackProgress(t) {
     const p = active();
@@ -11828,6 +12080,12 @@ Reading these two parts tells Maria what she is really buying before she clicks.
   }
   function renderIndex(root) {
     root.appendChild(viewHeader("Programs", "Pick a program, then work through it module by module"));
+    root.appendChild(el(
+      "div",
+      { class: "btn-row", style: "margin:-4px 0 4px" },
+      el("a", { class: "btn", href: "#/glossary" }, icon("bookOpen"), " Glossary"),
+      el("a", { class: "btn", href: "#/calculator" }, icon("grid"), " Calculator")
+    ));
     const byProg = /* @__PURE__ */ new Map();
     for (const t of curriculum.tracks) {
       const pid2 = t.program || "essentials";
@@ -11888,6 +12146,13 @@ Reading these two parts tells Maria what she is really buying before she clicks.
       { class: "btn-row mt1" },
       el("a", { class: "btn", href: "#/guide/" + t.id }, icon("bookOpen"), " Study guide")
     ));
+    root.appendChild(el(
+      "div",
+      { class: "tier-legend" },
+      el("span", {}, tierBadge("core"), " ", el("b", {}, "Core"), " essentials"),
+      el("span", {}, tierBadge("stretch"), " ", el("b", {}, "Stretch"), " past the basics"),
+      el("span", {}, tierBadge("pro"), " ", el("b", {}, "Pro"), " optional deep dive")
+    ));
     const bannerHost = el("div", {});
     root.appendChild(bannerHost);
     if (overview.needsPlacement) {
@@ -11946,7 +12211,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
             el(
               "span",
               {},
-              el("div", { class: "lt" }, l.title),
+              el("div", { class: "lt" }, l.title, " ", tierBadge(lessonTier(l, m.id))),
               el("div", { class: "lo" }, l.objective)
             )
           ));
@@ -11962,6 +12227,8 @@ Reading these two parts tells Maria what she is really buying before she clicks.
                 "div",
                 { class: "lt" },
                 l.title,
+                " ",
+                tierBadge(lessonTier(l, m.id)),
                 tierLocked && !isFamilyBuild() ? el("a", { class: "pill brass lock-chip", href: "#/upgrade", style: "text-decoration:none;margin-left:8px" }, "Upgrade") : null
               ),
               el(
@@ -12039,6 +12306,13 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     }
     root.appendChild(el("h1", {}, l.title));
     root.appendChild(el("p", { class: "sub", style: "max-width:68ch" }, l.objective));
+    const lTier = lessonTier(l, l.moduleId);
+    root.appendChild(el(
+      "div",
+      { style: "display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:6px" },
+      tierBadge(lTier),
+      lTier === "pro" ? el("span", { class: "small muted" }, "Optional deep dive \u2014 skipping it won\u2019t block your progress.") : null
+    ));
     if (l.source && l.trackId !== "foundations" && l.trackId !== "core") {
       root.appendChild(el("div", { class: "pill mt1" }, icon("bookOpen"), " " + l.source));
     }
@@ -12061,11 +12335,25 @@ Reading these two parts tells Maria what she is really buying before she clicks.
       ));
     }
     if (l.diagram && l.diagram.legs) root.appendChild(payoffDiagram(l.diagram));
+    const curveSpec = l.curve || CURVE_SPECS[l.id];
+    if (curveSpec) root.appendChild(curveDiagram(curveSpec));
     const demosFor = DEMOS.filter((d) => d.lessonId === l.id);
     const sim = l.sim && SIM_LINKS[l.sim];
+    const labParams = l.lab_params || LAB_PARAMS[l.id];
+    const deepLinkable = labParams && (l.sim === "greeks" || l.sim === "vol");
+    function labHref() {
+      if (!sim) return "#";
+      if (!deepLinkable) return sim.href;
+      const qs = new URLSearchParams(labParams).toString();
+      return qs ? sim.href + "?" + qs : sim.href;
+    }
     if (sim || demosFor.length) {
       const actions = el("div", { class: "btn-row" });
-      if (sim) actions.appendChild(el("a", { class: "btn primary", href: sim.href }, sim.label));
+      if (sim) actions.appendChild(el(
+        "a",
+        { class: "btn primary", href: labHref() },
+        deepLinkable ? sim.label + " \u2014 set up for this lesson" : sim.label
+      ));
       demosFor.forEach((d, n) => {
         const tag = demosFor.length > 1 ? d.title.replace(/^The /, "").replace(/,.*$/, "") + " \u2014 " : "";
         actions.appendChild(el("a", { class: "btn" + (sim || n > 0 ? "" : " primary"), href: "#/demo/" + d.id + "/watch" }, tag + "Watch the demo"));
@@ -12248,9 +12536,9 @@ Reading these two parts tells Maria what she is really buying before she clicks.
       if (S2 < K) return 0;
       return 0.5;
     }
-    const T = days / TRADING_YEAR;
-    const volSqrtT = iv * Math.sqrt(T);
-    const d2 = (Math.log(S2 / K) - 0.5 * iv * iv * T) / volSqrtT;
+    const T2 = days / TRADING_YEAR;
+    const volSqrtT = iv * Math.sqrt(T2);
+    const d2 = (Math.log(S2 / K) - 0.5 * iv * iv * T2) / volSqrtT;
     return ncdf(d2);
   }
 
@@ -12877,8 +13165,22 @@ Reading these two parts tells Maria what she is really buying before she clicks.
   ];
   var view10 = {
     render(root) {
-      let tab = "delta";
-      const P2 = { K: 100, dte: 30, iv: 0.3 };
+      const hash = location.hash;
+      const params = new URLSearchParams(hash.includes("?") ? hash.slice(hash.indexOf("?") + 1) : "");
+      function preset(name, fallback, min, max, step) {
+        const raw = params.get(name)?.trim();
+        if (!raw || !/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(raw)) return fallback;
+        const value = Number(raw);
+        if (!Number.isFinite(value)) return fallback;
+        const clamped = Math.max(min, Math.min(max, value));
+        return Number((min + Math.round((clamped - min) / step) * step).toFixed(10));
+      }
+      let tab = TABS.find((t) => t.id === params.get("tab"))?.id || "delta";
+      const P2 = {
+        K: preset("K", 100, 70, 130, 1),
+        dte: preset("dte", 30, 1, 90, 1),
+        iv: preset("iv", 30, 8, 80, 1) / 100
+      };
       let chart = null;
       root.appendChild(el("div", { class: "eyebrow" }, "Greeks Lab"));
       root.appendChild(el("h1", {}, "The dashboard dials of every option"));
@@ -12926,13 +13228,13 @@ Reading these two parts tells Maria what she is really buying before she clicks.
       sliders.appendChild(slider("Implied vol", 0.08, 0.8, 0.01, () => P2.iv, (v) => P2.iv = v, (v) => F.pct(v, 0)));
       const xs = [];
       for (let s2 = 60; s2 <= 140; s2 += 1) xs.push(s2);
-      const T = (d) => d / 365;
+      const T2 = (d) => d / 365;
       function seriesFor() {
         const base = { S: 100, K: P2.K, r: 0.04 };
         if (tab === "delta") return {
           series: [
-            { name: "Call delta", color: "--s1", points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T(P2.dte), v: P2.iv, type: "call" }).delta })) },
-            { name: "Put delta", color: "--s2", points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T(P2.dte), v: P2.iv, type: "put" }).delta })) }
+            { name: "Call delta", color: "--s1", points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T2(P2.dte), v: P2.iv, type: "call" }).delta })) },
+            { name: "Put delta", color: "--s2", points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T2(P2.dte), v: P2.iv, type: "put" }).delta })) }
           ],
           fmtY: (y) => y.toFixed(2),
           zeroLine: true,
@@ -12942,7 +13244,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
           series: [30, 10, 2].map((d, i) => ({
             name: `${d}-day gamma`,
             color: ["--s1", "--s2", "--s3"][i],
-            points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T(d), v: P2.iv, type: "call" }).gamma }))
+            points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T2(d), v: P2.iv, type: "call" }).gamma }))
           })),
           fmtY: (y) => y.toFixed(3),
           zeroLine: false
@@ -12952,8 +13254,8 @@ Reading these two parts tells Maria what she is really buying before she clicks.
           for (let d = Math.max(60, P2.dte); d >= 1; d--) days.push(d);
           return {
             series: [
-              { name: "At-the-money ($100 strike)", color: "--s1", points: days.map((d) => ({ x: -d, y: price({ S: 100, K: 100, T: T(d), v: P2.iv, r: 0.04, type: "call" }) })) },
-              { name: `Out-of-the-money ($${Math.round(110)} strike)`, color: "--s2", points: days.map((d) => ({ x: -d, y: price({ S: 100, K: 110, T: T(d), v: P2.iv, r: 0.04, type: "call" }) })) }
+              { name: "At-the-money ($100 strike)", color: "--s1", points: days.map((d) => ({ x: -d, y: price({ S: 100, K: 100, T: T2(d), v: P2.iv, r: 0.04, type: "call" }) })) },
+              { name: `Out-of-the-money ($${Math.round(110)} strike)`, color: "--s2", points: days.map((d) => ({ x: -d, y: price({ S: 100, K: 110, T: T2(d), v: P2.iv, r: 0.04, type: "call" }) })) }
             ],
             fmtX: (x) => Math.round(-x) + "d",
             fmtY: (y) => F.usd(y),
@@ -12965,7 +13267,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
           series: [60, 20, 5].map((d, i) => ({
             name: `${d}-day vega`,
             color: ["--s1", "--s2", "--s3"][i],
-            points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T(d), v: P2.iv, type: "call" }).vega }))
+            points: xs.map((x) => ({ x, y: greeks({ ...base, S: x, T: T2(d), v: P2.iv, type: "call" }).vega }))
           })),
           fmtY: (y) => F.usd(y),
           zeroLine: false
@@ -12991,7 +13293,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
         if (!chart) chart = line(chartBox, opts);
         else chart.update(opts);
         legend(legendBox, cfg.series.map((s2) => ({ name: s2.name, color: s2.color })));
-        const g = greeks({ S: 100, K: P2.K, T: T(P2.dte), v: P2.iv, r: 0.04, type: "call" });
+        const g = greeks({ S: 100, K: P2.K, T: T2(P2.dte), v: P2.iv, r: 0.04, type: "call" });
         tiles.innerHTML = "";
         const tile = (k, v, d) => el("div", { class: "stat" }, el("div", { class: "k" }, k), el("div", { class: "v" }, v), el("div", { class: "d muted" }, d));
         tiles.appendChild(tile("Call price", F.usd(g.price), `K=${F.usd(P2.K, 0)}, ${P2.dte}d, ${F.pct(P2.iv, 0)} IV`));
@@ -13051,6 +13353,16 @@ Reading these two parts tells Maria what she is really buying before she clicks.
   }
   var view11 = {
     render(root) {
+      const hash = location.hash;
+      const params = new URLSearchParams(hash.includes("?") ? hash.slice(hash.indexOf("?") + 1) : "");
+      function preset(name, fallback, min, max, step) {
+        const raw = params.get(name)?.trim();
+        if (!raw || !/^[+-]?(?:\d+\.?\d*|\.\d+)(?:e[+-]?\d+)?$/i.test(raw)) return fallback;
+        const value = Number(raw);
+        if (!Number.isFinite(value)) return fallback;
+        const clamped = Math.max(min, Math.min(max, value));
+        return Number((min + Math.round((clamped - min) / step) * step).toFixed(10));
+      }
       root.appendChild(el("div", { class: "eyebrow" }, "Volatility Lab"));
       root.appendChild(el("h1", {}, "Trade movement itself"));
       root.appendChild(el(
@@ -13067,7 +13379,11 @@ Reading these two parts tells Maria what she is really buying before she clicks.
         { class: "sub", style: "max-width:70ch" },
         "You buy a 30-day at-the-money straddle on a $100 stock and keep it delta-neutral. The solid line is your running P&L. Set realized vol above the implied vol you paid and watch hedging grind out profits; set it below and watch theta eat you."
       ));
-      const P2 = { iv: 0.25, rv: 0.4, hedge: 1 };
+      const P2 = {
+        iv: preset("ivpay", 25, 10, 60, 1) / 100,
+        rv: preset("rv", 40, 5, 80, 1) / 100,
+        hedge: preset("hedge", 1, 1, 5, 1)
+      };
       const sliderBox = el("div", { style: "max-width:560px" });
       card.appendChild(sliderBox);
       function slider(label, min, max, step, get2, set, fmt) {
@@ -13145,7 +13461,11 @@ Reading these two parts tells Maria what she is really buying before she clicks.
         { class: "sub", style: "max-width:70ch" },
         'In real markets, not every strike trades at the same implied vol. Downside puts usually cost extra vol \u2014 they are crash insurance, and insurance against disasters carries a premium. The slope is "skew"; the curvature is the "smile."'
       ));
-      const SP = { atm: 0.22, skew: 0.15, curv: 0.5 };
+      const SP = {
+        atm: preset("atm", 22, 10, 50, 1) / 100,
+        skew: preset("skew", 0.15, 0, 0.4, 0.01),
+        curv: preset("smile", 0.5, 0, 1.5, 0.05)
+      };
       const smileSliders = el("div", { style: "max-width:560px" });
       smileCard.appendChild(smileSliders);
       const smileBox = el("div", { class: "mt2" });
@@ -14943,10 +15263,10 @@ Reading these two parts tells Maria what she is really buying before she clicks.
   function buildBook(positions) {
     const book = [];
     for (const pos of positions) {
-      const S0 = market.quote(pos.sym).S;
+      const S02 = market.quote(pos.sym).S;
       for (const l of pos.legs) {
         if (l.kind === "stock") {
-          book.push({ pos, kind: "stock", side: l.side, qty: l.qty, S0 });
+          book.push({ pos, kind: "stock", side: l.side, qty: l.qty, S0: S02 });
           continue;
         }
         const q = market.optQuote(pos.sym, l.strike, l.expDay, l.kind);
@@ -14955,11 +15275,11 @@ Reading these two parts tells Maria what she is really buying before she clicks.
           kind: l.kind,
           side: l.side,
           qty: l.qty,
-          S0,
+          S0: S02,
           strike: l.strike,
           iv: q.iv,
           dte: q.dte,
-          basePx: price({ S: S0, K: l.strike, T: q.dte / TRADING_YEAR, v: q.iv, type: l.kind })
+          basePx: price({ S: S02, K: l.strike, T: q.dte / TRADING_YEAR, v: q.iv, type: l.kind })
         });
       }
     }
@@ -16102,9 +16422,143 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     }
   };
 
+  // src/ui/views/glossary.js
+  function splitSentences(body) {
+    return String(body || "").split(/\n+/).map((p) => p.replace(/^#+\s*/, "").replace(/^[-*]\s+/, "").trim()).filter(Boolean).flatMap((p) => p.split(/(?<=[.!?])\s+/)).map((s2) => s2.trim()).filter(Boolean);
+  }
+  function stripMarkdown(text) {
+    return String(text || "").replace(/\*\*([^*]+?)\*\*/g, "$1").replace(/\*([^*]+?)\*/g, "$1").replace(/`([^`]+?)`/g, "$1").trim();
+  }
+  function formatTerm(raw) {
+    const clean = String(raw || "").trim().replace(/\s+/g, " ");
+    if (!clean) return "";
+    return clean.charAt(0).toUpperCase() + clean.slice(1);
+  }
+  function buildGlossary() {
+    const byKey = /* @__PURE__ */ new Map();
+    const tracks = curriculum?.tracks || [];
+    for (const track2 of tracks) {
+      for (const mod of track2.modules || []) {
+        for (const lesson of mod.lessons || []) {
+          const sentences = splitSentences(lesson.body);
+          for (const sentence of sentences) {
+            const matches = sentence.matchAll(/\*\*([^*]+?)\*\*/g);
+            const definition = stripMarkdown(sentence);
+            if (!definition) continue;
+            for (const m of matches) {
+              const rawTerm = (m[1] || "").trim();
+              if (!rawTerm || !/^[a-zA-Z]/.test(rawTerm)) continue;
+              const key = rawTerm.toLowerCase().replace(/\s+/g, " ");
+              const existing = byKey.get(key);
+              if (!existing) {
+                byKey.set(key, {
+                  key,
+                  term: formatTerm(rawTerm),
+                  definition,
+                  lessonId: lesson.id,
+                  lessonTitle: lesson.title
+                });
+              } else if (existing.definition.length < 30 && definition.length >= 30) {
+                existing.definition = definition;
+                existing.lessonId = lesson.id;
+                existing.lessonTitle = lesson.title;
+              }
+            }
+          }
+        }
+      }
+    }
+    return [...byKey.values()].sort(
+      (a, b) => a.term.localeCompare(b.term, void 0, { sensitivity: "base" })
+    );
+  }
+  var view18 = {
+    render(root) {
+      const entries2 = buildGlossary();
+      root.appendChild(viewHeader("Reference", "Glossary"));
+      root.appendChild(
+        el(
+          "p",
+          { class: "sub", style: "max-width:68ch;margin:0 0 16px" },
+          "Plain-language definitions for key terms across the curriculum, taken directly from the lesson where each concept is first introduced."
+        )
+      );
+      const searchInput = el("input", {
+        type: "text",
+        placeholder: "Filter terms (e.g., strike, delta, expected value)\u2026",
+        "aria-label": "Filter glossary terms",
+        autocomplete: "off"
+      });
+      const countEl = el("div", { class: "small muted num" }, `${entries2.length} terms`);
+      const searchCard = el(
+        "div",
+        { class: "card pad-s mb2", style: "max-width:68ch" },
+        el(
+          "div",
+          { class: "flex-between" },
+          el("label", { class: "small muted", style: "font-weight:600;text-transform:uppercase;letter-spacing:0.06em" }, "Search glossary"),
+          countEl
+        ),
+        el("div", { class: "field mt1" }, searchInput)
+      );
+      root.appendChild(searchCard);
+      const listEl = el("div", {
+        class: "glossary-list",
+        style: "display:flex;flex-direction:column;gap:10px;max-width:68ch"
+      });
+      root.appendChild(listEl);
+      function renderEntries(query) {
+        const q = String(query || "").trim().toLowerCase();
+        const filtered = q ? entries2.filter((item) => item.term.toLowerCase().includes(q)) : entries2;
+        countEl.textContent = q ? `${filtered.length} of ${entries2.length} terms` : `${entries2.length} terms`;
+        listEl.innerHTML = "";
+        if (!filtered.length) {
+          listEl.appendChild(
+            el(
+              "div",
+              { class: "card", style: "text-align:center" },
+              el("p", { class: "sub", style: "margin:0" }, `No glossary terms matching "${query.trim()}".`)
+            )
+          );
+          return;
+        }
+        for (const item of filtered) {
+          listEl.appendChild(
+            el(
+              "article",
+              {
+                class: "card pad-s glossary-entry",
+                style: "break-inside:avoid;page-break-inside:avoid"
+              },
+              el(
+                "div",
+                { class: "flex-between" },
+                el("h3", { style: "margin:0;font-size:17px" }, el("strong", {}, item.term)),
+                el(
+                  "a",
+                  {
+                    class: "small",
+                    href: "#/learn/lesson/" + item.lessonId,
+                    style: "text-decoration:none;font-weight:600;white-space:nowrap"
+                  },
+                  `See lesson: ${item.lessonTitle} \u2192`
+                )
+              ),
+              el("p", { class: "sub", style: "margin:6px 0 0" }, item.definition)
+            )
+          );
+        }
+      }
+      searchInput.addEventListener("input", () => {
+        renderEntries(searchInput.value);
+      });
+      renderEntries("");
+    }
+  };
+
   // src/main.js
   function start4() {
-    boot({ home: view7, learn: view8, strategy: view9, greeks: view10, vol: view11, market: view12, risk: view13, progress: view14, journal: view15, missions: view6, legal: view4, calculator: view16, guide: view17 });
+    boot({ home: view7, learn: view8, strategy: view9, greeks: view10, vol: view11, market: view12, risk: view13, progress: view14, journal: view15, missions: view6, legal: view4, calculator: view16, guide: view17, glossary: view18 });
     start3();
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
       navigator.serviceWorker.register("./sw.js").catch(() => {
