@@ -866,6 +866,8 @@
       name,
       emoji,
       mode: "adult",
+      ownerId: null,
+      // links a profile to an external login (e.g. 'hh:<id>') when embedded
       riskMode: "all",
       // 'all' | 'defined' — defined-risk-only safety (Settings)
       xp: 0,
@@ -903,6 +905,26 @@
     db.profiles = db.profiles.filter((p) => p.id !== id);
     if (db.activeId === id) db.activeId = db.profiles[0]?.id || null;
     save();
+  }
+  var OWNER_EMOJIS = ["\u{1F393}", "\u{1F4C8}", "\u{1F9ED}", "\u{1F9E0}", "\u{1F989}", "\u{1F31F}", "\u{1F680}", "\u{1F3AF}"];
+  function bindToOwner(user2) {
+    if (!user2 || user2.id == null) return null;
+    const ownerId = "hh:" + user2.id;
+    let p = db.profiles.find((x) => x.ownerId === ownerId);
+    if (!p) {
+      if (db.profiles.length === 1 && db.profiles[0].ownerId == null) {
+        p = db.profiles[0];
+        p.ownerId = ownerId;
+      } else {
+        const emoji = OWNER_EMOJIS[Math.abs(Number(user2.id) || 0) % OWNER_EMOJIS.length];
+        p = blank(String(user2.name || "Learner").slice(0, 40), emoji);
+        p.ownerId = ownerId;
+        db.profiles.push(p);
+      }
+    }
+    db.activeId = p.id;
+    save();
+    return p;
   }
   var active = () => db.profiles.find((p) => p.id === db.activeId) || null;
   function setActive(id) {
@@ -16635,6 +16657,12 @@ Reading these two parts tells Maria what she is really buying before she clicks.
 
   // src/main.js
   function start4() {
+    if (typeof window !== "undefined" && window.__OA_USER__) {
+      try {
+        bindToOwner(window.__OA_USER__);
+      } catch {
+      }
+    }
     boot({ home: view7, learn: view8, strategy: view9, greeks: view10, vol: view11, market: view12, risk: view13, progress: view14, journal: view15, missions: view6, legal: view4, calculator: view16, guide: view17, glossary: view18 });
     start3();
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
