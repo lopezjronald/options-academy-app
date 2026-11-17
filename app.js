@@ -899,6 +899,11 @@
     p.riskMode = mode === "defined" ? "defined" : "all";
     save();
   }
+  function removeProfile(id) {
+    db.profiles = db.profiles.filter((p) => p.id !== id);
+    if (db.activeId === id) db.activeId = db.profiles[0]?.id || null;
+    save();
+  }
   var active = () => db.profiles.find((p) => p.id === db.activeId) || null;
   function setActive(id) {
     db.activeId = id;
@@ -11029,40 +11034,81 @@ Reading these two parts tells Maria what she is really buying before she clicks.
   function profilePicker(firstRun = false) {
     const wrap = el("div", {});
     wrap.appendChild(el("h2", {}, firstRun === true ? "Welcome to Options Academy" : "Select a trader profile"));
-    wrap.appendChild(el("p", { class: "sub" }, firstRun === true ? "A simulated trading floor: learn a concept, then apply it on a live simulated market. Each profile tracks its own progress, XP, and paper-money account." : "Switch profiles or add a new trader."));
+    wrap.appendChild(el("p", { class: "sub" }, firstRun === true ? "A simulated trading floor: learn a concept, then apply it on a live simulated market. Each profile tracks its own progress, XP, and paper-money account." : "Switch profiles, add a new trader, or remove one you no longer need."));
     const grid = el("div", { class: "profile-grid" });
-    for (const p of profiles()) {
-      const lv = levelOf(p.xp);
-      grid.appendChild(el(
-        "div",
-        {
-          class: "profile-tile" + (active()?.id === p.id ? " sel" : ""),
-          tabindex: "0",
-          role: "button",
-          onclick: () => {
-            setActive(p.id);
-            m.close();
-            refreshProfile();
-            route();
-          }
-        },
-        avEl(p),
-        el("div", { class: "pn", style: "font-weight:600" }, p.name),
-        el("div", { class: "small muted" }, "Trader"),
-        el("div", { class: "small num muted" }, `Lv ${lv.n} \xB7 ${p.xp} XP`)
-      ));
-    }
-    grid.appendChild(el(
-      "div",
-      { class: "profile-tile", tabindex: "0", role: "button", onclick: () => {
-        m.close();
-        addProfileModal();
-      } },
-      el("div", { class: "av" }, icon("plus")),
-      el("div", { style: "font-weight:600" }, "New profile")
-    ));
     wrap.appendChild(grid);
     const m = modal(wrap, { onClose: firstRun === true ? false : void 0 });
+    function confirmDelete(p) {
+      const box = el("div", {});
+      box.appendChild(el("h2", {}, "Remove " + p.name + "?"));
+      box.appendChild(el(
+        "p",
+        { class: "sub" },
+        "This permanently deletes this trader \u2014 its progress, XP, badges, paper account, and journal. This can\u2019t be undone."
+      ));
+      const cancel = el("button", { class: "btn" }, "Cancel");
+      const del = el("button", { class: "btn danger" }, "Remove " + p.name);
+      box.appendChild(el("div", { class: "btn-row mt1" }, cancel, del));
+      const cm = modal(box, {});
+      cancel.onclick = () => cm.close();
+      del.onclick = () => {
+        const wasActive = active()?.id === p.id;
+        removeProfile(p.id);
+        cm.close();
+        toast(p.name + " removed", "muted");
+        refreshProfile();
+        renderTiles();
+        if (wasActive) route();
+      };
+    }
+    function renderTiles() {
+      grid.innerHTML = "";
+      const list2 = profiles();
+      for (const p of list2) {
+        const lv = levelOf(p.xp);
+        const tile = el(
+          "div",
+          {
+            class: "profile-tile" + (active()?.id === p.id ? " sel" : ""),
+            tabindex: "0",
+            role: "button",
+            onclick: () => {
+              setActive(p.id);
+              m.close();
+              refreshProfile();
+              route();
+            }
+          },
+          avEl(p),
+          el("div", { class: "pn", style: "font-weight:600" }, p.name),
+          el("div", { class: "small muted" }, "Trader"),
+          el("div", { class: "small num muted" }, `Lv ${lv.n} \xB7 ${p.xp} XP`)
+        );
+        if (list2.length > 1) {
+          tile.appendChild(el("button", {
+            class: "profile-del",
+            type: "button",
+            title: "Remove profile",
+            "aria-label": "Remove " + p.name,
+            onclick: (e) => {
+              e.stopPropagation();
+              confirmDelete(p);
+            }
+          }, "\xD7"));
+        }
+        grid.appendChild(tile);
+      }
+      grid.appendChild(el(
+        "div",
+        { class: "profile-tile", tabindex: "0", role: "button", onclick: () => {
+          m.close();
+          addProfileModal();
+        } },
+        el("div", { class: "av" }, icon("plus")),
+        el("div", { style: "font-weight:600" }, "New profile")
+      ));
+    }
+    renderTiles();
     return m;
   }
   function addProfileModal(opts = {}) {
