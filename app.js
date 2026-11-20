@@ -5277,11 +5277,11 @@
       el("a", { href: "#/legal" }, "Full disclosures")
     );
   }
-  function dataDisclaimer() {
+  function dataDisclaimer(live = false) {
     return el(
       "p",
       { class: "sim-disclaimer small muted", role: "note" },
-      "Delayed market data for education only \u2014 not investment advice; all trading here is simulated and hypothetical results have inherent limitations. ",
+      (live ? "Real-time" : "Delayed") + " market data for education only \u2014 not investment advice; all trading here is simulated and hypothetical results have inherent limitations. ",
       el("a", { href: "#/legal" }, "Full disclosures")
     );
   }
@@ -14335,7 +14335,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     head.appendChild(el("span", { class: "pill " + FEED.badgeClass }, FEED.badge));
     root.appendChild(head);
     root.appendChild(el("p", { class: "sub", style: "max-width:72ch" }, FEED.sub));
-    root.appendChild(dataDisclaimer());
+    root.appendChild(dataDisclaimer(FEED.source === "schwab"));
     root.appendChild(el(
       "div",
       { class: "btn-row mt1" },
