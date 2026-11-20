@@ -4474,7 +4474,7 @@
     return realDataAllowed() && !!tradierKey();
   }
   var schwabCache = "unknown";
-  var FOUNDER_EMAILS = ["lopez.j.ronald@gmail.com"];
+  var FOUNDER_EMAILS = ["ron.jeff.lopez@gmail.com", "lopez.j.ronald@gmail.com"];
   function schwabAllowed() {
     if (!configured()) return false;
     const u = user();
