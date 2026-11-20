@@ -1002,6 +1002,21 @@ input[type="range"] { accent-color: var(--brass); width: 100%; }
   letter-spacing: 0.04em;
   font-size: 11px;
 }
+.real-live-badge {
+  background: var(--gain-soft);
+  color: var(--gain);
+  border: 1.5px solid var(--gain-mark);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  font-size: 11px;
+}
+.real-live-badge::before {
+  content: ''; display: inline-block; width: 7px; height: 7px; margin-right: 5px;
+  border-radius: 50%; background: var(--gain-mark);
+  animation: oa-live-pulse 1.8s ease-in-out infinite;
+}
+@keyframes oa-live-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
+@media (prefers-reduced-motion: reduce) { .real-live-badge::before { animation: none; } }
 .settings-section h3 { margin-top: 0; }
 .oa-banner {
   padding: 10px 12px;

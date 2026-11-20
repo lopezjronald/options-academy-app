@@ -4480,9 +4480,6 @@
     const u = user();
     return !!u && FOUNDER_EMAILS.includes(String(u.email || "").trim().toLowerCase());
   }
-  function schwabConnectedCached() {
-    return schwabCache === "connected";
-  }
   function fnBase() {
     const u = BILLING && BILLING.supabaseUrl ? String(BILLING.supabaseUrl).trim().replace(/\/+$/, "") : "";
     return u ? u + "/functions/v1" : "";
@@ -4524,7 +4521,7 @@
     }
   }
   function feedMode() {
-    if (s.feedMode === "schwab" && schwabAllowed() && schwabConnectedCached()) return "schwab";
+    if (s.feedMode === "schwab" && schwabAllowed()) return "schwab";
     return s.feedMode === "tradier" && realDataReady() ? "tradier" : "sim";
   }
   function setFeedMode(m) {
@@ -5026,8 +5023,10 @@
           "Link your own Schwab account to study your real positions and live quotes. Read-only \u2014 this app never places a trade. Schwab requires a reconnect about once a week."
         ));
         const statusLine = el("div", { class: "small muted mt1" }, "Checking connection\u2026");
+        const feedHost = el("div", { class: "mt1" });
         const actions = el("div", { class: "btn-row mt1" });
         sw.appendChild(statusLine);
+        sw.appendChild(feedHost);
         sw.appendChild(actions);
         root.appendChild(sw);
         const connectBtn = () => el("button", { class: "btn primary", type: "button", onclick: async (e) => {
@@ -5041,11 +5040,38 @@
         } }, "Connect Schwab");
         async function paintSchwab() {
           actions.innerHTML = "";
+          feedHost.innerHTML = "";
           statusLine.textContent = "Checking connection\u2026";
           const r = await schwabStatus();
           if (r.status === "connected") {
             const acct = r.accountHash ? ` \xB7 account ${String(r.accountHash).slice(0, 8)}\u2026` : "";
             statusLine.textContent = `Connected${acct} \xB7 reconnect in ${r.daysLeft ?? 0} day(s)`;
+            const simFeedBtn = el("button", { type: "button" }, "Sim");
+            const swFeedBtn = el("button", { type: "button" }, "Schwab live");
+            const feedSeg = el("div", { class: "seg", role: "group", "aria-label": "Market feed source" }, simFeedBtn, swFeedBtn);
+            const paintFeedSeg = () => {
+              const m = feedMode();
+              simFeedBtn.classList.toggle("on", m !== "schwab");
+              swFeedBtn.classList.toggle("on", m === "schwab");
+            };
+            simFeedBtn.addEventListener("click", () => {
+              setFeedMode("sim");
+              paintFeedSeg();
+              toast("Market feed: simulated.", "gain");
+            });
+            swFeedBtn.addEventListener("click", () => {
+              setFeedMode("schwab");
+              paintFeedSeg();
+              toast("Market feed: your live Schwab data \u2014 open the Market tab.", "gain");
+            });
+            paintFeedSeg();
+            feedHost.appendChild(el(
+              "div",
+              { class: "field" },
+              el("label", {}, "Market feed"),
+              feedSeg,
+              el("div", { class: "small muted mt1" }, "Live mode is watch + analyze only \u2014 read-only, never places an order.")
+            ));
             actions.appendChild(el("button", { class: "btn", type: "button", onclick: async () => {
               await schwabDisconnect();
               toast("Schwab disconnected.", "gain");
@@ -13975,6 +14001,242 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     };
   }
 
+  // src/engine/schwab.js
+  var DAY_MS2 = 864e5;
+  var GREEK_SENTINEL = -999;
+  var SchwabError = class extends Error {
+    /** @param {ErrorKind} kind @param {string} message */
+    constructor(kind, message) {
+      super(message);
+      this.name = "SchwabError";
+      this.kind = kind;
+    }
+  };
+  function numeric2(value) {
+    if (typeof value !== "number" && typeof value !== "string") return null;
+    if (typeof value === "string" && !value.trim()) return null;
+    const n = Number(value);
+    return Number.isFinite(n) ? n : null;
+  }
+  var num2 = (value) => numeric2(value) ?? 0;
+  function greek(value) {
+    const n = numeric2(value);
+    return n === null || n === GREEK_SENTINEL ? null : n;
+  }
+  function parseOccSymbol(symbol) {
+    if (typeof symbol !== "string" || symbol.length < 21) return null;
+    const s2 = symbol.slice(0, 21);
+    const root = s2.slice(0, 6).trim();
+    const yy = s2.slice(6, 8), mm = s2.slice(8, 10), dd = s2.slice(10, 12);
+    const cp = s2.slice(12, 13);
+    const strikeDigits = s2.slice(13, 21);
+    if (!root) return null;
+    if (!/^\d{6}$/.test(s2.slice(6, 12))) return null;
+    if (cp !== "C" && cp !== "P") return null;
+    if (!/^\d{8}$/.test(strikeDigits)) return null;
+    const month = Number(mm), day = Number(dd);
+    if (month < 1 || month > 12 || day < 1 || day > 31) return null;
+    return {
+      root,
+      expiry: `20${yy}-${mm}-${dd}`,
+      // YY -> 20YY, substrings already 2-digit
+      type: cp === "C" ? "call" : "put",
+      strike: Number(strikeDigits) / 1e3
+    };
+  }
+  function optionQuote2(o) {
+    const bid = numeric2(o.bid ?? o.bidPrice);
+    const ask = numeric2(o.ask ?? o.askPrice);
+    const last = numeric2(o.last ?? o.lastPrice);
+    const theta = greek(o.theta);
+    const vol = greek(o.volatility);
+    return {
+      bid: bid ?? 0,
+      ask: ask ?? 0,
+      mid: num2(bid !== null && ask !== null ? bid / 2 + ask / 2 : num2(last)),
+      // Absent greeks stay null — zero is a real greek value consumers must be able to trust.
+      delta: greek(o.delta),
+      gamma: greek(o.gamma),
+      vega: greek(o.vega),
+      // ─── UNIT CONVERSIONS — CONFIRMED against a live Schwab response (SPY, 2026-11-20) ───
+      //  1. Schwab 'volatility' is an annualized PERCENT (observed 36.374 = 36.374%) -> /100 for decimal IV.
+      //  2. Schwab 'theta' is per CALENDAR day (observed -0.796/day) -> *365/252 to the app's trading-day decay.
+      //  (-999 is Schwab's "no data" sentinel and is already mapped to null by greek().)
+      iv: vol === null ? null : vol / 100,
+      theta: theta === null ? null : theta * (365 / 252),
+      // ──────────────────────────────────────────────────────────────────────────────────
+      oi: num2(o.openInterest),
+      volume: num2(o.totalVolume)
+    };
+  }
+  function normalizePosition(p) {
+    const inst = p?.instrument || {};
+    const assetType = typeof inst.assetType === "string" ? inst.assetType : "UNKNOWN";
+    const symbol = typeof inst.symbol === "string" ? inst.symbol : "";
+    const description = typeof inst.description === "string" ? inst.description : "";
+    const long = num2(p?.longQuantity), short = num2(p?.shortQuantity);
+    const base = {
+      symbol,
+      assetType,
+      description,
+      long,
+      short,
+      qty: num2(long - short),
+      avgPrice: num2(p?.averagePrice),
+      // marketValue already reflects the x100 contract multiplier for options — never scale again.
+      marketValue: num2(p?.marketValue)
+    };
+    if (assetType === "OPTION") {
+      const occ = parseOccSymbol(symbol);
+      const mult4 = numeric2(inst.optionMultiplier);
+      const putCall = inst.putCall;
+      return {
+        ...base,
+        underlying: typeof inst.underlyingSymbol === "string" ? inst.underlyingSymbol : occ?.root ?? "",
+        type: occ ? occ.type : putCall === "CALL" ? "call" : putCall === "PUT" ? "put" : null,
+        strike: occ ? occ.strike : null,
+        expiry: occ ? occ.expiry : null,
+        multiplier: mult4 ?? 100
+      };
+    }
+    return { ...base, underlying: symbol, type: null, strike: null, expiry: null, multiplier: 1 };
+  }
+  function createSchwab({ base, token, fetchImpl = fetch, now = () => Date.now() }) {
+    const pending = /* @__PURE__ */ new Map();
+    let ready = Promise.resolve();
+    function request(fn, params) {
+      const url = `${base}/${fn}?${new URLSearchParams(params)}`;
+      const existing = pending.get(url);
+      if (existing) return existing;
+      const turn = ready;
+      ready = turn.then(() => new Promise((resolve2) => setTimeout(resolve2, 250)));
+      const result = turn.then(async () => {
+        const jwt = typeof token === "function" ? await token() : token;
+        const bearer = jwt == null ? "" : String(jwt).trim();
+        if (!bearer) throw new SchwabError("auth", "Sign in to connect your Schwab account.");
+        try {
+          const response = await fetchImpl(url, {
+            headers: { Authorization: `Bearer ${bearer}`, Accept: "application/json" }
+          });
+          if (response.status === 401 || response.status === 403) {
+            throw new SchwabError("auth", "Your session expired. Sign in again to continue.");
+          }
+          if (response.status === 429) throw new SchwabError("rate", "Schwab rate limit reached. Try again shortly.");
+          let data = null;
+          try {
+            data = await response.json();
+          } catch {
+            throw new SchwabError("network", "Schwab returned an unreadable response. Check your connection.");
+          }
+          if (response.status === 409 || data?.error === "reauth_required" || data?.status === "reauth_required" || data?.reauth === true) {
+            throw new SchwabError("reauth", "Your Schwab connection expired. Reconnect Schwab to continue.");
+          }
+          if (!response.ok) throw new SchwabError("network", "Schwab request failed. Check your connection.");
+          return data;
+        } catch (error) {
+          if (error instanceof SchwabError) throw error;
+          throw new SchwabError("network", "Unable to reach Schwab. Check your connection; corporate networks or browser CORS restrictions may block it.");
+        }
+      });
+      pending.set(url, result);
+      void result.then(() => pending.delete(url), () => pending.delete(url));
+      return result;
+    }
+    return {
+      /** @param {string} sym */
+      async quote(sym) {
+        const symbol = sym.trim().toUpperCase();
+        const data = await request("schwab-market", { op: "quote", symbol });
+        const entry = data?.[symbol];
+        if (!entry || typeof entry !== "object") throw new SchwabError("symbol", `No Schwab quote found for ${symbol}.`);
+        const q = entry.quote || {}, ref = entry.reference || {};
+        const S2 = num2(q.lastPrice);
+        const prevClose = num2(q.closePrice);
+        const chg = num2(S2 - prevClose);
+        return { sym: symbol, S: S2, prevClose, chg, chgPct: prevClose > 0 ? num2(chg / prevClose) : 0, name: ref.description || symbol };
+      },
+      /** @param {string} sym */
+      async expirations(sym) {
+        const data = await request("schwab-market", { op: "expirations", symbol: sym.trim().toUpperCase() });
+        const list2 = Array.isArray(data?.expirationList) ? data.expirationList : [];
+        const today = Math.floor(now() / DAY_MS2);
+        return [...new Set(list2.map((e) => e?.expirationDate))].filter((date) => typeof date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(date) && Number.isFinite(Date.parse(date))).sort().map((date) => {
+          const dte = Math.max(0, num2(Math.floor(Date.parse(
+            /** @type {string} */
+            date
+          ) / DAY_MS2) - today));
+          return { date, label: `${date} (${dte}d)`, dte };
+        });
+      },
+      /** @param {string} sym @param {string} date */
+      async chain(sym, date) {
+        const data = await request("schwab-market", { op: "chains", symbol: sym.trim().toUpperCase(), fromDate: date, toDate: date });
+        const strikes = /* @__PURE__ */ new Map();
+        const sides = [["call", data?.callExpDateMap], ["put", data?.putExpDateMap]];
+        for (const [side, expMap] of sides) {
+          if (!expMap || typeof expMap !== "object") continue;
+          for (const strikeMap of Object.values(expMap)) {
+            if (!strikeMap || typeof strikeMap !== "object") continue;
+            for (const [strikeKey, contracts] of Object.entries(strikeMap)) {
+              const contract = Array.isArray(contracts) ? contracts[0] : contracts;
+              if (!contract || typeof contract !== "object") continue;
+              const strike = numeric2(contract.strikePrice ?? strikeKey);
+              if (strike === null || strike <= 0) continue;
+              const row = strikes.get(strike) || { strike, call: null, put: null };
+              row[side] = optionQuote2(contract);
+              strikes.set(strike, row);
+            }
+          }
+        }
+        return [...strikes.values()].sort((a, b) => a.strike - b.strike);
+      },
+      /** Returns the latest `days` valid daily closes, oldest first.
+       * @param {string} sym @param {number} [days]
+       */
+      async history(sym, days = 60) {
+        const count = Math.max(0, Math.floor(num2(days)));
+        if (!count) return [];
+        const data = await request("schwab-market", { op: "history", symbol: sym.trim().toUpperCase(), days: String(count) });
+        const candles = Array.isArray(data?.candles) ? data.candles : [];
+        return candles.filter((c) => numeric2(c?.datetime) !== null && numeric2(c?.close) !== null).map((c) => ({ day: new Date(num2(c.datetime)).toISOString().slice(0, 10), p: num2(c.close) })).sort((a, b) => a.day.localeCompare(b.day)).slice(-count);
+      },
+      /** Map every account's plain number to its opaque hash. The hash — never the number — is what
+       * goes in every per-account URL. @returns {Promise<AccountRef[]>} */
+      async accountHashes() {
+        const data = await request("schwab-account", { op: "accounts" });
+        const list2 = Array.isArray(data) ? data : [];
+        return list2.filter((a) => a && typeof a.hashValue === "string").map((a) => ({ accountNumber: typeof a.accountNumber === "string" ? a.accountNumber : "", hash: a.hashValue }));
+      },
+      /** @param {string} hash @returns {Promise<Position[]>} */
+      async positions(hash) {
+        const data = await request("schwab-account", { op: "positions", hash });
+        const acct = data?.securitiesAccount || {};
+        const raw = Array.isArray(acct.positions) ? acct.positions : [];
+        return raw.map(normalizePosition);
+      },
+      /** Account values are read from Schwab's OWN fields and labeled as Schwab's (masterplan ruling 6):
+       * our Reg-T formula is a teaching model and must not override these.
+       * @param {string} hash @returns {Promise<Balances>} */
+      async balances(hash) {
+        const data = await request("schwab-account", { op: "balances", hash });
+        const acct = data?.securitiesAccount || {};
+        const cur = acct.currentBalances || {};
+        const agg = data?.aggregatedBalance || {};
+        return {
+          type: typeof acct.type === "string" ? acct.type : "UNKNOWN",
+          // 'CASH' | 'MARGIN'
+          liquidationValue: num2(cur.liquidationValue),
+          // Schwab's own; present on both cash & margin
+          // buyingPower exists on MARGIN accounts only — null (not 0) on cash, where it does not apply.
+          buyingPower: numeric2(cur.buyingPower),
+          cashBalance: num2(cur.cashBalance),
+          aggregatedLiquidationValue: numeric2(agg.currentLiquidationValue ?? agg.liquidationValue),
+          source: "schwab"
+        };
+      }
+    };
+  }
+
   // src/ui/real-watch.js
   var KEY6 = "oa.realwatch";
   var DEFAULTS = ["SPY", "QQQ", "AAPL", "MSFT", "IWM"];
@@ -13999,14 +14261,16 @@ Reading these two parts tells Maria what she is really buying before she clicks.
 
   // src/ui/real-market.js
   var isMobile2 = () => !!(window.matchMedia && matchMedia("(max-width: 640px)").matches);
-  function errBanner(err) {
-    const kind = err instanceof TradierError ? err.kind : "network";
+  function errBanner(err, source) {
+    const kind = err instanceof TradierError || err instanceof SchwabError ? err.kind : "network";
+    const schwab = source === "schwab";
     const map = {
-      auth: { title: "API key rejected", body: "Fix or re-paste your Tradier sandbox key in Settings.", href: "#/settings" },
-      cors: { title: "Connection blocked", body: "Browser or network blocked Tradier (corporate proxies often do). Try another network." },
-      network: { title: "Network error", body: "Could not reach Tradier. Check your connection and try again." },
+      auth: schwab ? { title: "Sign-in needed", body: "Your app session expired. Sign in again to use the Schwab feed.", href: "#/settings" } : { title: "API key rejected", body: "Fix or re-paste your Tradier sandbox key in Settings.", href: "#/settings" },
+      reauth: { title: "Reconnect Schwab", body: "Your weekly Schwab reconnect is due \u2014 reconnect in Settings.", href: "#/settings" },
+      cors: { title: "Connection blocked", body: "Your browser or network blocked the data feed (corporate proxies often do). Try another network." },
+      network: { title: "Network error", body: schwab ? "Could not reach Schwab just now. Try again in a moment." : "Could not reach Tradier. Check your connection and try again." },
       symbol: { title: "Unknown symbol", body: "That ticker returned no quotes. Check the symbol and try again." },
-      rate: { title: "Rate limited", body: "Tradier sandbox asked us to slow down. Wait a moment and refresh." }
+      rate: { title: "Rate limited", body: schwab ? "Schwab asked us to slow down. Wait a moment and refresh." : "Tradier sandbox asked us to slow down. Wait a moment and refresh." }
     };
     const m = map[kind] || map.network;
     const box = el(
@@ -14030,7 +14294,24 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     return o.ask ?? o.bid ?? 0;
   }
   function renderRealMarket(root, params) {
-    const client = createTradier({ key: tradierKey() });
+    const schwabFeed = feedMode() === "schwab";
+    const fnBase2 = BILLING && BILLING.supabaseUrl ? String(BILLING.supabaseUrl).trim().replace(/\/+$/, "") + "/functions/v1" : "";
+    const client = schwabFeed ? createSchwab({ base: fnBase2, token: () => accessToken() }) : createTradier({ key: tradierKey() });
+    const FEED = schwabFeed ? {
+      source: "schwab",
+      badge: "REAL \xB7 LIVE",
+      badgeClass: "real-live-badge",
+      eyebrow: "Live Market \u2014 Real (Schwab)",
+      stat: "Real-time",
+      sub: "Real-time quotes and option chains from your linked Schwab account \u2014 read-only, no fills. Tap Analyze on a strike to open it in the Strategy Lab."
+    } : {
+      source: "tradier",
+      badge: "REAL \xB7 DELAYED 15 MIN",
+      badgeClass: "real-delayed-badge",
+      eyebrow: "Live Market \u2014 Real (delayed)",
+      stat: "Delayed ~15 min",
+      sub: "Delayed sandbox quotes for study \u2014 no paper fills in Real mode. Tap Analyze on a strike to open it in the Strategy Lab with live mids."
+    };
     let watch = loadRealWatch();
     let sym = (params[0] || watch[0] || "SPY").toUpperCase();
     if (!watch.includes(sym)) watch = saveRealWatch([sym, ...watch]);
@@ -14048,16 +14329,12 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     let range = "3mo";
     let loadGen = 0;
     let bannerHost = null;
-    root.appendChild(el("div", { class: "eyebrow" }, "Live Market \u2014 Real (delayed)"));
+    root.appendChild(el("div", { class: "eyebrow" }, FEED.eyebrow));
     const head = el("div", { class: "flex-between", style: "flex-wrap:wrap;gap:8px" });
     head.appendChild(el("h1", {}, "Watch & analyze"));
-    head.appendChild(el("span", { class: "pill real-delayed-badge" }, "REAL \xB7 DELAYED 15 MIN"));
+    head.appendChild(el("span", { class: "pill " + FEED.badgeClass }, FEED.badge));
     root.appendChild(head);
-    root.appendChild(el(
-      "p",
-      { class: "sub", style: "max-width:72ch" },
-      "Delayed sandbox quotes for study \u2014 no paper fills in Real mode. Tap Analyze on a strike to open it in the Strategy Lab with live mids."
-    ));
+    root.appendChild(el("p", { class: "sub", style: "max-width:72ch" }, FEED.sub));
     root.appendChild(dataDisclaimer());
     root.appendChild(el(
       "div",
@@ -14184,7 +14461,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
         `${up ? "\u25B2" : "\u25BC"} ${F.usdSigned(quote.chg || 0)} (${F.pctSigned(quote.chgPct || 0)})`
       ));
       if (quote.name) detailStats.appendChild(el("span", { class: "muted" }, quote.name));
-      detailStats.appendChild(el("span", { class: "muted" }, "Delayed ~15 min"));
+      detailStats.appendChild(el("span", { class: "muted" }, FEED.stat));
       if (ivRankVal != null) {
         ivChip.style.display = "";
         ivChip.textContent = `IV vs HV ${Math.round(ivRankVal * 100)}`;
@@ -14229,7 +14506,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
         dte,
         expDate: exp.date,
         label: `Long ${kind} ${F.usd(strike, 0)}`,
-        source: "tradier",
+        source: FEED.source,
         legs: [{
           kind,
           side: 1,
@@ -14427,7 +14704,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
         }
       } catch (err) {
         if (gen !== loadGen) return;
-        setBanner(errBanner(err));
+        setBanner(errBanner(err, FEED.source));
         chain = [];
         renderChain();
       }
@@ -14459,7 +14736,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
       } catch (err) {
         if (gen !== loadGen) return;
         loadingEl.style.display = "none";
-        setBanner(errBanner(err));
+        setBanner(errBanner(err, FEED.source));
         detailTitle.textContent = sym;
         detailStats.innerHTML = "";
         chainBox.innerHTML = "";
@@ -14717,7 +14994,7 @@ Reading these two parts tells Maria what she is really buying before she clicks.
   }
   var view12 = {
     render(root, params) {
-      if (feedMode() === "tradier") {
+      if (feedMode() !== "sim") {
         return renderRealMarket(root, params);
       }
       let sym = params[0] && market.tickers[params[0]] ? params[0] : viewState2.sym || "LMND";
