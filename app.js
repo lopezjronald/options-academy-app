@@ -4910,6 +4910,28 @@
         { class: "sub", style: "max-width:68ch" },
         "Keys and backups stay on this device. Nothing here is synced to the cloud."
       ));
+      if (configured() && user()) {
+        const u = user();
+        const acct = el("div", { class: "card mt2 settings-section" });
+        acct.appendChild(el("h3", {}, "Account"));
+        acct.appendChild(el(
+          "p",
+          { class: "sub", style: "margin-bottom:0" },
+          "Signed in as ",
+          el("strong", {}, u.email || "your account"),
+          ". Your progress syncs to this account across your devices."
+        ));
+        acct.appendChild(el(
+          "div",
+          { class: "btn-row mt1" },
+          el("button", { class: "btn", type: "button", onclick: async () => {
+            await signOut();
+            toast("Signed out.", "gain");
+            setTimeout(() => location.reload(), 400);
+          } }, "Sign out")
+        ));
+        root.appendChild(acct);
+      }
       {
         const realCard = el("div", { class: "card mt2 settings-section" });
         realCard.appendChild(el(
