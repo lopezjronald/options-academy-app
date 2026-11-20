@@ -4473,11 +4473,62 @@
   function realDataReady() {
     return realDataAllowed() && !!tradierKey();
   }
+  var schwabCache = "unknown";
+  var FOUNDER_EMAILS = ["lopez.j.ronald@gmail.com"];
+  function schwabAllowed() {
+    if (!configured()) return false;
+    const u = user();
+    return !!u && FOUNDER_EMAILS.includes(String(u.email || "").trim().toLowerCase());
+  }
+  function schwabConnectedCached() {
+    return schwabCache === "connected";
+  }
+  function fnBase() {
+    const u = BILLING && BILLING.supabaseUrl ? String(BILLING.supabaseUrl).trim().replace(/\/+$/, "") : "";
+    return u ? u + "/functions/v1" : "";
+  }
+  async function schwabFetch(route2, method = "GET") {
+    const base = fnBase();
+    if (!base) return null;
+    const token = await accessToken();
+    if (!token) return null;
+    try {
+      const res = await fetch(`${base}/schwab-link/${route2}`, {
+        method,
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }
+      });
+      return await res.json().catch(() => ({ status: "error" }));
+    } catch {
+      return { status: "error" };
+    }
+  }
+  async function schwabStatus() {
+    const r = await schwabFetch("status", "GET") || { status: "disconnected" };
+    schwabCache = r.status || "disconnected";
+    if (schwabCache !== "connected" && s.feedMode === "schwab") {
+      s.feedMode = "sim";
+      persist();
+    }
+    return r;
+  }
+  async function schwabConnectUrl() {
+    const r = await schwabFetch("start", "POST");
+    return r && r.url ? r.url : null;
+  }
+  async function schwabDisconnect() {
+    await schwabFetch("disconnect", "POST");
+    schwabCache = "disconnected";
+    if (s.feedMode === "schwab") {
+      s.feedMode = "sim";
+      persist();
+    }
+  }
   function feedMode() {
+    if (s.feedMode === "schwab" && schwabAllowed() && schwabConnectedCached()) return "schwab";
     return s.feedMode === "tradier" && realDataReady() ? "tradier" : "sim";
   }
   function setFeedMode(m) {
-    s.feedMode = m === "tradier" ? "tradier" : "sim";
+    s.feedMode = m === "tradier" ? "tradier" : m === "schwab" ? "schwab" : "sim";
     persist();
   }
 
@@ -4848,7 +4899,7 @@
     const build2 = isFamilyBuild() ? "founder" : "commercial";
     const hash = (
       /** @type {any} */
-      "2026-11-17"
+      "2026-11-20"
     );
     return `${hash} \xB7 ${build2}`;
   }
@@ -4965,6 +5016,52 @@
             el("a", { href: "https://developer.tradier.com/", target: "_blank", rel: "noopener" }, "Get a Tradier sandbox key \u2192")
           ));
         }
+      }
+      if (schwabAllowed()) {
+        const sw = el("div", { class: "card mt2 settings-section" });
+        sw.appendChild(el("h3", {}, "Connect Schwab ", el("span", { class: "pill" }, "read-only")));
+        sw.appendChild(el(
+          "p",
+          { class: "sub" },
+          "Link your own Schwab account to study your real positions and live quotes. Read-only \u2014 this app never places a trade. Schwab requires a reconnect about once a week."
+        ));
+        const statusLine = el("div", { class: "small muted mt1" }, "Checking connection\u2026");
+        const actions = el("div", { class: "btn-row mt1" });
+        sw.appendChild(statusLine);
+        sw.appendChild(actions);
+        root.appendChild(sw);
+        const connectBtn = () => el("button", { class: "btn primary", type: "button", onclick: async (e) => {
+          e.currentTarget.disabled = true;
+          const url = await schwabConnectUrl();
+          if (url) window.location.href = url;
+          else {
+            toast("Could not start Schwab connect. Try again.", "loss");
+            e.currentTarget.disabled = false;
+          }
+        } }, "Connect Schwab");
+        async function paintSchwab() {
+          actions.innerHTML = "";
+          statusLine.textContent = "Checking connection\u2026";
+          const r = await schwabStatus();
+          if (r.status === "connected") {
+            const acct = r.accountHash ? ` \xB7 account ${String(r.accountHash).slice(0, 8)}\u2026` : "";
+            statusLine.textContent = `Connected${acct} \xB7 reconnect in ${r.daysLeft ?? 0} day(s)`;
+            actions.appendChild(el("button", { class: "btn", type: "button", onclick: async () => {
+              await schwabDisconnect();
+              toast("Schwab disconnected.", "gain");
+              paintSchwab();
+            } }, "Disconnect"));
+          } else if (r.status === "reauth_required") {
+            statusLine.textContent = "Reconnect needed \u2014 your weekly Schwab session expired.";
+            actions.appendChild(connectBtn());
+          } else {
+            statusLine.textContent = "Not connected.";
+            actions.appendChild(connectBtn());
+          }
+        }
+        if (/schwab=connected/.test(location.hash)) toast("Schwab connected.", "gain");
+        else if (/schwab=error/.test(location.hash)) toast("Schwab connection failed. Try again.", "loss");
+        paintSchwab();
       }
       if (p) {
         const safety = el("div", { class: "card mt2 settings-section" });
@@ -5169,7 +5266,7 @@
       const S2 = (title, ...kids) => root.appendChild(el("div", { class: "card mt2", style: "max-width:76ch" }, el("h3", {}, title), ...kids));
       S2(
         "Education only \u2014 not advice",
-        el("p", { class: "sub" }, "Options Academy (operated by Steadfast Labs LLC) is an educational product. Nothing here is investment, financial, legal, or tax advice, and nothing is a recommendation to buy or sell any security or derivative. We are not a registered investment adviser or broker-dealer. Every account, order, and fill on this platform is simulated \u2014 the platform never places real orders and never connects to a brokerage account for trading. Market prices are simulated by default; if you connect your own market-data account, the delayed or real quotes shown are for context only, and all trading remains simulated.")
+        el("p", { class: "sub" }, "Options Academy (operated by Steadfast Labs LLC) is an educational product. Nothing here is investment, financial, legal, or tax advice, and nothing is a recommendation to buy or sell any security or derivative. We are not a registered investment adviser or broker-dealer. The platform never places real orders \u2014 it has no ability to trade, now or ever. Market prices are simulated by default. If you connect your own brokerage or market-data account, we read it READ-ONLY: the quotes, positions, and balances shown are your own data, displayed for study only \u2014 never acted upon, never shared, and never used to place a trade. All trading on this platform remains simulated.")
       );
       S2(
         "Hypothetical performance (CFTC Rule 4.41)",
