@@ -5285,6 +5285,14 @@
       el("a", { href: "#/legal" }, "Full disclosures")
     );
   }
+  function brokerageDisclaimer() {
+    return el(
+      "p",
+      { class: "sim-disclaimer small muted", role: "note" },
+      "Your own Schwab positions and balances, read-only for study \u2014 this app never trades, and this is not investment advice. ",
+      el("a", { href: "#/legal" }, "Full disclosures")
+    );
+  }
   var view4 = {
     render(root) {
       root.appendChild(el("div", { class: "eyebrow" }, "Disclosures & legal"));
@@ -15877,16 +15885,17 @@ Reading these two parts tells Maria what she is really buying before she clicks.
   var SPOT_SHOCKS = [-0.15, -0.1, -0.05, 0, 0.05, 0.1, 0.15];
   var IV_SHOCKS = [0.2, 0.1, 0, -0.1];
   var DAY_OPTS = [0, 1, 3, 5];
-  function buildBook(positions) {
+  function buildBook(positions, quoteOf, optOf) {
     const book = [];
     for (const pos of positions) {
-      const S02 = market.quote(pos.sym).S;
+      const S02 = quoteOf(pos.sym)?.S || 0;
       for (const l of pos.legs) {
         if (l.kind === "stock") {
           book.push({ pos, kind: "stock", side: l.side, qty: l.qty, S0: S02 });
           continue;
         }
-        const q = market.optQuote(pos.sym, l.strike, l.expDay, l.kind);
+        const q = optOf(pos.sym, l.strike, l.expDay, l.kind);
+        if (!q || q.iv == null || !isFinite(q.iv) || !S02) continue;
         book.push({
           pos,
           kind: l.kind,
@@ -15919,6 +15928,199 @@ Reading these two parts tells Maria what she is really buying before she clicks.
     const tint = 0.06 + a * 0.22;
     return v > 0 ? `background:color-mix(in srgb, var(--gain-mark) ${Math.round(tint * 100)}%, transparent)` : `background:color-mix(in srgb, var(--loss) ${Math.round(tint * 100)}%, transparent)`;
   }
+  function renderMatrix(body, book, dDays, ctx) {
+    body.innerHTML = "";
+    if (ctx.note) body.appendChild(ctx.note);
+    const grid = IV_SHOCKS.map((dIv) => SPOT_SHOCKS.map((dS) => book.reduce((s2, leg) => s2 + legStress(leg, dS, dIv, dDays), 0)));
+    const flat = grid.flat();
+    const maxAbs = Math.max(...flat.map(Math.abs), 1);
+    let worst = { v: Infinity, dS: 0, dIv: 0 };
+    IV_SHOCKS.forEach((dIv, r) => SPOT_SHOCKS.forEach((dS, c) => {
+      if (grid[r][c] < worst.v) worst = { v: grid[r][c], dS, dIv };
+    }));
+    const card = el("div", { class: "card mt1" });
+    card.appendChild(el(
+      "div",
+      { class: "flex-between" },
+      el("h3", {}, `Spot \xD7 IV shock matrix${dDays ? ` \xB7 ${dDays} trading day${dDays > 1 ? "s" : ""} forward` : ""}`),
+      el("span", { class: "small muted num" }, `${ctx.count} position${ctx.count === 1 ? "" : "s"}`)
+    ));
+    const tbl = el("table", { class: "oa risk-matrix" });
+    const head = el("tr", {}, el("th", { class: "rm-corner" }, "IV \\ Spot"));
+    for (const dS of SPOT_SHOCKS) {
+      head.appendChild(el(
+        "th",
+        { class: "num" + (dS === 0 ? " rm-base" : "") },
+        (dS > 0 ? "+" : "") + Math.round(dS * 100) + "%"
+      ));
+    }
+    tbl.appendChild(head);
+    IV_SHOCKS.forEach((dIv, r) => {
+      const tr = el(
+        "tr",
+        {},
+        el(
+          "th",
+          { class: "num" + (dIv === 0 ? " rm-base" : "") },
+          (dIv > 0 ? "+" : "") + Math.round(dIv * 100) + " pts"
+        )
+      );
+      SPOT_SHOCKS.forEach((dS, c) => {
+        const v = grid[r][c];
+        const isWorst = v === worst.v && worst.v < 0;
+        tr.appendChild(el("td", {
+          class: "num" + (isWorst ? " rm-worst" : ""),
+          style: cellStyle(v, maxAbs),
+          title: `Spot ${(dS > 0 ? "+" : "") + Math.round(dS * 100)}% \xB7 IV ${(dIv > 0 ? "+" : "") + Math.round(dIv * 100)} pts`
+        }, F.usdSigned(v, 0)));
+      });
+      tbl.appendChild(tr);
+    });
+    card.appendChild(el("div", { class: "risk-matrix-scroll" }, tbl));
+    card.appendChild(el(
+      "p",
+      { class: "small muted mt1", style: "margin-bottom:0" },
+      "Cells are P&L change from today's theoretical mark if spot and implied vol move together. Forward cells hold today's vol surface flat apart from your shock. Deep red corner = the scenario that hurts most."
+    ));
+    if (ctx.omitted) {
+      card.appendChild(el(
+        "p",
+        { class: "small mt1", style: "margin-bottom:0;color:var(--brass-strong)" },
+        `${ctx.omitted} position${ctx.omitted === 1 ? "" : "s"} omitted \u2014 unsupported instrument or missing market data. The matrix covers only what's shown.`
+      ));
+    }
+    body.appendChild(card);
+    const worstLoss = Math.min(0, worst.v);
+    const worstPct = ctx.equity > 0 ? worstLoss / ctx.equity : 0;
+    const stats = el("div", { class: "stats mt2" });
+    stats.appendChild(el(
+      "div",
+      { class: "stat" },
+      el("div", { class: "k" }, "Worst scenario"),
+      el("div", { class: "v num down" }, F.usdSigned(worstLoss, 0))
+    ));
+    stats.appendChild(el(
+      "div",
+      { class: "stat" },
+      el("div", { class: "k" }, "Where it hits"),
+      el("div", { class: "v num" }, worstLoss < 0 ? `${worst.dS > 0 ? "+" : ""}${Math.round(worst.dS * 100)}% / ${worst.dIv > 0 ? "+" : ""}${Math.round(worst.dIv * 100)}pts` : "\u2014")
+    ));
+    stats.appendChild(el(
+      "div",
+      { class: "stat" },
+      el("div", { class: "k" }, ctx.equityLabel),
+      el("div", { class: "v num" }, ctx.equity > 0 ? F.pct(Math.abs(worstPct), 1) : "\u2014")
+    ));
+    if (ctx.bp != null) {
+      const shownBp = ctx.bpAfterLoss ? Math.max(0, ctx.bp + worstLoss) : ctx.bp;
+      stats.appendChild(el(
+        "div",
+        { class: "stat" },
+        el("div", { class: "k" }, ctx.bpLabel),
+        el("div", { class: "v num" }, F.usd(shownBp, 0))
+      ));
+    }
+    body.appendChild(stats);
+    if (worstPct <= -0.1) {
+      body.appendChild(el(
+        "p",
+        { class: "small mt1", style: "color:var(--loss)" },
+        "\u26A0 The worst cell costs more than 10% of your book \u2014 exactly the kind of tail a desk sizes around before the move."
+      ));
+    }
+    if (worstLoss < 0) {
+      const byPos = /* @__PURE__ */ new Map();
+      for (const leg of book) {
+        const v = legStress(leg, worst.dS, worst.dIv, dDays);
+        byPos.set(leg.pos, (byPos.get(leg.pos) || 0) + v);
+      }
+      const contribs = [...byPos.entries()].sort((a, b) => a[1] - b[1]);
+      const cCard = el("div", { class: "card mt2" });
+      cCard.appendChild(el("h3", {}, "Who hurts in the worst scenario"));
+      for (const [pos, v] of contribs.slice(0, 5)) {
+        cCard.appendChild(el(
+          "div",
+          { class: "pos-greeks mt1" },
+          el("span", {}, `${pos.sym} \xB7 ${pos.label}`),
+          el("span", { class: "num " + (v >= 0 ? "up" : "down") }, F.usdSigned(v, 0))
+        ));
+      }
+      body.appendChild(cCard);
+    }
+  }
+  async function loadSchwabBook(client) {
+    const hashes = await client.accountHashes();
+    if (!hashes.length) return { empty: true, positions: [] };
+    const hash = hashes[0].hash;
+    const [rawPositions, balances] = await Promise.all([client.positions(hash), client.balances(hash)]);
+    let omitted = 0;
+    const riskPositions = [];
+    const underlyings = /* @__PURE__ */ new Set();
+    const optKeys = /* @__PURE__ */ new Map();
+    for (const pos of rawPositions) {
+      const netQty = (pos.long || 0) - (pos.short || 0);
+      if (!netQty) continue;
+      const side = netQty >= 0 ? 1 : -1;
+      const qty = Math.abs(netQty);
+      if (pos.assetType === "EQUITY" && pos.symbol) {
+        underlyings.add(pos.symbol);
+        riskPositions.push({ sym: pos.symbol, label: `${qty} sh`, legs: [{ kind: "stock", side, qty }] });
+      } else if (pos.assetType === "OPTION" && pos.underlying && pos.type && pos.strike && pos.expiry) {
+        underlyings.add(pos.underlying);
+        optKeys.set(`${pos.underlying}|${pos.expiry}`, { sym: pos.underlying, expiry: pos.expiry });
+        riskPositions.push({
+          sym: pos.underlying,
+          label: `${side < 0 ? "\u2212" : "+"}${qty} ${pos.type} ${F.usd(pos.strike, 0)} ${pos.expiry}`,
+          legs: [{ kind: pos.type, side, qty, strike: pos.strike, expDay: pos.expiry }]
+        });
+      } else {
+        omitted++;
+      }
+    }
+    const quoteMap = /* @__PURE__ */ new Map();
+    await Promise.all([...underlyings].map(async (u) => {
+      try {
+        quoteMap.set(u, await client.quote(u));
+      } catch {
+        quoteMap.set(u, null);
+      }
+    }));
+    const optMap = /* @__PURE__ */ new Map();
+    await Promise.all([...optKeys.values()].map(async ({ sym, expiry }) => {
+      try {
+        const rows2 = await client.chain(sym, expiry);
+        const dte = Math.max(0, Math.round((Date.parse(expiry) - Date.now()) / 864e5));
+        for (const r of rows2) {
+          if (r.call && r.call.iv != null) optMap.set(`${sym}|${expiry}|${r.strike}|call`, { iv: r.call.iv, dte });
+          if (r.put && r.put.iv != null) optMap.set(`${sym}|${expiry}|${r.strike}|put`, { iv: r.put.iv, dte });
+        }
+      } catch {
+      }
+    }));
+    const clean = [];
+    for (const rp of riskPositions) {
+      const leg = rp.legs[0];
+      const S2 = quoteMap.get(rp.sym)?.S;
+      if (leg.kind === "stock") {
+        if (S2) clean.push(rp);
+        else omitted++;
+        continue;
+      }
+      const q = optMap.get(`${rp.sym}|${leg.expDay}|${leg.strike}|${leg.kind}`);
+      if (S2 && q && q.iv != null && isFinite(q.iv)) clean.push(rp);
+      else omitted++;
+    }
+    return {
+      empty: false,
+      positions: clean,
+      quoteOf: (s2) => quoteMap.get(s2) || { S: 0 },
+      optOf: (s2, strike, expDay, kind) => optMap.get(`${s2}|${expDay}|${strike}|${kind}`) || null,
+      balances,
+      omitted,
+      hash,
+      totalRaw: rawPositions.length
+    };
+  }
   var view13 = {
     render(root) {
       root.appendChild(el("div", { class: "eyebrow" }, "Risk Desk"));
@@ -15928,6 +16130,13 @@ Reading these two parts tells Maria what she is really buying before she clicks.
         { class: "sub", style: "max-width:70ch" },
         "Every open position repriced across simultaneous spot and implied-volatility shocks \u2014 the question a desk asks before the move happens, not after."
       ));
+      let source = "paper";
+      const schwabOffered = schwabAllowed();
+      const srcSeg = el("div", { class: "seg", role: "group", "aria-label": "Book source" });
+      const paperBtn = el("button", { type: "button", class: "on" }, "Paper");
+      const schwabBtn = el("button", { type: "button" }, "Schwab");
+      srcSeg.appendChild(paperBtn);
+      srcSeg.appendChild(schwabBtn);
       let dDays = 0;
       const dayBtns = DAY_OPTS.map((d) => el("button", {
         type: "button",
@@ -15940,160 +16149,134 @@ Reading these two parts tells Maria what she is really buying before she clicks.
       }, d === 0 ? "Today" : `+${d}d`));
       const daySeg = el("div", { class: "seg", role: "group", "aria-label": "Days forward" });
       dayBtns.forEach((b) => daySeg.appendChild(b));
-      const controls = el("div", { class: "field mt2" }, el("label", {}, "Time decay"), daySeg);
+      const controls = el("div", { class: "field mt2" });
+      if (schwabOffered) {
+        controls.appendChild(el("label", {}, "Book"));
+        controls.appendChild(srcSeg);
+        controls.appendChild(el("label", { class: "mt2" }, "Time decay"));
+      } else {
+        controls.appendChild(el("label", {}, "Time decay"));
+      }
+      controls.appendChild(daySeg);
       const body = el("div", {});
       root.appendChild(controls);
       root.appendChild(body);
-      function paintEmpty() {
-        controls.style.display = "none";
+      paperBtn.addEventListener("click", () => {
+        if (source === "paper") return;
+        source = "paper";
+        paperBtn.classList.add("on");
+        schwabBtn.classList.remove("on");
+        paint();
+      });
+      schwabBtn.addEventListener("click", () => {
+        if (source === "schwab") return;
+        source = "schwab";
+        schwabBtn.classList.add("on");
+        paperBtn.classList.remove("on");
+        paint();
+      });
+      function emptyCard(title, bodyText, btns) {
         body.innerHTML = "";
         body.appendChild(el(
           "div",
           { class: "card mt1" },
-          el("h3", {}, "No open positions to stress"),
-          el(
-            "p",
-            { class: "sub" },
-            "Open a position on the Live Market or build a spread in the Strategy Lab, then come back to see how it holds up when spot gaps and vol spikes at the same time."
-          ),
-          el(
-            "div",
-            { class: "btn-row mt1" },
-            el("a", { class: "btn primary", href: "#/market" }, "Open the Live Market"),
-            el("a", { class: "btn", href: "#/strategy" }, "Strategy Lab")
-          )
+          el("h3", {}, title),
+          el("p", { class: "sub" }, bodyText),
+          btns ? el("div", { class: "btn-row mt1" }, ...btns) : null
         ));
       }
-      function paint() {
+      function paintPaper() {
         const p = active();
         const positions = p?.positions || [];
         if (!positions.length) {
-          paintEmpty();
+          emptyCard(
+            "No open positions to stress",
+            "Open a position on the Live Market or build a spread in the Strategy Lab, then come back to see how it holds up when spot gaps and vol spikes at the same time.",
+            [
+              el("a", { class: "btn primary", href: "#/market" }, "Open the Live Market"),
+              el("a", { class: "btn", href: "#/strategy" }, "Strategy Lab")
+            ]
+          );
           return;
         }
-        controls.style.display = "";
-        body.innerHTML = "";
-        const book = buildBook(positions);
-        const grid = IV_SHOCKS.map((dIv) => SPOT_SHOCKS.map((dS) => book.reduce((s2, leg) => s2 + legStress(leg, dS, dIv, dDays), 0)));
-        const flat = grid.flat();
-        const maxAbs = Math.max(...flat.map(Math.abs), 1);
-        let worst = { v: Infinity, dS: 0, dIv: 0 };
-        IV_SHOCKS.forEach((dIv, r) => SPOT_SHOCKS.forEach((dS, c) => {
-          if (grid[r][c] < worst.v) worst = { v: grid[r][c], dS, dIv };
-        }));
-        const card = el("div", { class: "card mt1" });
-        card.appendChild(el(
-          "div",
-          { class: "flex-between" },
-          el("h3", {}, `Spot \xD7 IV shock matrix${dDays ? ` \xB7 ${dDays} trading day${dDays > 1 ? "s" : ""} forward` : ""}`),
-          el("span", { class: "small muted num" }, `${positions.length} position${positions.length === 1 ? "" : "s"}`)
-        ));
-        const tbl = el("table", { class: "oa risk-matrix" });
-        const head = el("tr", {}, el("th", { class: "rm-corner" }, "IV \\ Spot"));
-        for (const dS of SPOT_SHOCKS) {
-          head.appendChild(el(
-            "th",
-            { class: "num" + (dS === 0 ? " rm-base" : "") },
-            (dS > 0 ? "+" : "") + Math.round(dS * 100) + "%"
-          ));
-        }
-        tbl.appendChild(head);
-        IV_SHOCKS.forEach((dIv, r) => {
-          const tr = el(
-            "tr",
-            {},
-            el(
-              "th",
-              { class: "num" + (dIv === 0 ? " rm-base" : "") },
-              (dIv > 0 ? "+" : "") + Math.round(dIv * 100) + " pts"
-            )
-          );
-          SPOT_SHOCKS.forEach((dS, c) => {
-            const v = grid[r][c];
-            const isWorst = v === worst.v && worst.v < 0;
-            tr.appendChild(el("td", {
-              class: "num" + (isWorst ? " rm-worst" : ""),
-              style: cellStyle(v, maxAbs),
-              title: `Spot ${(dS > 0 ? "+" : "") + Math.round(dS * 100)}% \xB7 IV ${(dIv > 0 ? "+" : "") + Math.round(dIv * 100)} pts`
-            }, F.usdSigned(v, 0)));
-          });
-          tbl.appendChild(tr);
+        const book = buildBook(positions, (s2) => market.quote(s2), (s2, k, e, kind) => market.optQuote(s2, k, e, kind));
+        renderMatrix(body, book, dDays, {
+          count: positions.length,
+          equity: equity(p),
+          equityLabel: "Of equity",
+          bp: buyingPower(p),
+          bpLabel: "Buying power after",
+          bpAfterLoss: true,
+          omitted: 0
         });
-        card.appendChild(el("div", { class: "risk-matrix-scroll" }, tbl));
-        card.appendChild(el(
-          "p",
-          { class: "small muted mt1", style: "margin-bottom:0" },
-          "Cells are P&L change from today's theoretical mark if spot and implied vol move together. Forward cells hold today's vol surface flat apart from your shock. Deep red corner = the scenario that hurts most."
-        ));
-        body.appendChild(card);
-        const eq = equity(p);
-        const bp = buyingPower(p);
-        const worstLoss = Math.min(0, worst.v);
-        const worstPct = eq > 0 ? worstLoss / eq : 0;
-        const stats = el(
-          "div",
-          { class: "stats mt2" },
-          el(
-            "div",
-            { class: "stat" },
-            el("div", { class: "k" }, "Worst scenario"),
-            el("div", { class: "v num down" }, F.usdSigned(worstLoss, 0))
-          ),
-          el(
-            "div",
-            { class: "stat" },
-            el("div", { class: "k" }, "Where it hits"),
-            el("div", { class: "v num" }, worstLoss < 0 ? `${worst.dS > 0 ? "+" : ""}${Math.round(worst.dS * 100)}% / ${worst.dIv > 0 ? "+" : ""}${Math.round(worst.dIv * 100)}pts` : "\u2014")
-          ),
-          el(
-            "div",
-            { class: "stat" },
-            el("div", { class: "k" }, "Of equity"),
-            el("div", { class: "v num" }, F.pct(Math.abs(worstPct), 1))
-          ),
-          el(
-            "div",
-            { class: "stat" },
-            el("div", { class: "k" }, "Buying power after"),
-            el("div", { class: "v num" }, F.usd(Math.max(0, bp + worstLoss), 0))
-          )
-        );
-        body.appendChild(stats);
-        if (worstPct <= -0.1) {
-          body.appendChild(el(
-            "p",
-            { class: "small mt1", style: "color:var(--loss)" },
-            "\u26A0 The worst cell costs more than 10% of equity \u2014 the sizing discipline the journal grades starts right here."
-          ));
-        }
-        if (worstLoss < 0) {
-          const byPos = /* @__PURE__ */ new Map();
-          for (const leg of book) {
-            const v = legStress(leg, worst.dS, worst.dIv, dDays);
-            byPos.set(leg.pos, (byPos.get(leg.pos) || 0) + v);
+      }
+      let schwabGen = 0;
+      async function paintSchwab() {
+        const gen = ++schwabGen;
+        body.innerHTML = "";
+        body.appendChild(el("p", { class: "small muted" }, "Loading your Schwab book\u2026"));
+        const base = BILLING && BILLING.supabaseUrl ? String(BILLING.supabaseUrl).trim().replace(/\/+$/, "") + "/functions/v1" : "";
+        const client = createSchwab({ base, token: () => accessToken() });
+        try {
+          const data = await loadSchwabBook(client);
+          if (gen !== schwabGen) return;
+          if (data.empty || !data.positions.length) {
+            emptyCard(
+              "Your Schwab book is empty",
+              data.totalRaw ? "Your linked account has no positions we can stress right now. When you hold stock or options, your real book shows up here \u2014 read-only." : "No positions in your linked Schwab account yet. Fund it or place a trade at your broker, then come back to stress your real book here.",
+              [el("button", { class: "btn", type: "button", onclick: () => {
+                source = "paper";
+                paperBtn.classList.add("on");
+                schwabBtn.classList.remove("on");
+                paint();
+              } }, "Back to paper book")]
+            );
+            body.appendChild(brokerageDisclaimer());
+            return;
           }
-          const contribs = [...byPos.entries()].sort((a, b) => a[1] - b[1]);
-          const cCard = el("div", { class: "card mt2" });
-          cCard.appendChild(el("h3", {}, "Who hurts in the worst scenario"));
-          for (const [pos, v] of contribs.slice(0, 5)) {
-            cCard.appendChild(el(
-              "div",
-              { class: "pos-greeks mt1" },
-              el("span", {}, `${pos.sym} \xB7 ${pos.label}`),
-              el("span", { class: "num " + (v >= 0 ? "up" : "down") }, F.usdSigned(v, 0))
-            ));
-          }
-          body.appendChild(cCard);
+          const book = buildBook(data.positions, data.quoteOf, data.optOf);
+          const liq = data.balances?.liquidationValue || 0;
+          const bp = data.balances?.buyingPower;
+          renderMatrix(body, book, dDays, {
+            count: data.positions.length,
+            equity: liq,
+            equityLabel: "Of liquidation value",
+            bp: bp != null && isFinite(bp) ? bp : null,
+            bpLabel: "Schwab buying power",
+            omitted: data.omitted,
+            note: el(
+              "p",
+              { class: "small muted", style: "margin:0 0 4px" },
+              `Your real Schwab book \xB7 account ${String(data.hash).slice(0, 8)}\u2026 \xB7 values are Schwab's own. Read-only \u2014 this app never trades.`
+            )
+          });
+          body.appendChild(brokerageDisclaimer());
+        } catch (err) {
+          if (gen !== schwabGen) return;
+          const kind = err instanceof SchwabError ? err.kind : "network";
+          emptyCard(
+            kind === "reauth" ? "Reconnect Schwab" : "Could not load your Schwab book",
+            kind === "reauth" ? "Your weekly Schwab reconnect is due. Reconnect in Settings, then try again." : "We could not reach your Schwab account just now. Try again in a moment.",
+            [el("a", { class: "btn", href: "#/settings" }, "Open Settings")]
+          );
         }
+      }
+      function paint() {
+        controls.style.display = "";
+        if (source === "schwab") paintSchwab();
+        else paintPaper();
       }
       paint();
       let tickN = 0;
       const unTick = market.on("tick", () => {
-        if (++tickN % 3 === 0) paint();
+        if (source === "paper" && ++tickN % 3 === 0) paint();
       });
-      const unDay = market.on("day", paint);
+      const unDay = market.on("day", () => {
+        if (source === "paper") paint();
+      });
       root.appendChild(simDisclaimer());
       return () => {
+        schwabGen++;
         unTick();
         unDay();
       };
